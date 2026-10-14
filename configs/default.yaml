@@ -1,0 +1,49 @@
+project:
+  name: dp-fedq-default
+  seed: 2026
+  n_seeds: 3
+  output_dir: results
+
+dataset:
+  name: synthetic
+  n_samples: 2000
+  n_numeric: 16
+  n_categorical: 4
+  positive_fraction: 0.25
+  missing_fraction: 0.03
+
+split:
+  test_size: 0.2
+  validation_size: 0.2
+
+features:
+  d_prime: 8
+  use_pca: false
+
+encoding:
+  name: angle
+  repetitions: 2
+
+model:
+  n_qubits: 8
+  n_layers: 2
+
+federated:
+  n_clients: 5
+  rounds: 20
+  local_steps: 2
+  client_fraction: 0.8
+  batch_size: 32
+  iid: false
+  dirichlet_alpha: 0.5
+  learning_rate: 0.01
+
+privacy:
+  max_grad_norm: 1.0
+  noise_multiplier: 1.5
+  target_epsilon: null
+  delta: 0.000001
+  sampling: poisson
+
+evaluation:
+  privacy_epsilons: [1, 4, 8, inf]

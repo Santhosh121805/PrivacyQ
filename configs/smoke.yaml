@@ -1,0 +1,49 @@
+project:
+  name: dp-fedq-smoke
+  seed: 17
+  n_seeds: 1
+  output_dir: results
+
+dataset:
+  name: synthetic
+  n_samples: 240
+  n_numeric: 8
+  n_categorical: 2
+  positive_fraction: 0.25
+  missing_fraction: 0.02
+
+split:
+  test_size: 0.2
+  validation_size: 0.2
+
+features:
+  d_prime: 4
+  use_pca: false
+
+encoding:
+  name: angle
+  repetitions: 1
+
+model:
+  n_qubits: 4
+  n_layers: 1
+
+federated:
+  n_clients: 3
+  rounds: 2
+  local_steps: 1
+  client_fraction: 1.0
+  batch_size: 16
+  iid: true
+  dirichlet_alpha: 0.5
+  learning_rate: 0.03
+
+privacy:
+  max_grad_norm: 1.0
+  noise_multiplier: 2.0
+  target_epsilon: null
+  delta: 0.00001
+  sampling: poisson
+
+evaluation:
+  privacy_epsilons: [1, 4, 8, inf]
