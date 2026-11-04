@@ -29,6 +29,27 @@ SYNTHETIC_BANNER = (
 )
 
 
+LABEL_LIMITATION = (
+    "Limitation: the NSCH target is caregiver-reported, provider-diagnosed depression. "
+    "Much depression is never diagnosed (~63.6% of cases per the WHO estimate cited in "
+    "the literature survey), so undiagnosed adolescents sit in the negative class. Models "
+    "identify adolescents resembling those already diagnosed, which under-represents groups "
+    "with poorer access to care. The survey is cross-sectional and some predictors may be "
+    "consequences rather than causes: results identify who is at risk now; they do not "
+    "forecast who will become depressed."
+)
+
+
+def report_header(title: str, loader) -> list[str]:
+    """Standard header for every results markdown file."""
+    lines = [f"# {title} — {loader.source_tag()}", ""]
+    if loader.is_synthetic:
+        lines += [f"> **{SYNTHETIC_BANNER}**", ""]
+    elif loader.name.startswith("NSCH"):
+        lines += [f"> {LABEL_LIMITATION}", ""]
+    return lines
+
+
 def load_config(path: str | Path) -> dict:
     with Path(path).open("r", encoding="utf-8") as handle:
         return yaml.safe_load(handle) or {}

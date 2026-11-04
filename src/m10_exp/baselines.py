@@ -30,7 +30,6 @@ from src.m3_features.features import FeatureTransformer
 from src.m5_models.classical import count_parameters, make_classical
 from src.m8_eval.evaluation import binary_metrics
 from src.m10_exp.common import (
-    SYNTHETIC_BANNER,
     cv_folds,
     environment_record,
     holdout_split,
@@ -40,6 +39,7 @@ from src.m10_exp.common import (
     markdown_table,
     save_splits,
     summarise,
+    report_header,
     write_json,
 )
 
@@ -160,9 +160,7 @@ def run(config_path: str) -> Path:
     summary.insert(0, "data_source", loader.source_tag())
     summary.to_csv(run_dir / "summary.csv", index=False)
 
-    lines = [f"# Phase 1 classical baselines — {loader.source_tag()}", ""]
-    if loader.is_synthetic:
-        lines += [f"> **{SYNTHETIC_BANNER}**", ""]
+    lines = report_header("Phase 1 classical baselines", loader)
     lines += [
         f"Rows: {profile['n_rows']} (dev {profile['n_dev']}, locked hold-out {profile['n_holdout']}); "
         f"positive rate {profile['positive_rate']:.3%}. "

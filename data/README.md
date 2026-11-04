@@ -25,8 +25,23 @@ file is git-ignored.
   partitions), survey weight `fwc`, survey year. Models are trained unweighted, so
   results describe the sample, not U.S. population estimates.
 
-NSCH 2023 (`python scripts/download_nsch.py 2023`) has the same variables and can be
-pooled by listing both paths in a config.
+### Limitation: the label measures diagnosis, not depression
+
+The target is caregiver-reported, provider-diagnosed depression. A large share
+of depression is never diagnosed (the WHO estimate cited in this project's
+literature survey is ~63.6% of cases), and undiagnosed adolescents sit in the
+negative class. The label therefore captures *who gets diagnosed*, not *who is
+depressed*. A model trained on it identifies adolescents who resemble those
+already diagnosed, which under-represents groups with poorer access to care.
+
+In addition, NSCH is a one-time cross-sectional survey, and some predictors
+(e.g. difficulty making friends, staying calm when challenged, missed school)
+may be consequences of depression rather than causes. All results are framed as
+**identifying who is at risk now, not forecasting who will become depressed.**
+
+NSCH 2023 is downloadable with the same variables but is deliberately not pooled:
+the quantum models are subsample-limited, so extra rows buy nothing and would add
+a survey-year effect.
 
 ## Synthetic data
 
