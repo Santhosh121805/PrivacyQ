@@ -16,9 +16,21 @@ class FeatureTransformer:
         use_pca: bool = False,
         n_selected: int | None = None,
         seed: int = 0,
+        method: str | None = None,
     ) -> None:
+        """``method="mi"``: keep the top-``d_prime`` features by mutual information.
+        ``method="pca"``: project all standardized features onto ``d_prime``
+        principal components. ``method=None`` keeps the legacy behaviour
+        (MI pre-selection, then PCA when ``use_pca``). All statistics are fitted
+        on the rows passed to ``fit`` only.
+        """
         if not 1 <= d_prime <= 12:
             raise ValueError("d_prime must be between 1 and 12")
+        if method not in (None, "mi", "pca"):
+            raise ValueError("method must be None, 'mi' or 'pca'")
+        if method is not None:
+            use_pca = method == "pca"
+        self.method = method
         self.d_prime = d_prime
         self.use_pca = use_pca
         self.n_selected = n_selected
@@ -40,14 +52,22 @@ class FeatureTransformer:
         self.n_input_features_ = values.shape[1]
 
         selected_count = self.n_selected
+        if self.method == "mi":
+            selected_count = self.d_prime
+        elif self.method == "pca":
+            selected_count = values.shape[1]
         if selected_count is None:
             selected_count = min(values.shape[1], self.d_prime * (2 if self.use_pca else 1))
         if selected_count < self.d_prime or selected_count > values.shape[1]:
             raise ValueError("n_selected must be between d_prime and the input feature count")
 
         standardized = self.scaler.fit_transform(values)
-        self.selector.set_params(k=selected_count)
-        selected = self.selector.fit_transform(standardized, labels)
+        if selected_count == values.shape[1]:
+            self.selector = None
+            selected = standardized
+        else:
+            self.selector.set_params(k=selected_count)
+            selected = self.selector.fit_transform(standardized, labels)
         reduced = self.pca.fit_transform(selected) if self.pca is not None else selected
         self.angle_scaler.fit(reduced)
         self.is_fitted_ = True
@@ -60,7 +80,7 @@ class FeatureTransformer:
         if values.shape[1] != self.n_input_features_:
             raise ValueError("input feature count differs from fitted training data")
         standardized = self.scaler.transform(values)
-        selected = self.selector.transform(standardized)
+        selected = self.selector.transform(standardized) if self.selector is not None else standardized
         reduced = self.pca.transform(selected) if self.pca is not None else selected
         return self.angle_scaler.transform(reduced)
 

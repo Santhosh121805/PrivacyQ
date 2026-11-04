@@ -1,0 +1,27 @@
+# Phase 1: classical baselines on REAL data (NSCH 2024 public-use, adolescents 12-17).
+project:
+  name: phase1-nsch2024-depression
+  seed: 2026
+  output_dir: results
+  n_jobs: 8
+
+data:
+  loader: nsch
+  paths: [data/raw/nsch_2024/nsch_2024e_topical.dta]
+  target: depression_current
+  min_age: 12
+  max_age: 17
+
+split:
+  holdout_fraction: 0.2   # locked; untouched until final evaluation
+
+cv:
+  n_splits: 5
+  n_repeats: 3
+
+features:
+  include_full: true
+  methods: [mi, pca]
+  ks: [4, 6, 8]
+
+models: [logreg, random_forest, xgboost, mlp]

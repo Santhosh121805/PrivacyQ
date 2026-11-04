@@ -1,0 +1,28 @@
+# SYNTHETIC smoke test of the Phase 1 pipeline. Not a finding.
+project:
+  name: phase1-smoke
+  seed: 7
+  output_dir: results
+  n_jobs: 4
+
+data:
+  loader: synthetic_adolescent
+  n_samples: 3000
+  positive_fraction: 0.08
+
+split:
+  holdout_fraction: 0.2
+
+cv:
+  n_splits: 3
+  n_repeats: 1
+
+features:
+  include_full: true
+  methods: [mi, pca]
+  ks: [4]
+
+models: [logreg, random_forest, xgboost, mlp]
+model_params:
+  random_forest: {n_estimators: 100}
+  mlp: {epochs: 10}
