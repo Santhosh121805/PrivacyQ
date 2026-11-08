@@ -1,0 +1,61 @@
+# SYNTHETIC smoke test of Experiment 1. Not a finding.
+project:
+  name: exp1-smoke
+  seed: 2026
+  output_dir: results
+  n_jobs: 8
+data:
+  loader: synthetic_adolescent
+  n_samples: 2000
+  positive_fraction: 0.08
+split:
+  holdout_fraction: 0.2
+cv:
+  n_splits: 2
+  n_repeats: 1
+subsample:
+  n: 300
+tuning:
+  inner_val_fraction: 0.2
+experiment:
+  models:
+  - vqc
+  - hybrid
+  - qsvm
+  - logreg
+  encodings:
+  - angle
+  - amplitude
+  - zz
+  - reupload
+  qubits:
+  - 4
+  feature_methods:
+  - mi
+  - pca
+base_params:
+  vqc:
+    epochs: 3
+    batch_size: 64
+    init_scale: 0.1
+  hybrid:
+    epochs: 3
+    batch_size: 64
+    init_scale: 0.1
+grids:
+  qsvm:
+    C:
+    - 1.0
+  vqc:
+    learning_rate:
+    - 0.05
+    n_layers:
+    - 1
+  hybrid:
+    learning_rate:
+    - 0.05
+    n_layers:
+    - 2
+  logreg:
+    C:
+    - 1.0

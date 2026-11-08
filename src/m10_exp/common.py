@@ -50,6 +50,19 @@ def report_header(title: str, loader) -> list[str]:
     return lines
 
 
+def limit_worker_threads() -> None:
+    """One BLAS/OpenMP thread per worker process. Must run before workers spawn.
+
+    On the 12-core (4P+8E) development laptop, 13 workers with default thread
+    pools ran ~8x slower per task than a single process; 6 single-threaded
+    workers gave the best throughput.
+    """
+    import os
+
+    for var in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS"):
+        os.environ[var] = "1"
+
+
 def load_config(path: str | Path) -> dict:
     with Path(path).open("r", encoding="utf-8") as handle:
         return yaml.safe_load(handle) or {}

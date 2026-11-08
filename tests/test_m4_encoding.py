@@ -5,7 +5,7 @@ import pytest
 from src.m4_encoding import make_encoding
 
 
-@pytest.mark.parametrize("name", ["angle", "amplitude", "zz"])
+@pytest.mark.parametrize("name", ["angle", "amplitude", "zz", "reupload"])
 def test_encodings_build_valid_circuits_on_expected_wires(name):
     circuit = make_encoding(name, n_qubits=4)
     device = qml.device("default.qubit", wires=4)

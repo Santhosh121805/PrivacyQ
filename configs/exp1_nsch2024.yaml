@@ -1,0 +1,42 @@
+# Experiment 1: quantum encoding comparison on REAL data (NSCH 2024, ages 12-17). No privacy.
+project:
+  name: exp1-nsch2024-encodings
+  seed: 2026            # same seed => same hold-out and outer folds as Phase 1
+  output_dir: results
+  n_jobs: 13
+
+data:
+  loader: nsch
+  paths: [data/raw/nsch_2024/nsch_2024e_topical.dta]
+  target: depression_current
+  min_age: 12
+  max_age: 17
+
+split:
+  holdout_fraction: 0.2
+
+cv:
+  n_splits: 5
+  n_repeats: 3
+
+subsample:
+  n: 1500               # stratified rows per outer fold for quantum training (~150 positives)
+
+tuning:
+  inner_val_fraction: 0.2
+
+experiment:
+  models: [vqc, hybrid, qsvm, logreg]
+  encodings: [angle, amplitude, zz, reupload]
+  qubits: [4, 6, 8]
+  feature_methods: [mi, pca]
+
+base_params:
+  vqc: {epochs: 30, batch_size: 64, init_scale: 0.1}
+  hybrid: {epochs: 30, batch_size: 64, init_scale: 0.1}
+
+grids:
+  qsvm: {C: [0.1, 1.0, 10.0]}
+  vqc: {learning_rate: [0.01, 0.05], n_layers: [1, 2]}
+  hybrid: {learning_rate: [0.01, 0.05], n_layers: [2]}
+  logreg: {C: [0.01, 0.1, 1.0, 10.0]}

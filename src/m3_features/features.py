@@ -17,15 +17,23 @@ class FeatureTransformer:
         n_selected: int | None = None,
         seed: int = 0,
         method: str | None = None,
+        output: str = "angle",
     ) -> None:
         """``method="mi"``: keep the top-``d_prime`` features by mutual information.
         ``method="pca"``: project all standardized features onto ``d_prime``
         principal components. ``method=None`` keeps the legacy behaviour
         (MI pre-selection, then PCA when ``use_pca``). All statistics are fitted
         on the rows passed to ``fit`` only.
+
+        ``output="angle"`` min-max scales the result to [0, pi] (angle-type
+        encodings); ``output="standard"`` returns the standardized/PCA values
+        (amplitude encoding, which may use up to 2**n - 1 features).
         """
-        if not 1 <= d_prime <= 12:
-            raise ValueError("d_prime must be between 1 and 12")
+        if d_prime < 1:
+            raise ValueError("d_prime must be at least 1")
+        if output not in ("angle", "standard"):
+            raise ValueError("output must be 'angle' or 'standard'")
+        self.output = output
         if method not in (None, "mi", "pca"):
             raise ValueError("method must be None, 'mi' or 'pca'")
         if method is not None:
@@ -82,6 +90,8 @@ class FeatureTransformer:
         standardized = self.scaler.transform(values)
         selected = self.selector.transform(standardized) if self.selector is not None else standardized
         reduced = self.pca.transform(selected) if self.pca is not None else selected
+        if self.output == "standard":
+            return reduced
         return self.angle_scaler.transform(reduced)
 
     def fit_transform(

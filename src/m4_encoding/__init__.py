@@ -1,19 +1,11 @@
-"""PennyLane feature encodings for small statevector circuits."""
+"""PennyLane feature encodings (representation only; no privacy role)."""
 
-from src.m4_encoding.amplitude import amplitude_encoding
-from src.m4_encoding.angle import angle_encoding
-from src.m4_encoding.zz_featuremap import zz_featuremap
+from src.m4_encoding.encodings import (
+    ENCODING_NAMES,
+    Encoding,
+    circuit_resources,
+    encoding_resources,
+    make_encoding,
+)
 
-ENCODINGS = {
-    "angle": angle_encoding,
-    "amplitude": amplitude_encoding,
-    "zz": zz_featuremap,
-}
-
-
-def make_encoding(name: str, n_qubits: int, repetitions: int = 1):
-    try:
-        factory = ENCODINGS[name]
-    except KeyError as error:
-        raise ValueError(f"unknown encoding {name!r}") from error
-    return factory(n_qubits=n_qubits, repetitions=repetitions)
+__all__ = ["ENCODING_NAMES", "Encoding", "circuit_resources", "encoding_resources", "make_encoding"]

@@ -1,0 +1,50 @@
+# Experiment 1 (final): quantum encoding comparison on REAL data (NSCH 2024, ages 12-17). No privacy.
+# Grid cuts vs configs/exp1_nsch2024.yaml (documented in RESULTS.md):
+#  - 10 outer folds (repeats 0-1 of the Phase 1 3x5 CV) instead of 15: the first run was
+#    interrupted after completing every VQC configuration on these 10 folds.
+#  - Hybrid QNN removed from the encoding grid (~5x VQC cost per configuration); it is
+#    evaluated in Experiment 2 with the winning encoding.
+# VQC rows are reused from the interrupted run (same code, same folds; verified at load).
+project:
+  name: exp1-nsch2024-encodings-final
+  seed: 2026
+  output_dir: results
+  n_jobs: 6
+
+data:
+  loader: nsch
+  paths: [data/raw/nsch_2024/nsch_2024e_topical.dta]
+  target: depression_current
+  min_age: 12
+  max_age: 17
+
+split:
+  holdout_fraction: 0.2
+
+cv:
+  n_splits: 5
+  n_repeats: 2
+
+subsample:
+  n: 1500
+
+tuning:
+  inner_val_fraction: 0.2
+
+experiment:
+  models: [vqc, qsvm, logreg]
+  encodings: [angle, amplitude, zz, reupload]
+  qubits: [4, 6, 8]
+  feature_methods: [mi, pca]
+
+resume:
+  run_dir: results/exp1-nsch2024-encodings-20261104-222834
+  models: [vqc]
+
+base_params:
+  vqc: {epochs: 30, batch_size: 64, init_scale: 0.1}
+
+grids:
+  qsvm: {C: [0.1, 1.0, 10.0]}
+  vqc: {learning_rate: [0.01, 0.05], n_layers: [1, 2]}
+  logreg: {C: [0.01, 0.1, 1.0, 10.0]}
