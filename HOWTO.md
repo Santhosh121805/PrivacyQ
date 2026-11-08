@@ -1,4 +1,7 @@
-# HOWTO — run the web demo
+# HOWTO — run PrivacyQ
+
+PrivacyQ is a research configuration tool for privacy-preserving mental-health models.
+**Research configuration tool. Not for clinical or individual use.**
 
 ## Start it
 
@@ -9,68 +12,68 @@ From the project folder (`C:\Users\Santhosh S\Desktop\major`) in PowerShell:
 uvicorn api:app --reload
 ```
 
-Then open **http://127.0.0.1:8000/** in a browser. Stop with `Ctrl+C`.
-
-Fully offline: Tailwind, Observable Plot, d3 and the Inter / JetBrains Mono fonts are local copies in
-`web/vendor/` (see `web/vendor/README.md`). Nothing is trained at launch.
-
-## Startup and latency (measured 8 Nov 2026 on the development laptop)
-
-| What | Measured |
-|---|---|
-| Page served after `uvicorn` starts | ~3.5–4 s |
-| Models ready (first prediction possible) | ~7–15 s, depending on machine load |
-| QSVM prediction (final angle model), server time | 26–45 ms |
-| Logistic regression prediction, server time | 12–38 ms |
-| Full `/api/predict` round trip, circuit already drawn | 100–220 ms |
-| Same, first time a circuit is drawn for a record | 250–870 ms (`qml.draw_mpl`; cached afterwards) |
-
-Models load in a background thread so the page appears immediately; the page shows
-"Loading the cached models…" until they are ready. Load time is almost entirely importing torch,
-PennyLane and scikit-learn (required by the pipeline's own model classes), so it depends on how busy
-the laptop is: 6.9 s on a quiet machine, ~14 s with many browser windows open. **On the day, start the
-server a minute before the demo.** The QSVM does not recompute training-side kernel work per request: the
-statevectors of its 1,200 training rows are cached in `models/demo_models.pkl`; each request simulates
-one circuit for the new record and takes one matrix product against those cached states.
-
-The page shows the server-side timings under the Predict button.
+Open **http://127.0.0.1:8000/** in a browser. Stop with `Ctrl+C`.
 
 ## First time only (or if `models/` was deleted)
 
 ```powershell
-python scripts/build_demo_models.py
+python scripts/build_config_models.py     # ~15 s: caches the Inspect models in models/config_models.pkl
+python scripts/record_test_status.py      # runs the test suite, writes results/test_status.json for the Overview card
 ```
 
-Fits the final configurations once (~15 s) and caches them in `models/`. It reproduces the models scored
-on the locked hold-out, checks their C and thresholds match the hold-out run exactly, and never scores
-the hold-out again. Without the cache the page still opens and each section explains what to run.
+Without the model cache, Overview, Configure and Evidence still work (they only read `results/`); Inspect
+shows the command to run. Without `results/test_status.json` the "Tests passing" card says so instead of
+showing a number.
+
+## Measured on 8 Nov 2026 (development laptop)
+
+| What | Measured |
+|---|---|
+| Page served after `uvicorn` starts | 1.7 s |
+| Overview / Configure / Evidence usable | immediately (read only `results/`) |
+| Inspect models loaded (background thread) | 6.8 s; up to ~15 s when the laptop is busy (torch + PennyLane imports) |
+| `GET /api/configure` | 4 ms |
+| `POST /api/inspect`, QSVM, full six-step trace | 22 ms (angle) – 52 ms (ZZ) |
+| `POST /api/inspect`, logistic regression | 8 ms |
+| `GET /api/circuit` (`qml.draw_mpl`), first draw / cached | 45–148 ms / 2 ms |
+
+The QSVM does no training-side kernel work per request: the statevectors of its 1,200 training rows are
+stored in the cached model, so a prediction is one circuit simulation plus one matrix product.
+**On the day, start the server a minute before the demo.**
+
+## Pages
+
+| Page | What it does |
+|---|---|
+| Overview | Four headline numbers from `results/`, the privacy–utility curve (Observable Plot; classical blue, quantum teal), what the tool does and what was found. |
+| Configure | Encoding, model, feature count, ε and number of sites. The panel shows the **measured** ROC-AUC for that configuration (mean ± std over folds), the gap to the unprivatised classical baseline, balanced accuracy, recall, training cost and a plain-English verdict. A combination that was never run is labelled "Not measured" and the nearest measured configuration is shown, with every difference listed. Nothing is interpolated. |
+| Inspect | Traces a real NSCH record (a dev record none of the cached models was trained on) through the configured pipeline in six steps, then shows the circuit drawn by PennyLane `qml.draw_mpl()`. |
+| Evidence | The experiment tables and report figures, read from `results/tables` and `results/figures`. |
+
+Configurations are deep-linkable, e.g.
+`http://127.0.0.1:8000/#configure?model=vqc&enc=reupload&f=4&eps=4&sites=10`
+(the VQC at ε = 4 split across 10 sites: 0.658, "too few rows per site").
+
+## What the numbers mean (say this if asked)
+
+- **Configure numbers are cross-validation means** from Experiments 1–4; the baseline bar is logistic
+  regression on all 95 features and the full data (0.888 cross-validated; 0.892 on the locked hold-out).
+- **Only what was run can be shown.** DP was run for the VQC (re-uploading, 4 features) and logistic
+  regression; federation only at ε = 4. QSVM has no private or federated version: it is not trained by
+  gradient descent, so DP-SGD and FedAvg do not apply. The tool says this instead of inventing a number.
+- **Logistic regression under DP** is shown with the pre-declared clipping norm of 1; the panel also states
+  the post-hoc clipping-10 sensitivity result, which closes the apparent gap to the VQC.
+- **Privacy cost on the hold-out** is 0.8924 → 0.8609 = **0.0316**, displayed as 0.032 (three decimals).
+- **The QSVM's output is a decision score, not a probability.** Inspect labels it that way.
+- **VQC and Hybrid QNN weights are not cached**, so their Inspect trace uses the QSVM fitted with the same
+  encoding and feature count on the same rows; the page says so.
+
+## Assets
+
+Tailwind (Play CDN 3.4.16) and Observable Plot (0.6.16, ESM) load from their CDNs as specified; if the
+network is unavailable both fall back automatically to identical local copies in `web/vendor/`, so the tool
+also works offline. Inter and JetBrains Mono are served locally. The Tailwind Play script prints a
+"not for production" warning in the browser console; that is expected for a no-build tool.
 
 Dependencies beyond the pipeline (pinned in `requirements.txt`): `fastapi==0.115.6`, `uvicorn==0.32.1`,
-`watchfiles==0.24.0` (makes `--reload` use file notifications instead of polling every file in `.venv`).
-
-## Sections (one scrolling document)
-
-| Section | What it shows |
-|---|---|
-| Try it | The 8 most informative survey questions as inputs; load a random real NSCH record (a dev record neither model was trained on), a diagnosed one, or typical answers. **Predict** shows logistic regression (probability) and the QSVM (decision score) side by side, each with a bar against its threshold, and says explicitly when they disagree. |
-| Inside the pipeline | The same record through every stage as tables of real values: raw → imputed and scaled → reduced to 8 → quantum state (256 probabilities) → measured fidelities → score and decision. Switch encodings to watch the circuit (drawn by PennyLane `qml.draw_mpl`) and the prediction change. |
-| Privacy explorer | Slider over the measured ε (0.5, 1, 2, 4, 8, ∞); AUC for classical and quantum at that ε; Observable Plot curve with the point marked; hold-out headline. |
-| Results | Headline tables and the four report figures, read from `results/`. |
-
-Classical models are blue (`#4269d0`), quantum models teal (`#6cc5b0`) in every chart.
-
-## Deep links (rehearsal)
-
-- `http://127.0.0.1:8000/#try?record=9517` — a diagnosed adolescent both models flag.
-- `http://127.0.0.1:8000/#pipeline?record=9517&enc=zz` — same record with the ZZ feature map, which does
-  **not** flag it, while the final angle model does.
-- `http://127.0.0.1:8000/#privacy?eps=0` — privacy explorer at ε = 0.5.
-
-## Things to say while demoing
-
-- Research screening aid, not a diagnosis (the header says so throughout).
-- Logistic regression gives a probability; the QSVM gives an SVM decision score, which is not a
-  probability. Each is compared with its own threshold, chosen on inner-validation rows.
-- Inputs not on the form come from the loaded record, or from training medians.
-- Privacy headline: ε = 4 costs **0.0316** ROC-AUC on the hold-out (0.8924 → 0.8609) — say "about 0.03".
-  (0.031 comes from subtracting already-rounded numbers.)
+`watchfiles==0.24.0` (makes `--reload` use file notifications instead of polling `.venv`).

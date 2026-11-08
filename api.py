@@ -1,16 +1,18 @@
-"""Web demo for DP-FedQ: FastAPI JSON API + static frontend (web/).
+"""PrivacyQ — research configuration tool for privacy-preserving mental-health models.
 
 Run:  uvicorn api:app --reload      then open  http://127.0.0.1:8000/
 
-Research screening aid, not a diagnosis. Nothing is trained at launch: fitted
-models are loaded from models/demo_models.pkl (build once with
-`python scripts/build_demo_models.py`). Results and figures are read from
-results/, never recomputed. Every failure is returned as a JSON message.
+Research configuration tool. Not for clinical or individual use.
+Every reported number is read from experiment results in results/ (see
+privacyq.py); nothing is trained at launch. The Inspect page traces a record
+through models cached in models/config_models.pkl (build once with
+`python scripts/build_config_models.py`). Every failure is a JSON message.
 """
 
 from __future__ import annotations
 
 import io
+import json
 import math
 import pickle
 import random
@@ -21,93 +23,77 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-import yaml
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+import privacyq as pq
+
 ROOT = Path(__file__).resolve().parent
-MODELS = ROOT / "models" / "demo_models.pkl"
+MODELS = ROOT / "models" / "config_models.pkl"
 RESULTS = ROOT / "results"
-ENCODINGS = ("angle", "amplitude", "zz", "reupload")
-BUILD_HINT = "Run `python scripts/build_demo_models.py` once to fit and cache the demo models."
+BUILD_HINT = "Run `python scripts/build_config_models.py` once to fit and cache the Inspect models (~15 s)."
+NON_FEATURE_COLUMNS = ["label", "state_fips", "survey_weight", "survey_year"]
 
-# The 8 features most often chosen by mutual information (Phase 1, MI top-8, 15 folds).
-# Answer labels are from the NSCH 2024 codebook (nsch_2024_topical.do).
-INPUTS = [
-    ("makefriend", "Difficulty making or keeping friends", {1: "No difficulty", 2: "A little difficulty", 3: "A lot of difficulty"}),
-    ("k7q85_r", "Stays calm and in control when challenged", {1: "Always", 2: "Usually", 3: "Sometimes", 4: "Never"}),
-    ("bullied_r", "Bullied, picked on or excluded by others", {1: "Never (past 12 months)", 2: "1–2 times (past 12 months)",
-                                                               3: "1–2 times per month", 4: "1–2 times per week", 5: "Almost every day"}),
-    ("k2q01", "General health", {1: "Excellent", 2: "Very good", 3: "Good", 4: "Fair", 5: "Poor"}),
-    ("k7q02r_r", "Days of school missed (illness/injury, past 12 months)", {1: "None", 2: "1–3 days", 3: "4–6 days",
-                                                                             4: "7–10 days", 5: "11 or more days", 6: "Not enrolled in school"}),
-    ("k7q83_r", "Does all required homework", {1: "Always", 2: "Usually", 3: "Sometimes", 4: "Never"}),
-    ("k7q04r_r", "Times the school contacted the family about problems", {1: "None", 2: "1 time", 3: "2 or more times"}),
-    ("k7q84_r", "Works to finish tasks they start", {1: "Always", 2: "Usually", 3: "Sometimes", 4: "Never"}),
-]
-INPUT_KEYS = [k for k, _, _ in INPUTS]
-
-app = FastAPI(title="DP-FedQ demo", docs_url=None, redoc_url=None)
+app = FastAPI(title="PrivacyQ", docs_url=None, redoc_url=None)
 
 
-class DemoError(Exception):
+class ToolError(Exception):
     pass
 
 
 @app.exception_handler(RequestValidationError)
 async def bad_request(request: Request, exc: RequestValidationError):
     first = exc.errors()[0] if exc.errors() else {}
-    where = ".".join(str(p) for p in first.get("loc", []) if p != "body")
-    return JSONResponse(status_code=422, content={"error": f"Invalid request{(' at ' + where) if where else ''}: "
-                                                           f"{first.get('msg', 'malformed body')}"})
+    where = ".".join(str(p) for p in first.get("loc", []) if p not in ("body", "query"))
+    return JSONResponse(status_code=422, content={"error": f"Invalid request{(' (' + where + ')') if where else ''}: "
+                                                           f"{first.get('msg', 'malformed')}"})
 
 
 @app.exception_handler(Exception)
 async def any_error(request: Request, exc: Exception):  # never a bare 500
-    status = 503 if isinstance(exc, DemoError) else 422 if isinstance(exc, (ValueError, KeyError)) else 503
+    status = 422 if isinstance(exc, (ValueError, KeyError)) else 503
     return JSONResponse(status_code=status, content={"error": str(exc) or type(exc).__name__})
 
 
-_BUNDLE: dict | None = None
-_BUNDLE_LOCK = threading.Lock()
+# ------------------------------------------------------------------ models
+_MODELS: dict | None = None
+_LOCK = threading.Lock()
 
 
-def bundle() -> dict:
-    """Cached models, loaded once (thread-safe). Requests made while the background
-    warm-up is still loading simply wait for it."""
-    global _BUNDLE
-    if _BUNDLE is None:
-        with _BUNDLE_LOCK:
-            if _BUNDLE is None:
+def models() -> dict:
+    global _MODELS
+    if _MODELS is None:
+        with _LOCK:
+            if _MODELS is None:
                 if not MODELS.exists():
-                    raise DemoError(f"Cached models not found at models/demo_models.pkl. {BUILD_HINT}")
+                    raise ToolError(f"Cached models not found at models/config_models.pkl. {BUILD_HINT}")
                 with MODELS.open("rb") as fh:
-                    _BUNDLE = pickle.load(fh)
-    return _BUNDLE
+                    _MODELS = pickle.load(fh)
+    return _MODELS
 
 
-@lru_cache(maxsize=1)
-def runs() -> dict:
-    cfg = ROOT / "configs" / "final_report.yaml"
-    if not cfg.exists():
-        raise DemoError("configs/final_report.yaml not found; results cannot be located.")
-    return {k: ROOT / v for k, v in yaml.safe_load(cfg.read_text(encoding="utf-8"))["runs"].items()}
-
-
-def _csv(path: Path) -> pd.DataFrame:
-    if not path.exists():
-        raise DemoError(f"Result file missing: {path.relative_to(ROOT)}. Re-run the experiment or final report.")
-    return pd.read_csv(path)
+@app.on_event("startup")
+def warm() -> None:
+    """Load cached models in the background (torch/PennyLane imports dominate) so pages are served at once."""
+    def load():
+        try:
+            pq.catalogue()
+            models()
+        except Exception:
+            pass  # surfaced per request
+    threading.Thread(target=load, name="warmup", daemon=True).start()
 
 
 def _clean(v):
-    if isinstance(v, (np.floating, float)):
-        return None if math.isnan(float(v)) else float(v)
-    if isinstance(v, np.integer):
-        return int(v)
+    if v is None:
+        return None
+    if hasattr(v, "item"):
+        v = v.item()
+    if isinstance(v, float) and math.isnan(v):
+        return None
     return v
 
 
@@ -115,87 +101,97 @@ def _records(df: pd.DataFrame) -> list[dict]:
     return [{k: _clean(v) for k, v in row.items()} for row in df.to_dict("records")]
 
 
-@app.on_event("startup")
-def warm() -> None:
-    """Start loading the cached models (no training) in the background, so the page is
-    served immediately; torch + PennyLane imports dominate this (~5-10 s on a laptop)."""
-    def load():
-        try:
-            bundle()
-            import src.m5_models.quantum  # noqa: F401
-        except Exception:  # surfaced per request instead
-            pass
-
-    threading.Thread(target=load, name="model-warmup", daemon=True).start()
+def _csv(path: Path) -> pd.DataFrame:
+    try:
+        return pq.read_csv(path)
+    except pq.CatalogueError as e:
+        raise ToolError(str(e)) from e
 
 
-# --------------------------------------------------------------------- API ---
-@app.get("/api/sample")
-def sample(positive: bool | None = None, record_id: int | None = None):
-    b = bundle()
-    pool = b["pool"]
-    if record_id is not None:
-        if record_id not in pool.index:
-            raise ValueError(f"record {record_id} is not in the demo record pool")
-        row = record_id
-    else:
-        if positive is not None:
-            pool = pool[pool.label == int(positive)]
-        row = int(random.choice(list(pool.index)))
-    rec = b["pool"].loc[row]
-    from src.m1_data.nsch import FEATURES
+def _guard(fn):
+    try:
+        return fn()
+    except pq.CatalogueError as e:
+        raise ToolError(str(e)) from e
 
+
+# ------------------------------------------------------------------ overview
+@app.get("/api/overview")
+def overview():
+    r = _guard(pq.runs)
+    base = _guard(pq.baseline)
+    tests = _csv(r["exp2"] / "tests_same_rows_features.csv")
+    t = tests[(tests.metric == "roc_auc") & (tests.quantum == "qsvm/subsample/pca8") &
+              (tests.classical == "logreg/subsample/pca8")].iloc[0]
+    status_file = RESULTS / "test_status.json"
+    test_status = json.loads(status_file.read_text(encoding="utf-8")) if status_file.exists() else None
+    e3 = pd.concat([_csv(r["exp3"] / "summary.csv"), _csv(r["exp3_sensitivity"] / "summary.csv")])
+    e3["eps"] = [pq._eps(v) for v in e3.target_epsilon]
+    series = []
+    for arm, label, family, dash in [("logreg_full", "Logistic regression · full data, 95 features", "classical", False),
+                                     ("logreg_sub_clip10", "Logistic regression · same 1.2k rows as VQC (clip 10)", "classical", True),
+                                     ("vqc_sub", "VQC · re-uploading, 4 qubits, 1.2k rows", "quantum", False)]:
+        d = e3[e3.arm == arm].set_index("eps")
+        series.append({"arm": arm, "label": label, "family": family, "dashed": dash, "points": [
+            {"eps": e, "auc": _clean(d.loc[e, "roc_auc_mean"]), "std": _clean(d.loc[e, "roc_auc_std"])}
+            for e in pq.EPS_ORDER if e in d.index]})
     return {
-        "record_id": row,
-        "true_label": int(rec.label),
-        "inputs": [{"key": k, "label": lab, "options": [{"value": v, "text": t} for v, t in opts.items()],
-                    "value": _clean(rec[k])} for k, lab, opts in INPUTS],
-        "answers": [{"key": k, "description": FEATURES[k][1], "value": _clean(rec[k])} for k in FEATURES],
-        "source": f"{b['source']} — dev record not used to train either model",
+        "records": 21789,
+        "holdout_auc": base["holdout_auc"],
+        "privacy_cost": base["holdout_auc"] - base["dp4_holdout_auc"],
+        "dp4_holdout_auc": base["dp4_holdout_auc"],
+        "qsvm_auc": float(t.quantum_mean), "logreg_matched_auc": float(t.classical_mean),
+        "qvc_holm_p": float(t.wilcoxon_p_holm), "qvc_folds": int(t.k),
+        "tests": test_status,
+        "curve": {"epsilons": pq.EPS_ORDER, "series": series, "folds": 10},
     }
 
 
-class PredictRequest(BaseModel):
-    record_id: int | None = None
-    edits: dict[str, float | None] = {}
+# ------------------------------------------------------------------ configure
+@app.get("/api/configure")
+def configure(model: str, encoding: str, features: int, eps: str, sites: int):
+    return _guard(lambda: pq.resolve(model, encoding, features, eps, sites))
+
+
+# ------------------------------------------------------------------ inspect
+@app.get("/api/sample")
+def sample(record_id: int | None = None):
+    pool = models()["pool"]
+    if record_id is not None and record_id not in pool.index:
+        raise ValueError(f"record {record_id} is not in the demo record pool")
+    row = record_id if record_id is not None else int(random.choice(list(pool.index)))
+    return {"record_id": row, "survey_label": int(pool.loc[row, "label"]),
+            "note": "a dev record that none of the cached models was trained on"}
+
+
+class InspectRequest(BaseModel):
+    record_id: int
+    model: str = "qsvm"
     encoding: str = "angle"
+    features: int = 8
 
 
-def _record_frame(b: dict, req: PredictRequest) -> pd.DataFrame:
-    from src.m1_data.nsch import FEATURES
-
-    if req.record_id is not None:
-        if req.record_id not in b["pool"].index:
-            raise ValueError(f"record {req.record_id} is not in the demo record pool")
-        rec = b["pool"].loc[[req.record_id], list(FEATURES)].copy()
-    else:  # no record loaded: everything else imputed with the training medians / modes
-        rec = pd.DataFrame([{k: np.nan for k in FEATURES}])
-    for key, value in req.edits.items():
-        if key not in INPUT_KEYS:
-            raise ValueError(f"'{key}' is not an editable input")
-        allowed = dict((k, o) for k, _, o in INPUTS)[key]
-        if value is not None and int(value) not in allowed:
-            raise ValueError(f"{key}={value} is not a valid answer")
-        rec[key] = np.nan if value is None else float(value)
-    rec["label"] = 0  # placeholder column expected by the preprocessor; never read
-    for col in ("state_fips", "survey_weight", "survey_year"):
+def _record(record_id: int) -> pd.DataFrame:
+    pool = models()["pool"]
+    if record_id not in pool.index:
+        raise ValueError(f"record {record_id} is not in the demo record pool")
+    rec = pool.loc[[record_id]].copy()
+    for col in NON_FEATURE_COLUMNS[1:]:
         rec[col] = np.nan
     return rec.reset_index(drop=True)
 
 
-def _decision(value: float, threshold: float) -> dict:
-    return {"threshold": threshold, "at_risk": bool(value >= threshold), "distance": value - threshold}
+def _qsvm_inputs(record_id: int, encoding: str, features: int):
+    m = models()
+    if (encoding, features) not in m["qsvm"]:
+        raise ValueError("encoding/features combination not cached")
+    entry = m["qsvm"][(encoding, features)]
+    X = m["prep"].transform(_record(record_id), "label").to_numpy()
+    return entry, X, entry["transformer"].transform(X)
 
 
-CIRCUIT_STYLE = {
-    "svg.fonttype": "none", "font.family": "monospace", "font.monospace": ["JetBrains Mono", "DejaVu Sans Mono"],
-    "text.color": "#1b1e23", "patch.facecolor": "#ffffff", "patch.edgecolor": "#6b6f76", "patch.linewidth": 1.0,
-    "lines.color": "#9498a0", "lines.linewidth": 1.0, "figure.facecolor": "#ffffff", "axes.facecolor": "#ffffff",
-}
-
-
-@lru_cache(maxsize=64)
-def _circuit_svg(encoding: str, angles: tuple) -> str:
+@lru_cache(maxsize=128)
+def _circuit_svg(encoding: str, features: int, record_id: int) -> str:
     import matplotlib
 
     matplotlib.use("Agg")
@@ -204,18 +200,20 @@ def _circuit_svg(encoding: str, angles: tuple) -> str:
 
     from src.m4_encoding import make_encoding
 
-    enc = make_encoding(encoding, 8)
-    dev = qml.device("default.qubit", wires=8)
+    _, _, z = _qsvm_inputs(record_id, encoding, features)
+    enc = make_encoding(encoding, features)
 
-    @qml.qnode(dev)
+    @qml.qnode(qml.device("default.qubit", wires=features))
     def circuit(x):
         enc.feature_map(x)
         return qml.state()
 
-    x = enc.prepare(np.array([angles]))[0]
-    with plt.rc_context(CIRCUIT_STYLE):  # light style in the UI palette; labels kept as text (JetBrains Mono)
+    style = {"svg.fonttype": "none", "font.family": "monospace", "font.monospace": ["JetBrains Mono", "DejaVu Sans Mono"],
+             "text.color": "#1b1e23", "patch.facecolor": "#ffffff", "patch.edgecolor": "#6b6f76",
+             "patch.linewidth": 1.0, "lines.color": "#9498a0", "lines.linewidth": 1.0}
+    with plt.rc_context(style):
         fig, _ = qml.draw_mpl(circuit, decimals=None if encoding == "amplitude" else 2, level="device",
-                              style="rcParams")(x)
+                              style="rcParams")(enc.prepare(z)[0])
         buf = io.StringIO()
         fig.savefig(buf, format="svg", bbox_inches="tight", transparent=True)
     plt.close(fig)
@@ -223,137 +221,110 @@ def _circuit_svg(encoding: str, angles: tuple) -> str:
     return svg[svg.find("<svg"):]
 
 
-@app.post("/api/predict")
-def predict(req: PredictRequest):
-    if req.encoding not in ENCODINGS:
-        raise ValueError(f"encoding must be one of {ENCODINGS}")
-    b = bundle()
-    t_start = time.perf_counter()
-    rec = _record_frame(b, req)
+@app.get("/api/circuit")
+def circuit(encoding: str, features: int, record_id: int):
+    if encoding not in pq.ENCODINGS or features not in (4, 6, 8):
+        raise ValueError("unknown encoding or feature count")
+    t0 = time.perf_counter()
+    svg = _circuit_svg(encoding, features, record_id)
+    return Response(svg, media_type="image/svg+xml",
+                    headers={"Cache-Control": "max-age=3600", "X-Render-Ms": f"{1000 * (time.perf_counter() - t0):.1f}"})
 
-    # LogReg (final classical model): imputation/one-hot -> standardize -> logistic regression
-    lr = b["logreg"]
-    x_lr = lr["scaler"].transform(lr["prep"].transform(rec, "label").to_numpy())
-    p_lr = float(lr["model"].predict_proba(x_lr)[0, 1])
-    t_lr = time.perf_counter()
 
-    # QSVM path for the selected encoding (angle = the final, evaluated model)
-    q = b["qsvm"]
-    imputed = q["prep"].transform(rec, "label")
+@app.post("/api/inspect")
+def inspect(req: InspectRequest):
+    if req.model not in pq.MODELS or req.encoding not in pq.ENCODINGS or req.features not in (4, 6, 8):
+        raise ValueError("unknown model, encoding or feature count")
+    t0 = time.perf_counter()
+    m = models()
+    rec = _record(req.record_id)
+    raw = rec.drop(columns=NON_FEATURE_COLUMNS).iloc[0]
+    imputed = m["prep"].transform(rec, "label")
     X = imputed.to_numpy()
-
-    def qsvm_score(enc: str):
-        m = q["by_encoding"][enc]
-        z = m["transformer"].transform(X)
-        return m, z, float(m["model"].decision_scores(z)[0])
-
-    final_m, _, final_score = qsvm_score("angle")
-    t_qsvm = time.perf_counter()
-    m, z, score = qsvm_score(req.encoding)
-    ft, model = m["transformer"], m["model"]
-    standardized = ft.scaler.transform(X)[0]
-    reduced = ft.pca.transform(ft.scaler.transform(X))[0]
-    state = model._states(z)[0]
-    probs = np.abs(state) ** 2
-    order = np.argsort(-probs)[:8]
-    k_row = model._kernel(model._states(z), model.train_states_)[0]
-    svc = model.svc_
-    sv_k = k_row[svc.support_]
-    contrib = svc.dual_coef_[0] * sv_k
-    near = np.argsort(-sv_k)[:5]
-
-    t_c0 = time.perf_counter()
-    circuit = _circuit_svg(req.encoding, tuple(np.round(z[0][:8], 4)) if req.encoding != "amplitude"
-                           else tuple(np.round(z[0], 4)))
-    t_c1 = time.perf_counter()
-    raw = rec.drop(columns=["label", "state_fips", "survey_weight", "survey_year"]).iloc[0]
-    cv = b["qsvm_exp1_cv_auc_pca8_8q"][req.encoding]
-    trace = [
-        {"stage": "Raw answers", "detail": f"{int(raw.notna().sum())} of 66 whitelisted answers present, "
-                                           f"{int(raw.isna().sum())} missing", "values": [
-            {"name": k, "value": _clean(v) if not isinstance(v, str) else v} for k, v in raw.items()]},
-        {"stage": "Imputed + one-hot", "detail": "missing answers filled with training medians/modes; categories "
-                                                 f"expanded to 0/1 columns → {X.shape[1]} numbers",
-         "values": [{"name": c, "value": float(v)} for c, v in zip(imputed.columns, X[0])]},
-        {"stage": "Standardized", "detail": "each column centred and scaled with the 1,200 training rows",
-         "values": [{"name": c, "value": float(v)} for c, v in zip(imputed.columns, standardized)]},
-        {"stage": "Reduced", "detail": (f"PCA to {len(reduced)} components, then the constant slot; normalized "
-                                        "into 256 amplitudes" if req.encoding == "amplitude" else
-                                        "PCA to 8 components, then scaled to rotation angles in [0, π]"),
-         "values": [{"name": f"PC{i + 1}", "value": float(v)} for i, v in enumerate(reduced[:8])],
-         "angles": None if req.encoding == "amplitude" else [float(v) for v in z[0]]},
-        {"stage": "Quantum state", "detail": f"8 qubits → {len(state)} amplitudes (norm {np.linalg.norm(state):.6f})",
-         "probabilities": [float(p) for p in probs],
-         "top": [{"basis": format(int(i), "08b"), "amplitude_re": float(state[i].real),
-                  "amplitude_im": float(state[i].imag), "probability": float(probs[i])} for i in order]},
-        {"stage": "Measured", "detail": "fidelity |⟨φ(x)|φ(xᵢ)⟩|² with each training state — on hardware, the "
-                                        "probability of reading all-zeros from an overlap circuit",
-         "kernel": {"min": float(k_row.min()), "median": float(np.median(k_row)), "max": float(k_row.max()),
-                    "n_train": int(len(k_row)), "n_support": int(len(svc.support_))},
-         "nearest_support_vectors": [{"fidelity": float(sv_k[i]), "label": "diagnosed" if svc.dual_coef_[0][i] > 0
-                                      else "not diagnosed", "weight": float(svc.dual_coef_[0][i])} for i in near]},
-        {"stage": "Score", "detail": "Σ wᵢ·fidelityᵢ over support vectors + intercept, compared with the threshold "
-                                     "chosen on inner-validation rows",
-         "positive_part": float(contrib[contrib > 0].sum()), "negative_part": float(contrib[contrib < 0].sum()),
-         "intercept": float(svc.intercept_[0]), "score": score, **_decision(score, m["threshold"])},
-    ]
-    return {
-        "record_id": req.record_id,
-        "logreg": {"probability": p_lr, **_decision(p_lr, lr["threshold"]), "kind": "probability",
-                   "trained_rows": lr["n_train"], "C": lr["params"].get("C")},
-        "qsvm": {"score": final_score, **_decision(final_score, final_m["threshold"]), "kind": "decision score",
-                 "encoding": "angle", "trained_rows": q["n_train"], "C": final_m["params"].get("C")},
-        "selected_encoding": {"encoding": req.encoding, "score": score, **_decision(score, m["threshold"]),
-                              "cv_auc": cv},
-        "trace": trace,
-        "circuit_svg": circuit,
-        "timings_ms": {"logreg": 1000 * (t_lr - t_start), "qsvm_final": 1000 * (t_qsvm - t_lr),
-                       "circuit": 1000 * (t_c1 - t_c0),
-                       "trace": 1000 * ((time.perf_counter() - t_qsvm) - (t_c1 - t_c0)),
-                       "total": 1000 * (time.perf_counter() - t_start)},
-    }
-
-
-@app.get("/api/privacy")
-def privacy():
-    r = runs()
-    s = pd.concat([_csv(r["exp3"] / "summary.csv"), _csv(r["exp3_sensitivity"] / "summary.csv")], ignore_index=True)
-    s["eps"] = ["inf" if str(e) in ("inf", "nan") else f"{float(e):g}" for e in s.target_epsilon]
-    order = ["0.5", "1", "2", "4", "8", "inf"]
-    series_spec = [
-        ("vqc_sub", "VQC (quantum), 1.2k rows, PCA-4", "quantum"),
-        ("logreg_sub", "LogReg, same rows & features, clip 1", "classical"),
-        ("logreg_sub_clip10", "LogReg, same rows & features, clip 10 (sensitivity)", "classical"),
-        ("logreg_full", "LogReg, full data, all 95 features", "classical"),
-    ]
-    series = []
-    for arm, label, family in series_spec:
-        d = s[s.arm == arm].set_index("eps")
-        if d.empty:
-            continue
-        series.append({"arm": arm, "label": label, "family": family, "points": [
-            {"eps": e, "auc": _clean(d.loc[e, "roc_auc_mean"]), "auc_std": _clean(d.loc[e, "roc_auc_std"]),
-             "balanced_accuracy": _clean(d.loc[e, "balanced_accuracy_mean"]),
-             "epsilon_spent": _clean(d.loc[e, "epsilon_spent_mean"])} for e in order if e in d.index]})
-    h = _csv(r["holdout"] / "holdout_metrics.csv").set_index("model")
-    nonpriv, dp4 = float(h.loc["logreg_full_all95", "roc_auc"]), float(h.loc["dp_logreg_full_all95_eps4", "roc_auc"])
-    return {"epsilons": order, "delta": 1e-5, "series": series, "folds": 10,
-            "headline": {"nonprivate_auc": nonpriv, "dp_eps4_auc": dp4, "cost": nonpriv - dp4,
-                         "epsilon_spent": _clean(h.loc["dp_logreg_full_all95_eps4", "epsilon_spent"]),
-                         "source": "locked hold-out (4,358 adolescents), LogReg on full data"}}
+    n = req.features
+    steps = [{"title": "Raw survey answers", "detail": f"{int(raw.notna().sum())} of 66 whitelisted answers present.",
+              "rows": [[k, v if isinstance(v, str) else _clean(v)] for k, v in raw.items()]}]
+    note = None
+    if req.model == "logreg":
+        lr = m["logreg"][n]
+        ft = lr["transformer"]
+        std, red, z = ft.scaler.transform(X)[0], ft.pca.transform(ft.scaler.transform(X))[0], ft.transform(X)[0]
+        p = float(lr["model"].predict_proba(z.reshape(1, -1))[0, 1])
+        steps += [
+            {"title": "Imputed and scaled", "detail": "Missing answers filled with training medians or modes, categories "
+             "one-hot encoded (95 columns), then standardized on the 1,200 training rows.",
+             "rows": [[c, f"{a:.2f} → {b:.3f}"] for c, a, b in zip(imputed.columns, X[0], std)]},
+            {"title": f"Reduced to {n} features", "detail": f"PCA to {n} components, rescaled to [0, π] on training rows.",
+             "rows": [[f"PC{i + 1}", f"{a:.3f} → {b:.3f}"] for i, (a, b) in enumerate(zip(red, z))]},
+            {"title": "Encoded", "detail": "Not applicable: logistic regression uses the reduced values directly.", "rows": []},
+            {"title": "Measured", "detail": "Not applicable: no quantum circuit in a classical model.", "rows": []},
+            {"title": "Probability", "detail": "Logistic regression probability compared with the threshold chosen on "
+             "inner-validation rows.", "rows": [["probability", round(p, 4)], ["threshold", round(lr["threshold"], 4)],
+                                                ["decision", "above threshold" if p >= lr["threshold"] else "below threshold"]]},
+        ]
+        circuit_url = None
+    else:
+        entry = m["qsvm"][(req.encoding, n)]
+        ft, model = entry["transformer"], entry["model"]
+        std = ft.scaler.transform(X)[0]
+        red = ft.pca.transform(ft.scaler.transform(X))[0]
+        z = ft.transform(X)
+        state = model._states(z)[0]
+        probs = np.abs(state) ** 2
+        top = np.argsort(-probs)[:8]
+        k_row = model._kernel(model._states(z), model.train_states_)[0]
+        svc = model.svc_
+        sv_k = k_row[svc.support_]
+        near = np.argsort(-sv_k)[:5]
+        score = float(model.decision_scores(z)[0])
+        reduced_rows = ([[f"PC{i + 1} → qubit {i}", f"{a:.3f} → {b:.3f} rad"] for i, (a, b) in enumerate(zip(red, z[0]))]
+                        if req.encoding != "amplitude" else
+                        [[f"PC{i + 1}", f"{a:.3f}"] for i, a in enumerate(red[:12])] +
+                        [["…", f"{len(red)} components + 1 constant → {2 ** n} amplitudes"]])
+        steps += [
+            {"title": "Imputed and scaled", "detail": "Missing answers filled with training medians or modes, categories "
+             "one-hot encoded (95 columns), then standardized on the 1,200 training rows.",
+             "rows": [[c, f"{a:.2f} → {b:.3f}"] for c, a, b in zip(imputed.columns, X[0], std)]},
+            {"title": f"Reduced to {n} features" if req.encoding != "amplitude" else f"Reduced for {n}-qubit amplitude encoding",
+             "detail": (f"PCA to {n} components, rescaled to rotation angles in [0, π]." if req.encoding != "amplitude" else
+                        f"PCA to {len(red)} components (2^{n} − 1 slots), standardized, then normalized into amplitudes."),
+             "rows": reduced_rows},
+            {"title": "Encoded", "detail": f"{pq.ENCODINGS[req.encoding]} encoding on {n} qubits → {len(state)} amplitudes "
+             f"(norm {np.linalg.norm(state):.6f}). Eight most probable basis states:",
+             "rows": [[f"|{format(int(i), f'0{n}b')}⟩", f"{probs[i]:.4f}"] for i in top],
+             "probabilities": [float(v) for v in probs]},
+            {"title": "Measured", "detail": "Fidelity |⟨φ(x)|φ(xᵢ)⟩|² with each training state — on hardware, the probability "
+             "of reading all-zeros from an overlap circuit.",
+             "rows": [["training states compared", int(len(k_row))], ["fidelity min / median / max",
+                      f"{k_row.min():.3f} / {np.median(k_row):.3f} / {k_row.max():.3f}"],
+                      ["support vectors", int(len(svc.support_))]] +
+                     [[f"nearest support vector {j + 1} ({'diagnosed' if svc.dual_coef_[0][i] > 0 else 'not diagnosed'})",
+                       f"{sv_k[i]:.4f}"] for j, i in enumerate(near)]},
+            {"title": "Score (not a probability)", "detail": "The QSVM outputs an SVM decision score — weighted fidelities plus "
+             "an intercept — compared with the threshold chosen on inner-validation rows.",
+             "rows": [["decision score", round(score, 4)], ["threshold", round(entry["threshold"], 4)],
+                      ["decision", "above threshold" if score >= entry["threshold"] else "below threshold"]]},
+        ]
+        circuit_url = f"/api/circuit?encoding={req.encoding}&features={n}&record_id={req.record_id}"
+        if req.model in ("vqc", "hybrid"):
+            note = (f"{pq.MODELS[req.model]} weights are not cached in this tool, so the trace uses the QSVM fitted with the "
+                    f"same encoding and {n} features on the same 1,200 rows.")
+    return {"record_id": req.record_id, "survey_label": int(models()["pool"].loc[req.record_id, "label"]),
+            "model": req.model, "encoding": req.encoding, "features": n, "note": note, "steps": steps,
+            "circuit_url": circuit_url, "latency_ms": 1000 * (time.perf_counter() - t0)}
 
 
-@app.get("/api/results")
-def results():
+# ------------------------------------------------------------------ evidence
+@app.get("/api/evidence")
+def evidence():
     tables = RESULTS / "tables"
     t4 = _csv(tables / "table4_quantum_vs_classical.csv")
-    t11 = _csv(tables / "table11_holdout.csv")
-    t1 = _csv(tables / "table1_classical.csv")
     figs = [{"file": f, "url": f"/figures/{f}", "exists": (RESULTS / "figures" / f).exists()} for f in
-            ("privacy_utility_curve.png", "roc_curves.png", "encoding_comparison.png", "federated_convergence.png")]
-    return {"classical": _records(t1), "quantum_vs_classical": _records(t4[t4.Metric == "ROC-AUC"]),
-            "quantum_vs_classical_all": _records(t4), "holdout": _records(t11), "figures": figs,
-            "source": "results/tables (generated by src.m10_exp.final_report)"}
+            ("privacy_utility_curve.png", "encoding_comparison.png", "roc_curves.png", "federated_convergence.png")]
+    return {"matched": _records(t4[t4.Metric == "ROC-AUC"].drop(columns=["Metric"])),
+            "holdout": _records(_csv(tables / "table11_holdout.csv")),
+            "encodings": _records(_csv(tables / "table2_encodings.csv")),
+            "figures": figs}
 
 
 @app.get("/api/{rest:path}")
