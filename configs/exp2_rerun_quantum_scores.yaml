@@ -1,0 +1,93 @@
+# Re-run of VQC and Hybrid QNN from Experiment 2 to recover validation scores for ROC curves.
+# Same seeds/folds; metrics must reproduce the original rows.
+project:
+  name: exp2-rerun-vqc-hybrid-scores
+  seed: 2026
+  output_dir: results
+  n_jobs: 6
+data:
+  loader: nsch
+  paths:
+  - data/raw/nsch_2024/nsch_2024e_topical.dta
+  target: depression_current
+  min_age: 12
+  max_age: 17
+split:
+  holdout_fraction: 0.2
+cv:
+  n_splits: 5
+  n_repeats: 3
+subsample:
+  n: 1500
+tuning:
+  inner_val_fraction: 0.2
+experiment:
+  regimes:
+  - subsample
+  feature_sets:
+    pca4:
+      method: pca
+      k: 4
+    pca8:
+      method: pca
+      k: 8
+    all95:
+      method: all
+  classical_models: []
+  quantum:
+    vqc:
+      feature_set: pca4
+      encoding: reupload
+      n_qubits: 4
+      epochs: 30
+      batch_size: 64
+      init_scale: 0.1
+      grid:
+        learning_rate:
+        - 0.01
+        - 0.05
+        n_layers:
+        - 1
+        - 2
+    hybrid:
+      feature_set: all95
+      encoding: angle
+      n_qubits: 8
+      n_layers: 2
+      epochs: 30
+      batch_size: 64
+      init_scale: 0.1
+      grid:
+        learning_rate:
+        - 0.01
+        - 0.05
+base_params:
+  xgboost:
+    n_estimators: 300
+  mlp:
+    epochs: 60
+    batch_size: 128
+grids:
+  logreg:
+    C:
+    - 0.01
+    - 0.1
+    - 1.0
+    - 10.0
+  xgboost:
+    max_depth:
+    - 2
+    - 4
+    - 6
+    learning_rate:
+    - 0.03
+    - 0.1
+  mlp:
+    hidden:
+    - - 32
+    - - 64
+      - 32
+    weight_decay:
+    - 0.0001
+    - 0.01
+skip_report: true

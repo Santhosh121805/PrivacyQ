@@ -78,6 +78,11 @@ All numbers are from `results/RESULTS.md` (real NSCH 2024 data, mean over folds)
    across clients, fell from 0.805 (centralised) to ≈0.66 with 10 clients: each client has
    too few records for DP noise to average out.
 
+6. **The locked hold-out confirms the cross-validation numbers.** Scored once at the end
+   (`python -m src.m10_exp.holdout_eval --config configs/holdout_final.yaml`, which refuses to
+   run twice): LogReg 0.892, QSVM 0.854, DP LogReg ε = 4 0.861 — each CV mean lies inside the
+   hold-out 95% interval.
+
 Bottom line: on this dataset, quantum encodings are a workable representation layer but
 give no accuracy or privacy benefit over a well-set-up classical baseline; the privacy
 guarantee always comes from DP-SGD, never from the quantum circuit.
@@ -141,5 +146,5 @@ synthetic-only smoke runner.
 ## Known stubs and limits
 
 Secure aggregation and gradient-inversion auditing are explicit stubs. RandomForest was
-dropped from all results on supervisor instruction. The locked hold-out set was not
-evaluated. See the Limitations section of `results/RESULTS.md`.
+dropped from all results on supervisor instruction. See the Limitations section of
+`results/RESULTS.md`.

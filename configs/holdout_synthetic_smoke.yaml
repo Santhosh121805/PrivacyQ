@@ -1,0 +1,50 @@
+# SYNTHETIC dry run of the hold-out script. Not a finding.
+project:
+  name: holdout-smoke
+  seed: 2026
+  output_dir: results
+data:
+  loader: synthetic_adolescent
+  n_samples: 3000
+  positive_fraction: 0.08
+split:
+  holdout_fraction: 0.2
+tuning:
+  inner_val_fraction: 0.2
+models:
+  logreg_full_all95:
+    kind: logreg
+    features:
+      method: all
+    grid:
+      C:
+      - 0.01
+      - 0.1
+      - 1.0
+      - 10.0
+  qsvm_angle_pca8_1500rows:
+    kind: qsvm
+    subsample: 600
+    features:
+      method: pca
+      k: 8
+    params:
+      encoding: angle
+      n_qubits: 8
+    grid:
+      C:
+      - 0.1
+      - 1.0
+      - 10.0
+  dp_logreg_full_all95_eps4:
+    kind: dp
+    features:
+      method: all
+    params:
+      kind: logreg
+      epsilon: 4
+      delta: 1.0e-05
+      max_grad_norm: 1.0
+      epochs: 30
+      batch_size: 256
+      learning_rate: 0.05

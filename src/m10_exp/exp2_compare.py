@@ -186,9 +186,10 @@ def run(config_path: str) -> Path:
     results.to_csv(run_dir / "fold_metrics.csv", index=False)
     part.unlink(missing_ok=True)
     np.savez_compressed(run_dir / "val_scores.npz", **{k.replace("|", "__"): v for k, v in scores.items()})
-    from src.m10_exp.exp2_report import write_report
+    if not config.get("skip_report"):
+        from src.m10_exp.exp2_report import write_report
 
-    write_report(run_dir, results, loader, config)
+        write_report(run_dir, results, loader, config)
     print(f"wrote {run_dir}")
     return run_dir
 

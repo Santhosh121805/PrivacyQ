@@ -7,3 +7,4 @@ runs:
   exp3: results/exp3-nsch2024-privacy-utility-20261108-165618
   exp3_sensitivity: results/exp3-sensitivity-logreg-clipping-20261108-170152
   exp4: results/exp4-nsch2024-federated-dp-20261108-170320
+  holdout: results/holdout-20261108-173801

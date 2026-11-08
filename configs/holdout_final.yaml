@@ -1,0 +1,26 @@
+# One-shot hold-out evaluation of the final configurations (REAL NSCH 2024).
+# Same protocol as cross-validation; trained on all dev rows; scored once on the 4,358-row hold-out.
+project: {name: holdout-final, seed: 2026, output_dir: results}
+data:
+  loader: nsch
+  paths: [data/raw/nsch_2024/nsch_2024e_topical.dta]
+  target: depression_current
+  min_age: 12
+  max_age: 17
+split: {holdout_fraction: 0.2}
+tuning: {inner_val_fraction: 0.2}
+models:
+  logreg_full_all95:
+    kind: logreg
+    features: {method: all}
+    grid: {C: [0.01, 0.1, 1.0, 10.0]}
+  qsvm_angle_pca8_1500rows:
+    kind: qsvm
+    subsample: 1500
+    features: {method: pca, k: 8}
+    params: {encoding: angle, n_qubits: 8}
+    grid: {C: [0.1, 1.0, 10.0]}
+  dp_logreg_full_all95_eps4:
+    kind: dp
+    features: {method: all}
+    params: {kind: logreg, epsilon: 4, delta: 1.0e-5, max_grad_norm: 1.0, epochs: 30, batch_size: 256, learning_rate: 0.05}
