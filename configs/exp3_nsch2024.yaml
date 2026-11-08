@@ -1,0 +1,31 @@
+# Experiment 3: privacy-utility curve on REAL data (NSCH 2024, ages 12-17).
+# Arms chosen by the pre-declared rule from Experiment 2 (results/exp2-nsch2024-quantum-vs-classical-20261108-165426):
+#  quantum   = best gradient-trained quantum model (VQC 0.814 > hybrid 0.784)
+#  classical = best gradient-trained classical model on full data, all features (LogReg 0.888 > MLP 0.886)
+# Fixed hyperparameters: VQC lr/layers = most frequently selected non-privately in Experiment 2.
+project: {name: exp3-nsch2024-privacy-utility, seed: 2026, output_dir: results, n_jobs: 6}
+data:
+  loader: nsch
+  paths: [data/raw/nsch_2024/nsch_2024e_topical.dta]
+  target: depression_current
+  min_age: 12
+  max_age: 17
+split: {holdout_fraction: 0.2}
+cv: {n_splits: 5, n_repeats: 2}     # 10 folds (scope limited to finish on time)
+subsample: {n: 1500}
+tuning: {inner_val_fraction: 0.2}
+experiment:
+  epsilons: [0.5, 1, 2, 4, 8, null]
+  delta: 1.0e-5
+  feature_sets:
+    pca4: {method: pca, k: 4}
+    all95: {method: all}
+  arms:
+    vqc_sub: {label: "VQC re-upload 4q (1.2k rows, PCA-4)", kind: vqc, family: quantum, regime: subsample,
+              feature_set: pca4, learning_rate: 0.05, epochs: 30, batch_size: 128,
+              model_params: {encoding: reupload, n_qubits: 4, n_layers: 2}}
+    logreg_sub: {label: "LogReg (same 1.2k rows, PCA-4)", kind: logreg, family: classical, regime: subsample,
+                 feature_set: pca4, learning_rate: 0.05, epochs: 30, batch_size: 128}
+    logreg_full: {label: "LogReg (full 11k rows, all 95 features)", kind: logreg, family: classical, regime: full,
+                  feature_set: all95, learning_rate: 0.05, epochs: 30, batch_size: 256}
+  comparisons: [[vqc_sub, logreg_sub]]

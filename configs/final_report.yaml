@@ -1,0 +1,9 @@
+# Inputs for results/RESULTS.md (python -m src.m10_exp.final_report --config configs/final_report.yaml)
+output_dir: results
+runs:
+  phase1: results/phase1-nsch2024-depression-20261104-183743
+  exp1: results/exp1-nsch2024-encodings-final-20261108-160825
+  exp2: results/exp2-nsch2024-quantum-vs-classical-20261108-165426
+  exp3: results/exp3-nsch2024-privacy-utility-20261108-165618
+  exp3_sensitivity: results/exp3-sensitivity-logreg-clipping-20261108-170152
+  exp4: results/exp4-nsch2024-federated-dp-20261108-170320
