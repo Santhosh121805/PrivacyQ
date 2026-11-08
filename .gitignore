@@ -9,3 +9,4 @@ data/*
 !data/README.md
 data/raw/
 data/processed/
+models/
