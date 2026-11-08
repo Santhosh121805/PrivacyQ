@@ -40,7 +40,13 @@ def build_mlp(n_features: int, hidden: tuple[int, ...] = (64, 32)) -> torch.nn.M
 
 
 class TorchMLPClassifier(BaseEstimator, ClassifierMixin):
-    """MLP trained with Adam on positive-class-weighted binary cross-entropy."""
+    """MLP trained with Adam on positive-class-weighted binary cross-entropy.
+
+    With ``eval_set`` the weights from the epoch with the best eval ROC-AUC are
+    kept (early stopping on the inner validation split).
+    """
+
+    supports_eval_set = True
 
     def __init__(
         self,
@@ -60,7 +66,11 @@ class TorchMLPClassifier(BaseEstimator, ClassifierMixin):
         self.balance = balance
         self.seed = seed
 
-    def fit(self, X: np.ndarray, y: np.ndarray) -> "TorchMLPClassifier":
+    def fit(self, X: np.ndarray, y: np.ndarray, eval_set=None) -> "TorchMLPClassifier":
+        import copy
+
+        from sklearn.metrics import roc_auc_score
+
         torch.manual_seed(self.seed)
         generator = torch.Generator().manual_seed(self.seed)
         X_t = torch.as_tensor(np.asarray(X), dtype=torch.float32)
@@ -77,12 +87,19 @@ class TorchMLPClassifier(BaseEstimator, ClassifierMixin):
             shuffle=True,
             generator=generator,
         )
-        self.model_.train()
-        for _ in range(self.epochs):
+        best_auc, best_state, self.best_epoch_ = -np.inf, None, self.epochs
+        for epoch in range(1, self.epochs + 1):
+            self.model_.train()
             for xb, yb in loader:
                 optimizer.zero_grad()
                 loss_fn(self.model_(xb).squeeze(-1), yb).backward()
                 optimizer.step()
+            if eval_set is not None:
+                auc = roc_auc_score(eval_set[1], self.decision_function(eval_set[0]))
+                if auc > best_auc:
+                    best_auc, best_state, self.best_epoch_ = auc, copy.deepcopy(self.model_.state_dict()), epoch
+        if best_state is not None:
+            self.model_.load_state_dict(best_state)
         self.classes_ = np.array([0, 1])
         self.n_features_in_ = X_t.shape[1]
         return self

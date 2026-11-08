@@ -24,4 +24,4 @@ features:
   methods: [mi, pca]
   ks: [4, 6, 8]
 
-models: [logreg, random_forest, xgboost, mlp]
+models: [logreg, xgboost, mlp]   # RandomForest dropped on supervisor instruction

@@ -40,6 +40,13 @@ LABEL_LIMITATION = (
 )
 
 
+def stamp_synthetic(fig, loader) -> None:
+    """Write a visible SYNTHETIC warning onto a matplotlib figure."""
+    if getattr(loader, "is_synthetic", False):
+        fig.text(0.5, 0.5, "SYNTHETIC DATA — NOT A FINDING", ha="center", va="center", fontsize=min(26.0, 2.6 * fig.get_figwidth()),
+                 color="#e34948", alpha=0.35, rotation=20, weight="bold")
+
+
 def report_header(title: str, loader) -> list[str]:
     """Standard header for every results markdown file."""
     lines = [f"# {title} — {loader.source_tag()}", ""]

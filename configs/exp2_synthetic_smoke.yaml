@@ -1,0 +1,95 @@
+# SYNTHETIC smoke test of Experiment 2. Not a finding.
+project:
+  name: exp2-smoke
+  seed: 2026
+  output_dir: results
+  n_jobs: 6
+data:
+  loader: synthetic_adolescent
+  n_samples: 2500
+  positive_fraction: 0.08
+split:
+  holdout_fraction: 0.2
+cv:
+  n_splits: 3
+  n_repeats: 1
+subsample:
+  n: 400
+tuning:
+  inner_val_fraction: 0.2
+experiment:
+  regimes:
+  - subsample
+  - full
+  feature_sets:
+    pca4:
+      method: pca
+      k: 4
+    pca8:
+      method: pca
+      k: 8
+    all95:
+      method: all
+  classical_models:
+  - logreg
+  - random_forest
+  - xgboost
+  - mlp
+  quantum:
+    qsvm:
+      feature_set: pca8
+      encoding: angle
+      n_qubits: 8
+      grid:
+        C:
+        - 0.1
+    vqc:
+      feature_set: pca4
+      encoding: reupload
+      n_qubits: 4
+      epochs: 2
+      batch_size: 64
+      init_scale: 0.1
+      grid:
+        learning_rate:
+        - 0.01
+        n_layers:
+        - 1
+    hybrid:
+      feature_set: all95
+      encoding: angle
+      n_qubits: 8
+      n_layers: 2
+      epochs: 2
+      batch_size: 64
+      init_scale: 0.1
+      grid:
+        learning_rate:
+        - 0.01
+base_params:
+  random_forest:
+    n_estimators: 30
+  xgboost:
+    n_estimators: 30
+  mlp:
+    epochs: 3
+    batch_size: 128
+grids:
+  logreg:
+    C:
+    - 0.01
+  random_forest:
+    min_samples_leaf:
+    - 1
+    max_features:
+    - sqrt
+  xgboost:
+    max_depth:
+    - 2
+    learning_rate:
+    - 0.03
+  mlp:
+    hidden:
+    - - 32
+    weight_decay:
+    - 0.0001

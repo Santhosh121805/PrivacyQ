@@ -1,0 +1,74 @@
+# SYNTHETIC smoke test of Experiment 4. Not a finding.
+project:
+  name: exp4-smoke
+  seed: 7
+  output_dir: results
+  n_jobs: 4
+data:
+  loader: synthetic_adolescent
+  n_samples: 2500
+  positive_fraction: 0.08
+split:
+  holdout_fraction: 0.2
+cv:
+  n_splits: 3
+  n_repeats: 1
+subsample:
+  n: 600
+tuning:
+  inner_val_fraction: 0.2
+experiment:
+  epsilons:
+  - 1
+  - null
+  delta: 1.0e-05
+  feature_sets:
+    pca4:
+      method: pca
+      k: 4
+    all:
+      method: all
+  arms:
+    vqc_sub:
+      label: VQC (synthetic)
+      kind: vqc
+      family: quantum
+      regime: subsample
+      feature_set: pca4
+      learning_rate: 0.05
+      epochs: 2
+      batch_size: 64
+      model_params:
+        encoding: reupload
+        n_qubits: 4
+        n_layers: 1
+    logreg_sub:
+      label: LogReg same rows (synthetic)
+      kind: logreg
+      family: classical
+      regime: subsample
+      feature_set: pca4
+      learning_rate: 0.05
+      epochs: 2
+      batch_size: 64
+    logreg_full:
+      label: LogReg full (synthetic)
+      kind: logreg
+      family: classical
+      regime: full
+      feature_set: all
+      learning_rate: 0.05
+      epochs: 2
+      batch_size: 128
+  comparisons:
+  - - vqc_sub
+    - logreg_sub
+  clients:
+  - 3
+  - 5
+  partitions:
+  - iid
+  - by_state
+  rounds: 2
+  local_epochs: 1
+  reference_run: results/SYNTHETIC-exp3-smoke-20261108-162036

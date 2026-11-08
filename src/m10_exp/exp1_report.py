@@ -12,7 +12,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from src.m8_eval.stats import corrected_resampled_ttest, holm, wilcoxon_p  # noqa: E402
-from src.m10_exp.common import markdown_table, report_header, summarise  # noqa: E402
+from src.m10_exp.common import markdown_table, report_header, stamp_synthetic, summarise  # noqa: E402
 
 HEAD = ["balanced_accuracy", "recall", "roc_auc", "pr_auc"]
 
@@ -99,7 +99,7 @@ def _fmt_tests(df: pd.DataFrame, cols: list[str]) -> str:
     return "\n".join(lines)
 
 
-def plot_encodings(summary: pd.DataFrame, run_dir: Path) -> None:
+def plot_encodings(summary: pd.DataFrame, run_dir: Path, loader=None) -> None:
     models = [m for m in ["qsvm", "vqc", "hybrid"] if m in set(summary.model)]
     methods = ["mi", "pca", "learned"]
     panels = [(m, f) for m in models for f in methods if ((summary.model == m) & (summary.feature_method == f)).any()]
@@ -123,8 +123,11 @@ def plot_encodings(summary: pd.DataFrame, run_dir: Path) -> None:
         ax.set_ylim(0.5, 0.9)
         ax.grid(axis="y", alpha=0.3)
     axes[0][0].set_ylabel("ROC-AUC (mean ± std over folds)")
-    axes[0][-1].legend(fontsize=7, loc="lower right")
-    fig.tight_layout()
+    handles, labels = axes[0][0].get_legend_handles_labels()
+    fig.legend(handles, labels, fontsize=8, loc="lower center", ncol=5, frameon=False)
+    fig.tight_layout(rect=(0, 0.08, 1, 1))
+    if loader is not None:
+        stamp_synthetic(fig, loader)
     fig.savefig(run_dir / "exp1_encoding_auc.png", dpi=160)
     plt.close(fig)
 
@@ -139,7 +142,7 @@ def write_report(run_dir: Path, results: pd.DataFrame, resources: pd.DataFrame, 
     enc_t.to_csv(run_dir / "encoding_tests.csv", index=False)
     swing.to_csv(run_dir / "encoding_swing.csv", index=False)
     meth_t.to_csv(run_dir / "mi_vs_pca_tests.csv", index=False)
-    plot_encodings(summary, run_dir)
+    plot_encodings(summary, run_dir, loader)
 
     cost = summary[summary.model != "logreg"][["model", "encoding", "feature_method", "n_qubits",
                                                "n_params_mean", "fit_seconds_mean", "tuning_seconds_mean"]]

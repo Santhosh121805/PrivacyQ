@@ -19,31 +19,22 @@ def dirichlet_partition(
     alpha: float = 0.5,
     seed: int = 0,
 ) -> list[np.ndarray]:
+    """Label-skewed split: each class's rows are divided across clients in
+    Dirichlet(alpha) proportions. Every row goes to exactly one client."""
     if n_clients < 1:
         raise ValueError("n_clients must be at least 1")
     if alpha <= 0:
         raise ValueError("alpha must be positive")
     values = np.asarray(labels, dtype=int)
-    unique = np.unique(values)
     rng = np.random.default_rng(seed)
-    allocations = rng.dirichlet(np.full(len(unique), alpha), size=n_clients)
-    client_indices: list[np.ndarray] = []
-    for client in range(n_clients):
-        counts = np.round(allocations[client] * len(values)).astype(int)
-        counts[-1] = len(values) - counts[:-1].sum()
-        counts = np.clip(counts, 0, None)
-        selected = []
-        for class_id, class_index in enumerate(unique):
-            members = np.where(values == class_index)[0]
-            if len(members) == 0:
-                continue
-            take = min(counts[class_id], len(members))
-            selected.extend(members[:take])
-        if len(selected) < len(values) / max(1, n_clients):
-            remaining = np.setdiff1d(np.arange(len(values)), np.array(selected, dtype=int))
-            selected.extend(remaining[: max(0, len(values) - len(selected))])
-        client_indices.append(np.array(sorted(selected), dtype=int))
-    return client_indices
+    buckets: list[list[int]] = [[] for _ in range(n_clients)]
+    for cls in np.unique(values):
+        members = rng.permutation(np.where(values == cls)[0])
+        shares = rng.dirichlet(np.full(n_clients, alpha))
+        cuts = (np.cumsum(shares)[:-1] * len(members)).astype(int)
+        for client, part in enumerate(np.split(members, cuts)):
+            buckets[client].extend(part.tolist())
+    return [np.array(sorted(b), dtype=int) for b in buckets]
 
 
 def weighted_fedavg(client_updates: list[np.ndarray | dict[str, np.ndarray]], weights: list[float] | None = None):
@@ -91,4 +82,4 @@ def partition_frame(
         client_index_sets = iid_partition(indices, n_clients=n_clients, seed=seed)
     else:
         client_index_sets = dirichlet_partition(frame[label_column].to_numpy(), n_clients=n_clients, alpha=alpha, seed=seed)
-    return [frame.iloc[indices].copy() for indices in client_index_sets]
+    return [frame.iloc[part].copy() for part in client_index_sets]
