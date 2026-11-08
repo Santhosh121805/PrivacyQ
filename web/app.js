@@ -1,385 +1,348 @@
 "use strict";
 
-// ------------------------------------------------------------------ state
-const state = {
-  spec: null,          // the 8 editable inputs (from /api/sample)
-  record: null,        // {record_id, true_label, inputs} or null = typical answers
-  encoding: "angle",
-  prediction: null,
-  privacy: null,
-  epsIndex: 3,
-};
+/* DP-FedQ notebook UI — vanilla JS + Observable Plot (global `Plot`, local UMD build). */
+
+const COLOR = { classical: "#4269d0", classicalLight: "#97bbf5", quantum: "#6cc5b0", risk: "#ff725c", muted: "#6b6f76", line: "#e4e4e7", ink: "#1b1e23" };
+const ENC_NAMES = { angle: "Angle", amplitude: "Amplitude", zz: "ZZ feature map", reupload: "Re-uploading" };
+
+const state = { spec: null, record: null, encoding: "angle", prediction: null, privacy: null, epsIndex: 3 };
 const $ = (id) => document.getElementById(id);
-const fmt = (v, d = 3) => (v === null || v === undefined || Number.isNaN(v) ? "–" : Number(v).toFixed(d));
-const signed = (v, d = 3) => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(d);
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const f = (v, d = 3) => (v === null || v === undefined || Number.isNaN(Number(v)) ? "–" : Number(v).toFixed(d));
+const sgn = (v, d = 3) => (Number(v) >= 0 ? "+" : "−") + Math.abs(Number(v)).toFixed(d);
+const num = (v, d = 3, cls = "") => `<span class="num ${cls}">${f(v, d)}</span>`;
 
 async function api(path, options = {}) {
-  let res;
-  try {
-    res = await fetch(path, options);
-  } catch (e) {
-    throw new Error("Cannot reach the demo server. Is `uvicorn api:app` running?");
-  }
-  let body = null;
-  try { body = await res.json(); } catch (e) { /* non-JSON */ }
-  if (!res.ok) throw new Error((body && body.error) || `Request failed (${res.status})`);
+  let res, body = null;
+  try { res = await fetch(path, options); } catch (e) { throw new Error("Cannot reach the demo server — is `uvicorn api:app --reload` running?"); }
+  try { body = await res.json(); } catch (e) { /* not JSON */ }
+  if (!res.ok) throw new Error((body && body.error) || `Request failed (HTTP ${res.status})`);
   return body;
 }
 function showError(id, err) {
   const el = $(id);
-  if (!err) { el.hidden = true; el.textContent = ""; return; }
-  el.hidden = false;
-  el.textContent = err.message || String(err);
+  el.hidden = !err;
+  el.textContent = err ? (err.message || String(err)) : "";
+}
+function postPredict() {
+  return api("/api/predict", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ record_id: state.record ? state.record.record_id : null, edits: edits(), encoding: state.encoding }),
+  });
 }
 
-// ------------------------------------------------------------------ routing
-const SECTIONS = ["try", "pipeline", "privacy", "results"];
-function parseHash() {
-  const raw = location.hash.replace(/^#/, "") || "try";
-  const [name, query] = raw.split("?");
-  return { name: SECTIONS.includes(name) ? name : "try", params: new URLSearchParams(query || "") };
-}
-async function route() {
-  const { name, params } = parseHash();
-  SECTIONS.forEach((s) => { $(s).hidden = s !== name; });
-  document.querySelectorAll(".sidenav a").forEach((a) => a.classList.toggle("active", a.dataset.section === name));
-  if (params.get("record")) await loadRecord({ record_id: params.get("record") }, true);
-  if (params.get("enc") && params.get("enc") !== state.encoding) setEncoding(params.get("enc"), false);
-  if (name === "pipeline") await ensurePrediction("pipe-error");
-  if (name === "try" && params.get("record")) await runPredict();
-  if (name === "privacy") await loadPrivacy();
-  if (name === "results") await loadResults();
-}
-window.addEventListener("hashchange", route);
-
-// ------------------------------------------------------------------ 1. Try it
+// ---------------------------------------------------------------- 1. Try it
 function renderInputs() {
   const form = $("inputs");
-  form.innerHTML = "";
-  for (const inp of state.spec) {
-    const current = state.record ? state.record.inputs.find((i) => i.key === inp.key).value : null;
-    const field = document.createElement("div");
-    field.className = "field";
-    const id = `in-${inp.key}`;
+  form.innerHTML = state.spec.map((inp) => {
     const opts = [`<option value="">${state.record ? "Missing in record (imputed)" : "Typical (training median)"}</option>`]
       .concat(inp.options.map((o) => `<option value="${o.value}">${esc(o.text)}</option>`)).join("");
-    field.innerHTML = `<label for="${id}">${esc(inp.label)}</label><select id="${id}" data-key="${inp.key}">${opts}</select><small>${inp.key}</small>`;
-    form.appendChild(field);
-    const sel = field.querySelector("select");
-    sel.value = current === null || current === undefined ? "" : String(Math.round(current));
-    sel.dataset.original = sel.value;
-    sel.addEventListener("change", () => field.classList.toggle("changed", sel.value !== sel.dataset.original));
-  }
+    return `<label class="block"><span class="block text-small font-medium mb-1">${esc(inp.label)}</span>
+      <select data-key="${inp.key}">${opts}</select>
+      <span class="block num text-caption text-muted mt-1">${inp.key}</span></label>`;
+  }).join("");
+  form.querySelectorAll("select").forEach((s) => {
+    const v = state.record ? state.record.inputs.find((i) => i.key === s.dataset.key).value : null;
+    s.value = v === null || v === undefined ? "" : String(Math.round(v));
+  });
 }
 function edits() {
   const out = {};
   document.querySelectorAll("#inputs select").forEach((s) => { out[s.dataset.key] = s.value === "" ? null : Number(s.value); });
   return out;
 }
-function setRecordInfo() {
-  const el = $("record-info");
-  if (!state.record) { el.textContent = "No record loaded: answers not shown use training medians."; return; }
-  const lab = state.record.true_label ? "diagnosed (currently has depression)" : "not diagnosed";
-  el.innerHTML = `Record <b>#${state.record.record_id}</b> · survey label: <b>${lab}</b> · a dev record neither model was trained on`;
+function recordInfo() {
+  $("record-info").innerHTML = state.record
+    ? `Record <span class="num">#${state.record.record_id}</span> · survey label: <span class="text-ink">${state.record.true_label ? "diagnosed (currently has depression)" : "not diagnosed"}</span> · a dev record neither model was trained on.`
+    : "No record loaded: answers not shown use training medians.";
 }
-async function loadRecord(query, silent = false) {
+function clearPrediction() {
+  state.prediction = null;
+  $("prediction").innerHTML = "";
+  $("disagree").hidden = true;
+  $("latency").textContent = "";
+}
+async function loadRecord(query = {}) {
   showError("try-error", null);
   try {
-    const qs = new URLSearchParams(query).toString();
-    const s = await api(`/api/sample${qs ? "?" + qs : ""}`);
+    const s = await api(`/api/sample?${new URLSearchParams(query)}`);
     state.spec = s.inputs.map(({ key, label, options }) => ({ key, label, options }));
     state.record = s;
-    state.prediction = null;
-    renderInputs();
-    setRecordInfo();
-    $("prediction-cards").innerHTML = "";
-    $("disagree").hidden = true;
-  } catch (e) {
-    showError("try-error", e);
-    if (!silent) throw e;
-  }
+    renderInputs(); recordInfo(); clearPrediction();
+    return true;
+  } catch (e) { showError("try-error", e); return false; }
 }
-async function resetTypical() {
-  if (!state.spec) await loadRecord({}, true);
+async function typicalAnswers() {
+  if (!state.spec && !(await loadRecord())) return;
   state.record = null;
-  state.prediction = null;
-  renderInputs();
-  setRecordInfo();
-  $("prediction-cards").innerHTML = "";
-  $("disagree").hidden = true;
+  renderInputs(); recordInfo(); clearPrediction();
 }
 
-function gauge(value, threshold, lo, hi, atRisk) {
+function bar(value, threshold, lo, hi, color) {
   const pct = (v) => Math.max(0, Math.min(100, ((v - lo) / (hi - lo)) * 100));
-  return `<div class="gauge"><div class="track"></div><div class="thr" style="left:${pct(threshold)}%"></div>
-    <div class="dot ${atRisk ? "yes" : ""}" style="left:${pct(value)}%"></div></div>
-    <div class="gauge-labels"><span>${fmt(lo, 2)}</span><span>threshold ${fmt(threshold, 3)}</span><span>${fmt(hi, 2)}</span></div>`;
+  return `<div class="relative h-5 mt-4">
+      <div class="absolute top-[9px] inset-x-0 h-px bg-line"></div>
+      <div class="absolute top-[3px] w-px h-[14px] bg-ink" style="left:${pct(threshold)}%"></div>
+      <div class="absolute top-[5px] w-[10px] h-[10px] -ml-[5px] rounded-full transition-all" style="left:${pct(value)}%;background:${color}"></div>
+    </div>
+    <div class="flex justify-between num text-caption text-muted"><span>${f(lo, 2)}</span><span>threshold ${f(threshold, 3)}</span><span>${f(hi, 2)}</span></div>`;
 }
-function modelCard(title, sub, m, value, valueLabel, lo, hi) {
-  return `<div class="card ${m.at_risk ? "risk" : ""}">
-    <div class="kicker">${esc(title)}</div>
-    <div class="muted">${esc(sub)}</div>
-    <div class="big">${fmt(value, 3)}</div>
-    <div class="muted">${esc(valueLabel)}</div>
-    ${gauge(value, m.threshold, lo, hi, m.at_risk)}
-    <p><span class="verdict ${m.at_risk ? "yes" : "no"}">${m.at_risk ? "Flagged: at risk" : "Not flagged"}</span></p>
-    <dl class="kv"><dt>Threshold</dt><dd>${fmt(m.threshold, 4)}</dd>
-    <dt>Distance from threshold</dt><dd>${signed(m.distance, 4)}</dd></dl></div>`;
+function modelBlock(title, sub, m, value, kind, lo, hi, color) {
+  return `<div>
+    <div class="text-small font-medium" style="color:${color}">${esc(title)}</div>
+    <div class="text-caption text-muted">${esc(sub)}</div>
+    <div class="num text-[44px] leading-tight mt-3 tracking-tight">${f(value, 3)}</div>
+    <div class="text-caption text-muted">${esc(kind)}</div>
+    ${bar(value, m.threshold, lo, hi, color)}
+    <table class="mt-4"><tr><td class="text-muted">Decision</td><td class="n ${m.at_risk ? "text-[#b4462f]" : ""}">${m.at_risk ? "flagged as at risk" : "not flagged"}</td></tr>
+    <tr><td class="text-muted">Threshold</td><td class="n">${f(m.threshold, 4)}</td></tr>
+    <tr><td class="text-muted">Distance from threshold</td><td class="n">${sgn(m.distance, 4)}</td></tr></table></div>`;
 }
 function renderPrediction(p) {
   const lr = p.logreg, q = p.qsvm;
   const span = Math.max(1, Math.abs(q.distance) * 1.25);
-  $("prediction-cards").innerHTML =
-    modelCard("Classical · Logistic regression", `all 95 features · trained on ${lr.trained_rows.toLocaleString()} rows · C = ${lr.C}`,
-      lr, lr.probability, "probability of current diagnosed depression", 0, 1) +
-    modelCard("Quantum · QSVM (angle encoding, 8 qubits)", `PCA-8 · trained on ${q.trained_rows.toLocaleString()} rows · C = ${q.C}`,
-      q, q.score, "SVM decision score (not a probability)", q.threshold - span, q.threshold + span);
-  const b = $("disagree");
-  b.hidden = false;
+  $("prediction").innerHTML =
+    modelBlock("Logistic regression · classical", `all 95 features · C = ${lr.C}`, lr, lr.probability,
+      "probability of current diagnosed depression", 0, 1, COLOR.classical) +
+    modelBlock("QSVM · quantum kernel", `angle encoding, 8 qubits, PCA-8 · C = ${q.C}`, q, q.score,
+      "SVM decision score (not a probability)", q.threshold - span, q.threshold + span, COLOR.quantum);
+  const d = $("disagree");
+  d.hidden = false;
+  const truth = state.record ? ` The survey label for this adolescent is <span class="font-medium">${state.record.true_label ? "diagnosed" : "not diagnosed"}</span>.` : "";
   if (lr.at_risk !== q.at_risk) {
-    b.className = "banner disagree";
-    b.textContent = `The models disagree: logistic regression says ${lr.at_risk ? "at risk" : "not at risk"}, the QSVM says ${q.at_risk ? "at risk" : "not at risk"}.`;
+    d.innerHTML = `<span class="font-semibold">The models disagree.</span> Logistic regression ${lr.at_risk ? "flags" : "does not flag"} this record; the QSVM ${q.at_risk ? "flags" : "does not flag"} it.${truth}`;
+    d.className = "mt-6 text-body border-l-2 pl-3 border-risk";
   } else {
-    b.className = "banner agree";
-    b.textContent = `Both models agree: ${lr.at_risk ? "flagged as at risk" : "not flagged"}.`;
+    d.innerHTML = `Both models agree: ${lr.at_risk ? "flagged as at risk" : "not flagged"}.${truth}`;
+    d.className = "mt-6 text-body border-l-2 pl-3 border-line";
   }
-  if (state.record) {
-    const truth = state.record.true_label === 1;
-    b.textContent += ` Survey label: ${truth ? "diagnosed" : "not diagnosed"}.`;
-  }
+  const t = p.timings_ms;
+  $("latency").textContent = `server: QSVM ${f(t.qsvm_final, 0)} ms · LogReg ${f(t.logreg, 0)} ms · total ${f(t.total, 0)} ms`;
 }
-async function runPredict() {
-  if (!state.spec) await loadRecord({}, true).catch(() => {});
-  if (!state.spec) return;
+async function predict() {
+  if (!state.spec && !(await loadRecord())) return;
   const btn = $("btn-predict");
   btn.disabled = true;
-  $("predict-status").textContent = "Running the pipeline…";
   showError("try-error", null);
   try {
-    state.prediction = await api("/api/predict", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ record_id: state.record ? state.record.record_id : null, edits: edits(), encoding: state.encoding }),
-    });
+    state.prediction = await postPredict();
     renderPrediction(state.prediction);
     renderPipeline(state.prediction);
-    $("predict-status").textContent = "";
-  } catch (e) {
-    showError("try-error", e);
-    $("predict-status").textContent = "";
-  } finally {
-    btn.disabled = false;
-  }
+  } catch (e) { showError("try-error", e); } finally { btn.disabled = false; }
 }
 
-// ------------------------------------------------------------------ 2. Pipeline
-function setEncoding(enc, run = true) {
+// ---------------------------------------------------------------- 2. Pipeline
+async function setEncoding(enc) {
   state.encoding = enc;
   document.querySelectorAll("#enc-switch button").forEach((b) => b.classList.toggle("on", b.dataset.enc === enc));
-  if (run) pipelinePredict();
-}
-async function ensurePrediction(errId) {
-  if (state.prediction && state.prediction.selected_encoding.encoding === state.encoding) { renderPipeline(state.prediction); return; }
-  await pipelinePredict(errId);
-}
-async function pipelinePredict(errId = "pipe-error") {
-  if (!state.spec) { try { await loadRecord({}); } catch (e) { showError(errId, e); return; } }
-  $("pipe-status").textContent = "Encoding and classifying…";
-  showError(errId, null);
+  if (!state.spec && !(await loadRecord())) return;
+  showError("pipe-error", null);
+  $("enc-summary").style.opacity = ".5";
   try {
-    state.prediction = await api("/api/predict", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ record_id: state.record ? state.record.record_id : null, edits: edits(), encoding: state.encoding }),
-    });
+    state.prediction = await postPredict();
     renderPipeline(state.prediction);
     renderPrediction(state.prediction);
-  } catch (e) {
-    showError(errId, e);
-  } finally {
-    $("pipe-status").textContent = "";
-  }
+  } catch (e) { showError("pipe-error", e); } finally { $("enc-summary").style.opacity = "1"; }
 }
-function vec(values, n = 12, digits = 3) {
-  const cell = (v) => `<span><b>${esc(v.name)}</b>${typeof v.value === "number" ? fmt(v.value, digits) : esc(v.value ?? "missing")}</span>`;
-  const head = values.slice(0, n).map(cell).join("");
-  const rest = values.length > n ? `<details><summary>Show all ${values.length}</summary><div class="vec">${values.slice(n).map(cell).join("")}</div></details>` : "";
-  return `<div class="vec">${head}</div>${rest}`;
+function kvTable(rows, cols = ["Value"]) {
+  return `<table><tr><th>Name</th>${cols.map((c) => `<th class="n">${esc(c)}</th>`).join("")}</tr>${rows.join("")}</table>`;
+}
+function valueTable(values, shown = 10, digits = 3) {
+  const row = (v) => `<tr><td class="num text-caption">${esc(v.name)}</td><td class="n">${typeof v.value === "number" ? f(v.value, digits) : esc(v.value ?? "missing")}</td></tr>`;
+  const head = kvTable(values.slice(0, shown).map(row));
+  return values.length > shown
+    ? head + `<details><summary>Show all ${values.length}</summary>${kvTable(values.slice(shown).map(row))}</details>` : head;
+}
+function step(n, title, detail, body) {
+  return `<li><div class="flex items-baseline gap-3"><span class="num text-caption text-muted">${String(n).padStart(2, "0")}</span>
+    <h2>${esc(title)}</h2></div><p class="text-small text-muted mt-1 mb-3">${esc(detail)}</p>${body}</li>`;
 }
 function renderPipeline(p) {
   const s = p.selected_encoding;
-  const names = { angle: "Angle", amplitude: "Amplitude", zz: "ZZ feature map", reupload: "Re-uploading" };
-  $("enc-summary").innerHTML = `
-    <div class="card ${s.at_risk ? "risk" : ""}"><div class="kicker">${names[s.encoding]} · QSVM score</div><div class="big mid">${fmt(s.score, 3)}</div>
-      <span class="verdict ${s.at_risk ? "yes" : "no"}">${s.at_risk ? "Flagged: at risk" : "Not flagged"}</span>
-      <dl class="kv"><dt>Threshold</dt><dd>${fmt(s.threshold, 4)}</dd><dt>Distance</dt><dd>${signed(s.distance, 4)}</dd></dl></div>
-    <div class="card"><div class="kicker">Cross-validation ROC-AUC</div><div class="big mid">${fmt(s.cv_auc.mean, 3)}</div>
-      <div class="muted">± ${fmt(s.cv_auc.std, 3)} over ${s.cv_auc.folds} folds (Experiment 1, PCA, 8 qubits)</div></div>
-    <div class="card"><div class="kicker">Status</div><p>${s.encoding === "angle"
-      ? "<b>Final evaluated model.</b> Hold-out ROC-AUC 0.854."
-      : "Comparison encoding, fitted on the same 1,200 rows. Not the final model."}</p>
-      <p class="muted">Logistic regression on this record: ${fmt(p.logreg.probability, 3)} (${p.logreg.at_risk ? "flagged" : "not flagged"}).</p></div>`;
+  $("enc-summary").innerHTML = `<table class="max-w-xl"><tr><th>${ENC_NAMES[s.encoding]} · QSVM</th><th class="n">Value</th></tr>
+    <tr><td class="text-muted">Decision score for this record</td><td class="n">${f(s.score, 4)}</td></tr>
+    <tr><td class="text-muted">Threshold (inner-validation)</td><td class="n">${f(s.threshold, 4)}</td></tr>
+    <tr><td class="text-muted">Decision</td><td class="n ${s.at_risk ? "text-[#b4462f]" : ""}">${s.at_risk ? "flagged as at risk" : "not flagged"}</td></tr>
+    <tr><td class="text-muted">Cross-validation ROC-AUC (Exp. 1, PCA, 8 qubits)</td><td class="n">${f(s.cv_auc.mean, 3)} ± ${f(s.cv_auc.std, 3)}</td></tr>
+    <tr><td class="text-muted">Status</td><td class="n">${s.encoding === "angle" ? "final evaluated model (hold-out 0.854)" : "comparison only"}</td></tr></table>`;
   $("circuit").innerHTML = p.circuit_svg;
-  $("circuit-caption").textContent = s.encoding === "amplitude"
-    ? "(state preparation of 256 amplitudes; shown as one block)"
-    : "(this record's angles, rounded to 2 decimals)";
+  const svg = $("circuit").querySelector("svg");
+  if (svg) {  // fixed, readable height; wide circuits scroll sideways instead of shrinking
+    svg.removeAttribute("width"); svg.removeAttribute("height");
+    svg.style.height = "360px"; svg.style.width = "auto"; svg.style.maxWidth = "none";
+  }
+  const wide = svg && svg.viewBox.baseVal && svg.viewBox.baseVal.width / svg.viewBox.baseVal.height * 360 > 780;
+  $("circuit-caption").innerHTML = `${ENC_NAMES[s.encoding]} circuit on 8 qubits for this record${s.encoding === "amplitude" ? " — state preparation of 256 amplitudes, drawn as one block" : ", angles in radians rounded to 2 decimals"}.${wide ? " Scroll sideways to see the whole circuit." : ""} Drawn server-side with PennyLane <span class="num">qml.draw_mpl()</span>.`;
+
   const t = p.trace;
-  const stage = (title, detail, body) => `<li><h4>${esc(title)}</h4><div class="detail">${esc(detail)}</div>${body}</li>`;
-  const red = t[3];
-  const st = t[4];
-  const maxP = Math.max(...st.probabilities);
-  const bars = `<div class="bars" title="probability of each of the 256 basis states">${st.probabilities.map((v) => `<div style="height:${(v / maxP) * 100}%"></div>`).join("")}</div>`;
-  const topRows = st.top.map((r) => `<tr><td><code>|${r.basis}⟩</code></td><td>${signed(r.amplitude_re, 4)}${Math.abs(r.amplitude_im) > 1e-9 ? ` ${signed(r.amplitude_im, 4)}i` : ""}</td><td>${fmt(r.probability, 4)}</td></tr>`).join("");
-  const m = t[5];
-  const nsv = m.nearest_support_vectors.map((r) => `<tr><td>${fmt(r.fidelity, 4)}</td><td>${r.label}</td><td>${signed(r.weight, 4)}</td></tr>`).join("");
-  const sc = t[6];
+  const red = t[3], st = t[4], me = t[5], sc = t[6];
+  const stateRows = st.top.map((r) => `<tr><td class="num">|${r.basis}⟩</td><td class="n">${sgn(r.amplitude_re, 4)}${Math.abs(r.amplitude_im) > 1e-9 ? ` ${sgn(r.amplitude_im, 4)}i` : ""}</td><td class="n">${f(r.probability, 4)}</td></tr>`);
+  const nsv = me.nearest_support_vectors.map((r) => `<tr><td>${r.label}</td><td class="n">${f(r.fidelity, 4)}</td><td class="n">${sgn(r.weight, 4)}</td></tr>`);
   $("stages").innerHTML = [
-    stage(t[0].stage, t[0].detail, vec(t[0].values, 12, 1)),
-    stage(t[1].stage, t[1].detail, vec(t[1].values, 12, 2)),
-    stage(t[2].stage, t[2].detail, vec(t[2].values, 12, 3)),
-    stage(red.stage, red.detail, vec(red.values, 8, 3) + (red.angles ? `<p class="muted" style="margin:10px 0 4px">Rotation angles (radians), one per qubit:</p>` +
-      vec(red.angles.map((v, i) => ({ name: `q${i}`, value: v })), 8, 3) : "")),
-    stage(st.stage, st.detail, bars + `<table style="margin-top:12px"><tr><th>Basis state</th><th>Amplitude</th><th>Probability</th></tr>${topRows}</table>`),
-    stage(m.stage, m.detail, `<dl class="kv"><dt>Training states compared</dt><dd>${m.kernel.n_train.toLocaleString()}</dd>
-      <dt>Fidelity min / median / max</dt><dd>${fmt(m.kernel.min, 3)} / ${fmt(m.kernel.median, 3)} / ${fmt(m.kernel.max, 3)}</dd>
-      <dt>Support vectors</dt><dd>${m.kernel.n_support}</dd></dl>
-      <p class="muted" style="margin:12px 0 4px">Nearest support vectors:</p>
-      <table><tr><th>Fidelity</th><th>Their label</th><th>Weight</th></tr>${nsv}</table>`),
-    stage(sc.stage, sc.detail, `<dl class="kv"><dt>Pull towards "at risk"</dt><dd>${signed(sc.positive_part, 4)}</dd>
-      <dt>Pull towards "not at risk"</dt><dd>${signed(sc.negative_part, 4)}</dd><dt>Intercept</dt><dd>${signed(sc.intercept, 4)}</dd>
-      <dt>Score</dt><dd><b>${fmt(sc.score, 4)}</b></dd><dt>Threshold</dt><dd>${fmt(sc.threshold, 4)}</dd>
-      <dt>Decision</dt><dd><span class="verdict ${sc.at_risk ? "yes" : "no"}">${sc.at_risk ? "Flagged: at risk" : "Not flagged"}</span></dd></dl>`),
+    step(1, t[0].stage, t[0].detail, valueTable(t[0].values, 10, 1)),
+    step(2, "Imputed and scaled", `${t[1].detail}; then each column standardized on the 1,200 training rows.`,
+      `<table><tr><th>Column</th><th class="n">Imputed</th><th class="n">Standardized</th></tr>${t[1].values.slice(0, 10).map((v, i) =>
+        `<tr><td class="num text-caption">${esc(v.name)}</td><td class="n">${f(v.value, 2)}</td><td class="n">${f(t[2].values[i].value, 3)}</td></tr>`).join("")}</table>
+       <details><summary>Show all ${t[1].values.length}</summary><table>${t[1].values.slice(10).map((v, i) =>
+        `<tr><td class="num text-caption">${esc(v.name)}</td><td class="n">${f(v.value, 2)}</td><td class="n">${f(t[2].values[i + 10].value, 3)}</td></tr>`).join("")}</table></details>`),
+    step(3, "Reduced to 8 features", red.detail, red.angles
+      ? `<table><tr><th>Component</th><th class="n">PCA value</th><th class="n">Angle (rad)</th></tr>${red.values.map((v, i) =>
+          `<tr><td class="num text-caption">${v.name} → qubit ${i}</td><td class="n">${f(v.value, 3)}</td><td class="n">${f(red.angles[i], 3)}</td></tr>`).join("")}</table>`
+      : valueTable(red.values, 8, 3)),
+    step(4, "Encoded to a quantum state", st.detail, `<div id="state-chart"></div>
+      <p class="caption">Probability of each of the 256 basis states. The eight largest:</p>
+      <table class="mt-2"><tr><th>Basis state</th><th class="n">Amplitude</th><th class="n">Probability</th></tr>${stateRows.join("")}</table>`),
+    step(5, "Measured", me.detail, `<table><tr><th>Quantity</th><th class="n">Value</th></tr>
+      <tr><td class="text-muted">Training states compared</td><td class="n">${me.kernel.n_train.toLocaleString()}</td></tr>
+      <tr><td class="text-muted">Fidelity min / median / max</td><td class="n">${f(me.kernel.min, 3)} / ${f(me.kernel.median, 3)} / ${f(me.kernel.max, 3)}</td></tr>
+      <tr><td class="text-muted">Support vectors</td><td class="n">${me.kernel.n_support}</td></tr></table>
+      <p class="caption">Nearest support vectors:</p><table class="mt-2"><tr><th>Their label</th><th class="n">Fidelity</th><th class="n">Weight</th></tr>${nsv.join("")}</table>`),
+    step(6, "Score and decision", `${sc.detail}. The QSVM produces a decision score, not a probability.`,
+      `<table><tr><th>Quantity</th><th class="n">Value</th></tr>
+      <tr><td class="text-muted">Pull towards "at risk"</td><td class="n">${sgn(sc.positive_part, 4)}</td></tr>
+      <tr><td class="text-muted">Pull towards "not at risk"</td><td class="n">${sgn(sc.negative_part, 4)}</td></tr>
+      <tr><td class="text-muted">Intercept</td><td class="n">${sgn(sc.intercept, 4)}</td></tr>
+      <tr><td class="font-medium">Score</td><td class="n font-medium">${f(sc.score, 4)}</td></tr>
+      <tr><td class="text-muted">Threshold</td><td class="n">${f(sc.threshold, 4)}</td></tr>
+      <tr><td class="text-muted">Decision</td><td class="n ${sc.at_risk ? "text-[#b4462f]" : ""}">${sc.at_risk ? "flagged as at risk" : "not flagged"}</td></tr>
+      <tr><td class="text-muted">Logistic regression on the same record</td><td class="n">p = ${f(p.logreg.probability, 3)}</td></tr></table>`),
   ].join("");
+  const probs = st.probabilities.map((v, i) => ({ i, v }));
+  $("state-chart").replaceChildren(Plot.plot({
+    width: 760, height: 150, marginLeft: 48,
+    style: { fontFamily: "JetBrains Mono, monospace", fontSize: "11px", color: COLOR.muted },
+    x: { label: "basis state index (0–255)", ticks: [0, 64, 128, 192, 255] },
+    y: { label: "probability", grid: true },
+    marks: [Plot.ruleY([0], { stroke: COLOR.line }), Plot.rectY(probs, { x1: "i", x2: (d) => d.i + 0.8, y: "v", fill: COLOR.quantum })],
+  }));
 }
 
-// ------------------------------------------------------------------ 3. Privacy
-const SERIES_STYLE = {
-  vqc_sub: { color: "#2E7D8C", dash: "", marker: "circle" },
-  logreg_full: { color: "#16233D", dash: "", marker: "square" },
-  logreg_sub_clip10: { color: "#16233D", dash: "6 4", marker: "diamond" },
-  logreg_sub: { color: "#9AA1AE", dash: "", marker: "triangle" },
+// ---------------------------------------------------------------- 3. Privacy
+const SERIES = {
+  vqc_sub: { color: COLOR.quantum, dash: null, symbol: "circle", short: "VQC (quantum), 1.2k rows" },
+  logreg_full: { color: COLOR.classical, dash: null, symbol: "square", short: "LogReg, full data" },
+  logreg_sub_clip10: { color: COLOR.classical, dash: "5,4", symbol: "diamond", short: "LogReg, same rows, clip 10" },
+  logreg_sub: { color: COLOR.classicalLight, dash: null, symbol: "triangle", short: "LogReg, same rows, clip 1" },
 };
 async function loadPrivacy() {
   showError("priv-error", null);
-  if (!state.privacy) {
-    try { state.privacy = await api("/api/privacy"); } catch (e) { showError("priv-error", e); return; }
-  }
-  renderPrivacy();
-}
-function marker(kind, x, y, color) {
-  const r = 6;
-  if (kind === "square") return `<rect x="${x - r}" y="${y - r}" width="${2 * r}" height="${2 * r}" fill="${color}" stroke="#fff" stroke-width="1.5"/>`;
-  if (kind === "diamond") return `<path d="M${x} ${y - r - 1}L${x + r + 1} ${y}L${x} ${y + r + 1}L${x - r - 1} ${y}Z" fill="${color}" stroke="#fff" stroke-width="1.5"/>`;
-  if (kind === "triangle") return `<path d="M${x} ${y - r - 1}L${x + r + 1} ${y + r}L${x - r - 1} ${y + r}Z" fill="${color}" stroke="#fff" stroke-width="1.5"/>`;
-  return `<circle cx="${x}" cy="${y}" r="${r}" fill="${color}" stroke="#fff" stroke-width="1.5"/>`;
+  try { state.privacy = await api("/api/privacy"); renderPrivacy(); } catch (e) { showError("priv-error", e); }
 }
 function renderPrivacy() {
   const P = state.privacy;
-  const eps = P.epsilons;
-  const idx = state.epsIndex;
-  const e = eps[idx];
-  $("eps-value").textContent = e === "inf" ? "ε = ∞ (no privacy)" : `ε = ${e}`;
-  const at = (arm) => { const s = P.series.find((x) => x.arm === arm); return s ? s.points.find((p) => p.eps === e) : null; };
-  const inf = (arm) => { const s = P.series.find((x) => x.arm === arm); return s ? s.points.find((p) => p.eps === "inf") : null; };
-  const card = (title, sub, arm) => {
-    const p = at(arm), base = inf(arm);
-    if (!p) return `<div class="card"><div class="kicker">${title}</div><p class="muted">No data.</p></div>`;
-    const drop = e === "inf" ? "" : `<div class="muted">${signed(p.auc - base.auc, 3)} vs non-private (${fmt(base.auc, 3)})</div>`;
-    return `<div class="card"><div class="kicker">${title}</div><div class="muted">${sub}</div><div class="big">${fmt(p.auc, 3)}</div>
-      <div class="muted">ROC-AUC ± ${fmt(p.auc_std, 3)}</div>${drop}
-      <dl class="kv"><dt>Balanced accuracy</dt><dd>${fmt(p.balanced_accuracy, 3)}</dd><dt>ε spent (Opacus)</dt><dd>${p.epsilon_spent === null ? "– (no DP)" : fmt(p.epsilon_spent, 3)}</dd></dl></div>`;
+  if (!P) return;
+  const eps = P.epsilons, e = eps[state.epsIndex];
+  const label = (x) => (x === "inf" ? "∞" : x);
+  $("eps-label").textContent = e === "inf" ? "ε = ∞  (no privacy)" : `ε = ${e}`;
+  const find = (arm, x) => { const s = P.series.find((z) => z.arm === arm); return s && s.points.find((p) => p.eps === x); };
+  const readout = (arm, title, sub, color) => {
+    const p = find(arm, e), base = find(arm, "inf");
+    if (!p) return `<div class="text-small text-muted">No data for ${esc(title)}.</div>`;
+    return `<div><div class="text-small font-medium" style="color:${color}">${title}</div><div class="text-caption text-muted">${sub}</div>
+      <div class="num text-[44px] leading-tight mt-3 tracking-tight">${f(p.auc, 3)}</div>
+      <div class="text-caption text-muted">ROC-AUC <span class="num">± ${f(p.auc_std, 3)}</span>${e === "inf" ? "" : ` · <span class="num">${sgn(p.auc - base.auc, 3)}</span> vs non-private`}</div>
+      <table class="mt-3"><tr><td class="text-muted">Balanced accuracy</td><td class="n">${f(p.balanced_accuracy, 3)}</td></tr>
+      <tr><td class="text-muted">ε spent (Opacus)</td><td class="n">${p.epsilon_spent === null ? "– (no DP)" : f(p.epsilon_spent, 3)}</td></tr></table></div>`;
   };
-  $("priv-cards").innerHTML = card("Quantum · VQC", "re-uploading, 4 qubits, 1.2k rows, PCA-4", "vqc_sub") +
-    card("Classical · Logistic regression", "full data, all 95 features", "logreg_full");
+  $("priv-readout").innerHTML = readout("logreg_full", "Logistic regression · classical", "full data, all 95 features", COLOR.classical) +
+    readout("vqc_sub", "VQC · quantum", "re-uploading, 4 qubits, 1.2k rows, PCA-4", COLOR.quantum);
 
-  // chart
-  const W = 900, H = 380, L = 64, R = 24, T = 18, B = 52;
-  const xs = (i) => (i < 5 ? L + i * ((W - L - R - 90) / 4) : W - R - 30);
-  const all = P.series.flatMap((s) => s.points.flatMap((p) => [p.auc - p.auc_std, p.auc + p.auc_std]));
-  const lo = Math.floor(Math.min(...all) * 20) / 20, hi = Math.ceil(Math.max(...all) * 20) / 20;
-  const ys = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
-  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="ROC-AUC against privacy budget">`;
-  for (let v = lo; v <= hi + 1e-9; v += 0.05) {
-    svg += `<line x1="${L}" x2="${W - R}" y1="${ys(v)}" y2="${ys(v)}" stroke="#ECE9E0"/>`;
-    svg += `<text x="${L - 10}" y="${ys(v) + 4}" text-anchor="end" font-size="13" fill="#6F7686">${v.toFixed(2)}</text>`;
+  const rows = P.series.flatMap((s) => s.points.map((p) => ({ ...p, arm: s.arm, x: label(p.eps), lo: p.auc - p.auc_std, hi: p.auc + p.auc_std })));
+  const finite = rows.filter((r) => r.eps !== "inf");
+  const sel = rows.filter((r) => r.eps === e);
+  const domain = eps.map(label);
+  const marks = [Plot.ruleX([label(e)], { stroke: COLOR.classical, strokeOpacity: 0.08, strokeWidth: 28 }),
+    Plot.ruleX([label(e)], { stroke: COLOR.classical, strokeOpacity: 0.5, strokeWidth: 1 })];
+  for (const [arm, st] of Object.entries(SERIES)) {
+    const a = finite.filter((r) => r.arm === arm), all = rows.filter((r) => r.arm === arm);
+    if (!all.length) continue;
+    marks.push(Plot.line(a, { x: "x", y: "auc", stroke: st.color, strokeWidth: 2, strokeDasharray: st.dash || undefined }));
+    const last = a[a.length - 1], inf = all.find((r) => r.eps === "inf");
+    if (last && inf) marks.push(Plot.line([last, inf], { x: "x", y: "auc", stroke: st.color, strokeWidth: 1, strokeDasharray: "2,3" }));
+    marks.push(Plot.ruleX(all, { x: "x", y1: "lo", y2: "hi", stroke: st.color, strokeOpacity: 0.5 }));
+    marks.push(Plot.dot(all, { x: "x", y: "auc", fill: st.color, symbol: st.symbol, r: 4, stroke: "white", strokeWidth: 1 }));
   }
-  svg += `<line x1="${(xs(4) + xs(5)) / 2}" x2="${(xs(4) + xs(5)) / 2}" y1="${T}" y2="${H - B}" stroke="#B9B5A8" stroke-dasharray="2 4"/>`;
-  svg += `<rect x="${xs(idx) - 26}" y="${T}" width="52" height="${H - T - B}" fill="#E3EFF1" opacity=".7"/>`;
-  eps.forEach((v, i) => {
-    svg += `<text x="${xs(i)}" y="${H - B + 22}" text-anchor="middle" font-size="14" fill="${i === idx ? "#16233D" : "#6F7686"}" font-weight="${i === idx ? 700 : 400}">${v === "inf" ? "∞" : v}</text>`;
-  });
-  svg += `<text x="${(L + W - R) / 2}" y="${H - 8}" text-anchor="middle" font-size="13" fill="#6F7686">privacy budget ε (smaller = stronger privacy) · δ = ${P.delta}</text>`;
-  for (const s of P.series) {
-    const st = SERIES_STYLE[s.arm] || { color: "#888", dash: "", marker: "circle" };
-    const pts = s.points.map((p) => ({ i: eps.indexOf(p.eps), ...p })).filter((p) => p.i >= 0);
-    const finite = pts.filter((p) => p.eps !== "inf");
-    svg += `<polyline fill="none" stroke="${st.color}" stroke-width="2.5" stroke-dasharray="${st.dash}" points="${finite.map((p) => `${xs(p.i)},${ys(p.auc)}`).join(" ")}"/>`;
-    const last = finite[finite.length - 1], infp = pts.find((p) => p.eps === "inf");
-    if (last && infp) svg += `<line x1="${xs(last.i)}" y1="${ys(last.auc)}" x2="${xs(infp.i)}" y2="${ys(infp.auc)}" stroke="${st.color}" stroke-width="1.2" stroke-dasharray="2 4"/>`;
-    for (const p of pts) {
-      svg += `<line x1="${xs(p.i)}" x2="${xs(p.i)}" y1="${ys(p.auc - p.auc_std)}" y2="${ys(p.auc + p.auc_std)}" stroke="${st.color}" stroke-width="1.2" opacity=".6"/>`;
-      svg += marker(st.marker, xs(p.i), ys(p.auc), st.color);
-    }
-  }
-  svg += "</svg>";
-  $("priv-chart").innerHTML = svg;
-  $("priv-legend").innerHTML = P.series.map((s) => {
-    const st = SERIES_STYLE[s.arm] || { color: "#888", dash: "" };
-    return `<span><i class="${st.dash ? "dash" : ""}" style="border-color:${st.color}"></i>${esc(s.label)}</span>`;
-  }).join("");
-
+  marks.push(Plot.dot(sel, { x: "x", y: "auc", r: 7, stroke: COLOR.ink, strokeWidth: 1.5, fill: "none" }));
+  marks.push(Plot.text(sel.filter((r) => r.arm === "vqc_sub" || r.arm === "logreg_full"),
+    { x: "x", y: "auc", text: (d) => d.auc.toFixed(3), dx: 14, textAnchor: "start", fill: COLOR.ink, stroke: "white", strokeWidth: 4,
+      paintOrder: "stroke", fontFamily: "JetBrains Mono, monospace", fontSize: 12 }));
+  $("priv-chart").replaceChildren(Plot.plot({
+    width: 780, height: 380, marginLeft: 52, marginRight: 52,
+    style: { fontFamily: "JetBrains Mono, monospace", fontSize: "12px", color: COLOR.muted, background: "white" },
+    x: { type: "point", domain, label: "privacy budget ε  (smaller = stronger privacy)", padding: 0.4 },
+    y: { label: "ROC-AUC", grid: true, domain: [Math.floor(Math.min(...rows.map((r) => r.lo)) * 20) / 20, Math.ceil(Math.max(...rows.map((r) => r.hi)) * 20) / 20] },
+    marks,
+  }));
+  $("priv-legend").innerHTML = Object.entries(SERIES).filter(([arm]) => P.series.some((s) => s.arm === arm)).map(([arm, st]) =>
+    `<span class="inline-flex items-center gap-2"><svg width="24" height="8"><line x1="0" x2="24" y1="4" y2="4" stroke="${st.color}" stroke-width="2" ${st.dash ? `stroke-dasharray="${st.dash}"` : ""}/></svg>${esc(st.short)}</span>`).join("");
   const h = P.headline;
-  $("priv-headline").innerHTML = `<div class="kicker">Headline · ${esc(h.source)}</div>
-    <div class="big">−${fmt(h.cost, 3)} AUC</div>
-    <p>Privacy at ε ≈ 4 costs about <b>${fmt(h.cost, 4)}</b> ROC-AUC on the locked hold-out: ${fmt(h.nonprivate_auc, 4)} without privacy → ${fmt(h.dp_eps4_auc, 4)} with DP-SGD (ε spent ${fmt(h.epsilon_spent, 2)}, δ = ${P.delta}).
-    The curve above is cross-validation (${P.folds} folds); the headline is the one-shot hold-out.</p>
-    <p class="muted">Note: with a shared clipping norm of 1, LogReg on the quantum model's 1.2k rows looked far worse under DP than the VQC. The dashed clip-10 line shows that gap was a hyperparameter artefact, not a quantum advantage.</p>`;
-  $("priv-table").innerHTML = `<table><tr><th>Arm</th><th>ROC-AUC</th><th>± std</th><th>Balanced acc.</th><th>ε spent</th></tr>${P.series.map((s) => {
-    const p = s.points.find((x) => x.eps === e);
-    return p ? `<tr class="${s.family === "quantum" ? "hl" : ""}"><td>${esc(s.label)}</td><td>${fmt(p.auc, 3)}</td><td>${fmt(p.auc_std, 3)}</td><td>${fmt(p.balanced_accuracy, 3)}</td><td>${p.epsilon_spent === null ? "–" : fmt(p.epsilon_spent, 3)}</td></tr>` : "";
-  }).join("")}</table>`;
+  $("priv-headline").innerHTML = `<div class="border-t border-line pt-6">
+    <p class="text-caption text-muted uppercase tracking-wide">Headline · ${esc(h.source)}</p>
+    <p class="text-h2 mt-2">Privacy at ε ≈ 4 costs about <span class="num">${f(h.cost, 2)}</span> ROC-AUC on the hold-out
+      (<span class="num">${f(h.nonprivate_auc, 4)}</span> → <span class="num">${f(h.dp_eps4_auc, 4)}</span>, a drop of <span class="num">${f(h.cost, 4)}</span>).</p>
+    <p class="caption">Measured once on the locked 4,358-adolescent hold-out; ε spent <span class="num">${f(h.epsilon_spent, 3)}</span>, δ = 10⁻⁵. The curve above is cross-validation.
+    With a shared clipping norm of 1, LogReg on the quantum model's 1.2k rows looked far worse under DP than the VQC; the dashed clip-10 line shows that gap was a hyperparameter artefact, not a quantum advantage.</p></div>`;
 }
-$("eps-slider").addEventListener("input", (ev) => { state.epsIndex = Number(ev.target.value); if (state.privacy) renderPrivacy(); });
+$("eps").addEventListener("input", (ev) => { state.epsIndex = Number(ev.target.value); renderPrivacy(); });
 
-// ------------------------------------------------------------------ 4. Results
-function table(rows, highlight) {
-  if (!rows || !rows.length) return `<p class="muted">No rows.</p>`;
-  const cols = Object.keys(rows[0]);
-  return `<table><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr>${rows.map((r) =>
-    `<tr class="${highlight && highlight(r) ? "hl" : ""}">${cols.map((c) => `<td>${r[c] === null ? "" : esc(r[c])}</td>`).join("")}</tr>`).join("")}</table>`;
+// ---------------------------------------------------------------- 4. Results
+function table(rows, opts = {}) {
+  if (!rows || !rows.length) return `<p class="caption">No rows.</p>`;
+  const cols = Object.keys(rows[0]).filter((c) => !(opts.drop || []).includes(c));
+  const isNum = (c) => rows.every((r) => r[c] === null || /^[−+\-<\d.]/.test(String(r[c])));
+  return `<div class="overflow-x-auto"><table><tr>${cols.map((c) => `<th class="${isNum(c) ? "n" : ""}">${esc(c)}</th>`).join("")}</tr>${rows.map((r) =>
+    `<tr>${cols.map((c) => `<td class="${isNum(c) ? "n" : ""}">${esc(r[c] ?? "")}</td>`).join("")}</tr>`).join("")}</table></div>`;
 }
-let resultsLoaded = false;
 async function loadResults() {
-  if (resultsLoaded) return;
   showError("res-error", null);
   try {
     const r = await api("/api/results");
-    $("tbl-qvc").innerHTML = table(r.quantum_vs_classical);
+    $("tbl-qvc").innerHTML = table(r.quantum_vs_classical, { drop: ["Metric"] });
     $("tbl-holdout").innerHTML = table(r.holdout);
-    $("tbl-classical").innerHTML = table(r.classical);
-    const captions = {
-      "privacy_utility_curve.png": "Privacy–utility curve (headline): ROC-AUC against ε for the quantum and classical models.",
-      "roc_curves.png": "Mean ROC curves over 15 folds: the three quantum models, LogReg on the same inputs, and LogReg on full data.",
+    const cap = {
+      "privacy_utility_curve.png": "Privacy–utility curve (headline figure of the report).",
+      "roc_curves.png": "Mean ROC curves over 15 folds: three quantum models, LogReg on the same inputs, LogReg on full data.",
       "encoding_comparison.png": "Experiment 1: ROC-AUC by encoding, qubit count and feature selection; black bar = LogReg on the same inputs.",
-      "federated_convergence.png": "Experiment 4: federated training with DP at ε = 4 across 3, 5 and 10 clients.",
+      "federated_convergence.png": "Experiment 4: FedAvg with client-side DP at ε = 4 for 3, 5 and 10 clients. The VQC curves are still rising at round 30.",
     };
-    $("figures").innerHTML = r.figures.map((f, i) => f.exists
-      ? `<figure class="${i === 0 || i === 2 ? "wide" : ""}"><img src="${f.url}" alt="${esc(captions[f.file] || f.file)}" loading="lazy"><figcaption>${esc(captions[f.file] || f.file)}</figcaption></figure>`
-      : `<figure><div class="error">Figure missing: results/figures/${esc(f.file)}</div></figure>`).join("");
-    resultsLoaded = true;
-  } catch (e) {
-    showError("res-error", e);
-  }
+    $("figures").innerHTML = r.figures.map((fg) => fg.exists
+      ? `<figure><img src="${fg.url}" alt="${esc(cap[fg.file] || fg.file)}" class="w-full border border-line rounded-md" loading="lazy"><figcaption class="caption">${esc(cap[fg.file] || fg.file)}</figcaption></figure>`
+      : `<p class="error">Figure missing: results/figures/${esc(fg.file)}</p>`).join("");
+  } catch (e) { showError("res-error", e); }
 }
 
-// ------------------------------------------------------------------ wiring
-$("btn-random").addEventListener("click", () => loadRecord({}).catch(() => {}));
-$("btn-random-pos").addEventListener("click", () => loadRecord({ positive: true }).catch(() => {}));
-$("btn-reset").addEventListener("click", () => resetTypical().catch((e) => showError("try-error", e)));
-$("btn-predict").addEventListener("click", runPredict);
+// ---------------------------------------------------------------- navigation
+function highlightNav() {
+  let current = "try";
+  for (const id of ["try", "pipeline", "privacy", "results"]) {
+    if ($(id).getBoundingClientRect().top < 160) current = id;
+  }
+  document.querySelectorAll("[data-nav]").forEach((a) => a.classList.toggle("active", a.dataset.nav === current));
+}
+window.addEventListener("scroll", highlightNav, { passive: true });
+
+$("btn-random").addEventListener("click", () => loadRecord());
+$("btn-random-pos").addEventListener("click", () => loadRecord({ positive: true }));
+$("btn-reset").addEventListener("click", typicalAnswers);
+$("btn-predict").addEventListener("click", predict);
 $("inputs").addEventListener("submit", (e) => e.preventDefault());
 document.querySelectorAll("#enc-switch button").forEach((b) => b.addEventListener("click", () => setEncoding(b.dataset.enc)));
 
+// Deep links: #section?record=9517&enc=zz&eps=0  (used for rehearsal and testing)
 (async function init() {
-  try { await resetTypical(); } catch (e) { showError("try-error", e); }
-  await route();
+  const [section, query] = (location.hash.replace(/^#/, "") || "try").split("?");
+  const params = new URLSearchParams(query || "");
+  if (params.get("eps") !== null) { state.epsIndex = Number(params.get("eps")); $("eps").value = state.epsIndex; }
+  if (params.get("enc")) {
+    state.encoding = params.get("enc");
+    document.querySelectorAll("#enc-switch button").forEach((b) => b.classList.toggle("on", b.dataset.enc === state.encoding));
+  }
+  $("record-info").textContent = "Loading the cached models (first start only takes a few seconds)…";
+  const t0 = performance.now();
+  const ok = params.get("record") ? await loadRecord({ record_id: params.get("record") }) : await loadRecord();
+  console.info(`models ready after ${Math.round(performance.now() - t0)} ms`);
+  if (ok) await predict();
+  await Promise.all([loadPrivacy(), loadResults()]);
+  if (section && $(section)) $(section).scrollIntoView();
+  highlightNav();
 })();

@@ -14,6 +14,8 @@ import io
 import math
 import pickle
 import random
+import threading
+import time
 from functools import lru_cache
 from pathlib import Path
 
@@ -69,12 +71,22 @@ async def any_error(request: Request, exc: Exception):  # never a bare 500
     return JSONResponse(status_code=status, content={"error": str(exc) or type(exc).__name__})
 
 
-@lru_cache(maxsize=1)
+_BUNDLE: dict | None = None
+_BUNDLE_LOCK = threading.Lock()
+
+
 def bundle() -> dict:
-    if not MODELS.exists():
-        raise DemoError(f"Cached models not found at models/demo_models.pkl. {BUILD_HINT}")
-    with MODELS.open("rb") as fh:
-        return pickle.load(fh)
+    """Cached models, loaded once (thread-safe). Requests made while the background
+    warm-up is still loading simply wait for it."""
+    global _BUNDLE
+    if _BUNDLE is None:
+        with _BUNDLE_LOCK:
+            if _BUNDLE is None:
+                if not MODELS.exists():
+                    raise DemoError(f"Cached models not found at models/demo_models.pkl. {BUILD_HINT}")
+                with MODELS.open("rb") as fh:
+                    _BUNDLE = pickle.load(fh)
+    return _BUNDLE
 
 
 @lru_cache(maxsize=1)
@@ -105,12 +117,16 @@ def _records(df: pd.DataFrame) -> list[dict]:
 
 @app.on_event("startup")
 def warm() -> None:
-    """Load cached models and import the quantum stack so the first click is fast (no training)."""
-    try:
-        bundle()
-        import src.m5_models.quantum  # noqa: F401
-    except Exception:  # surfaced per request instead
-        pass
+    """Start loading the cached models (no training) in the background, so the page is
+    served immediately; torch + PennyLane imports dominate this (~5-10 s on a laptop)."""
+    def load():
+        try:
+            bundle()
+            import src.m5_models.quantum  # noqa: F401
+        except Exception:  # surfaced per request instead
+            pass
+
+    threading.Thread(target=load, name="model-warmup", daemon=True).start()
 
 
 # --------------------------------------------------------------------- API ---
@@ -171,6 +187,13 @@ def _decision(value: float, threshold: float) -> dict:
     return {"threshold": threshold, "at_risk": bool(value >= threshold), "distance": value - threshold}
 
 
+CIRCUIT_STYLE = {
+    "svg.fonttype": "none", "font.family": "monospace", "font.monospace": ["JetBrains Mono", "DejaVu Sans Mono"],
+    "text.color": "#1b1e23", "patch.facecolor": "#ffffff", "patch.edgecolor": "#6b6f76", "patch.linewidth": 1.0,
+    "lines.color": "#9498a0", "lines.linewidth": 1.0, "figure.facecolor": "#ffffff", "axes.facecolor": "#ffffff",
+}
+
+
 @lru_cache(maxsize=64)
 def _circuit_svg(encoding: str, angles: tuple) -> str:
     import matplotlib
@@ -190,10 +213,11 @@ def _circuit_svg(encoding: str, angles: tuple) -> str:
         return qml.state()
 
     x = enc.prepare(np.array([angles]))[0]
-    fig, _ = qml.draw_mpl(circuit, decimals=None if encoding == "amplitude" else 2, level="device",
-                          style="black_white")(x)
-    buf = io.StringIO()
-    fig.savefig(buf, format="svg", bbox_inches="tight")
+    with plt.rc_context(CIRCUIT_STYLE):  # light style in the UI palette; labels kept as text (JetBrains Mono)
+        fig, _ = qml.draw_mpl(circuit, decimals=None if encoding == "amplitude" else 2, level="device",
+                              style="rcParams")(x)
+        buf = io.StringIO()
+        fig.savefig(buf, format="svg", bbox_inches="tight", transparent=True)
     plt.close(fig)
     svg = buf.getvalue()
     return svg[svg.find("<svg"):]
@@ -204,12 +228,14 @@ def predict(req: PredictRequest):
     if req.encoding not in ENCODINGS:
         raise ValueError(f"encoding must be one of {ENCODINGS}")
     b = bundle()
+    t_start = time.perf_counter()
     rec = _record_frame(b, req)
 
     # LogReg (final classical model): imputation/one-hot -> standardize -> logistic regression
     lr = b["logreg"]
     x_lr = lr["scaler"].transform(lr["prep"].transform(rec, "label").to_numpy())
     p_lr = float(lr["model"].predict_proba(x_lr)[0, 1])
+    t_lr = time.perf_counter()
 
     # QSVM path for the selected encoding (angle = the final, evaluated model)
     q = b["qsvm"]
@@ -222,6 +248,7 @@ def predict(req: PredictRequest):
         return m, z, float(m["model"].decision_scores(z)[0])
 
     final_m, _, final_score = qsvm_score("angle")
+    t_qsvm = time.perf_counter()
     m, z, score = qsvm_score(req.encoding)
     ft, model = m["transformer"], m["model"]
     standardized = ft.scaler.transform(X)[0]
@@ -235,6 +262,10 @@ def predict(req: PredictRequest):
     contrib = svc.dual_coef_[0] * sv_k
     near = np.argsort(-sv_k)[:5]
 
+    t_c0 = time.perf_counter()
+    circuit = _circuit_svg(req.encoding, tuple(np.round(z[0][:8], 4)) if req.encoding != "amplitude"
+                           else tuple(np.round(z[0], 4)))
+    t_c1 = time.perf_counter()
     raw = rec.drop(columns=["label", "state_fips", "survey_weight", "survey_year"]).iloc[0]
     cv = b["qsvm_exp1_cv_auc_pca8_8q"][req.encoding]
     trace = [
@@ -275,8 +306,11 @@ def predict(req: PredictRequest):
         "selected_encoding": {"encoding": req.encoding, "score": score, **_decision(score, m["threshold"]),
                               "cv_auc": cv},
         "trace": trace,
-        "circuit_svg": _circuit_svg(req.encoding, tuple(np.round(z[0][:8], 4)) if req.encoding != "amplitude"
-                                    else tuple(np.round(z[0], 4))),
+        "circuit_svg": circuit,
+        "timings_ms": {"logreg": 1000 * (t_lr - t_start), "qsvm_final": 1000 * (t_qsvm - t_lr),
+                       "circuit": 1000 * (t_c1 - t_c0),
+                       "trace": 1000 * ((time.perf_counter() - t_qsvm) - (t_c1 - t_c0)),
+                       "total": 1000 * (time.perf_counter() - t_start)},
     }
 
 

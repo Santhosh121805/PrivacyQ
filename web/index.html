@@ -3,106 +3,166 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DP-FedQ Demo</title>
-  <link rel="stylesheet" href="style.css?v=2">
+  <title>DP-FedQ Notebook</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%228%22 cy=%228%22 r=%226%22 fill=%22%236cc5b0%22/%3E%3C/svg%3E">
+  <style>
+    @font-face { font-family: "Inter"; font-weight: 400; font-display: swap; src: url("vendor/fonts/inter-latin-400.woff2") format("woff2"); }
+    @font-face { font-family: "Inter"; font-weight: 500; font-display: swap; src: url("vendor/fonts/inter-latin-500.woff2") format("woff2"); }
+    @font-face { font-family: "Inter"; font-weight: 600; font-display: swap; src: url("vendor/fonts/inter-latin-600.woff2") format("woff2"); }
+    @font-face { font-family: "JetBrains Mono"; font-weight: 400; font-display: swap; src: url("vendor/fonts/jetbrains-mono-latin-400.woff2") format("woff2"); }
+    @font-face { font-family: "JetBrains Mono"; font-weight: 500; font-display: swap; src: url("vendor/fonts/jetbrains-mono-latin-500.woff2") format("woff2"); }
+  </style>
+  <!-- Pinned local copies (offline): Tailwind Play CDN 3.4.16, d3 7.9.0, Observable Plot 0.6.16 -->
+  <script src="vendor/tailwind-play-3.4.16.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: "#1b1e23", muted: "#6b6f76", line: "#e4e4e7", raised: "#f9f9f9",
+            accent: "#4269d0", classical: "#4269d0", quantum: "#6cc5b0", risk: "#ff725c",
+          },
+          fontFamily: {
+            sans: ["Inter", "system-ui", "Segoe UI", "sans-serif"],
+            mono: ["JetBrains Mono", "Consolas", "monospace"],
+          },
+          fontSize: {
+            display: ["32px", { lineHeight: "1.2", letterSpacing: "-0.02em" }],
+            h2: ["22px", { lineHeight: "1.3", letterSpacing: "-0.02em" }],
+            body: ["16px", { lineHeight: "1.6" }],
+            small: ["14px", { lineHeight: "1.5" }],
+            caption: ["13px", { lineHeight: "1.5" }],
+          },
+          maxWidth: { doc: "840px" },
+          transitionDuration: { DEFAULT: "150ms" },
+        },
+      },
+    };
+  </script>
+  <script src="vendor/d3-7.9.0.min.js"></script>
+  <script src="vendor/plot-0.6.16.umd.min.js"></script>
+  <style type="text/tailwindcss">
+    @layer base {
+      body { @apply bg-white text-ink font-sans text-body antialiased; }
+      h1 { @apply text-display font-semibold; }
+      h2 { @apply text-h2 font-semibold; }
+      .num { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
+      table { @apply w-full text-small border-collapse; }
+      th { @apply text-left font-medium text-muted py-1.5 pr-4 border-b border-line; }
+      td { @apply py-1.5 pr-4 border-b border-line align-top; }
+      td.n, th.n { @apply num text-right; }
+      select { @apply w-full bg-white border border-line rounded px-2.5 py-1.5 text-small text-ink transition-colors focus:outline-none focus:border-accent; }
+      input[type=range] { accent-color: #4269d0; }
+      summary { @apply cursor-pointer text-caption text-accent mt-2; }
+    }
+    @layer components {
+      .btn { @apply inline-flex items-center gap-2 border border-line rounded px-3 py-1.5 text-small text-ink bg-white transition-colors hover:border-ink disabled:opacity-50 disabled:cursor-wait; }
+      .btn-primary { @apply border-accent bg-accent text-white hover:bg-[#3557b8] hover:border-[#3557b8]; }
+      .caption { @apply text-caption text-muted mt-2; }
+      .lede { @apply text-body text-ink/90 mb-5; }
+      .panel { @apply border border-line rounded-md p-5; }
+      .raised { @apply bg-raised border border-line rounded-md; }
+      .seg button { @apply px-3 py-1.5 text-small border-r border-line transition-colors; }
+      .seg button:last-child { @apply border-r-0; }
+      .seg button.on { @apply bg-ink text-white; }
+      .error { @apply text-small text-[#b4462f] border-l-2 border-risk pl-3 py-1 my-3; }
+      .navlink { @apply block py-1 text-small text-muted transition-colors hover:text-ink; }
+      .navlink.active { @apply text-ink font-medium; }
+    }
+  </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <span class="brand-title">Privacy-Preserving Adolescent Mental Health Using Quantum AI</span>
-      <span class="brand-sub">NSCH 2024 · ages 12–17 · hybrid classical–quantum pipeline</span>
-    </div>
-    <div class="disclaimer" role="note">Research screening aid, not a diagnosis.</div>
+  <header class="fixed top-0 inset-x-0 z-20 h-12 bg-white border-b border-line flex items-center justify-between px-6">
+    <span class="text-small font-medium tracking-tight">Privacy-preserving adolescent mental health using quantum AI</span>
+    <span class="text-small text-muted"><span class="text-ink font-medium">Research screening aid, not a diagnosis.</span></span>
   </header>
 
-  <div class="layout">
-    <nav class="sidenav" aria-label="Sections">
-      <a href="#try" data-section="try">1 · Try it</a>
-      <a href="#pipeline" data-section="pipeline">2 · Inside the pipeline</a>
-      <a href="#privacy" data-section="privacy">3 · Privacy explorer</a>
-      <a href="#results" data-section="results">4 · Results</a>
-      <p class="nav-note">Every number on these pages comes from the real fitted models or the saved result files. Nothing is trained while you watch.</p>
+  <aside class="fixed top-12 bottom-0 left-0 w-56 border-r border-line px-6 py-8">
+    <nav class="space-y-1">
+      <a class="navlink" href="#try" data-nav="try">Try it</a>
+      <a class="navlink" href="#pipeline" data-nav="pipeline">Inside the pipeline</a>
+      <a class="navlink" href="#privacy" data-nav="privacy">Privacy explorer</a>
+      <a class="navlink" href="#results" data-nav="results">Results</a>
     </nav>
+    <p class="caption mt-10">NSCH 2024, adolescents 12–17. Every number comes from the cached final models or the saved result files; nothing is trained while you watch.</p>
+  </aside>
 
-    <main>
-      <!-- 1. Try it -->
-      <section id="try" class="section">
+  <main class="ml-56 pt-12">
+    <div class="max-w-doc px-12 pb-32">
+
+      <!-- 1 ------------------------------------------------------------ -->
+      <section id="try" class="pt-14">
         <h1>Try it</h1>
-        <p class="lead">Set the eight survey answers that mutual information ranked most informative, then predict. The other 58 answers come from the loaded record (or typical answers if none is loaded), and the full final pipeline runs on all of them.</p>
-        <div class="error" id="try-error" hidden></div>
-        <div class="toolbar">
+        <p class="lede mt-3">Eight survey answers that mutual information ranked most informative. Every other answer comes from the loaded record — or the training median when no record is loaded — and the full final pipeline runs on all 66.</p>
+        <div id="try-error" class="error" hidden></div>
+        <div class="flex flex-wrap items-center gap-2">
           <button class="btn" id="btn-random">Load a random real NSCH record</button>
           <button class="btn" id="btn-random-pos">Load a diagnosed adolescent</button>
-          <button class="btn btn-quiet" id="btn-reset">Typical answers (no record)</button>
-          <span class="record-info" id="record-info">No record loaded: unlisted answers use training medians.</span>
+          <button class="btn" id="btn-reset">Typical answers</button>
         </div>
-        <form id="inputs" class="inputs"></form>
-        <div class="toolbar">
+        <p class="caption" id="record-info"></p>
+        <form id="inputs" class="grid grid-cols-2 gap-x-8 gap-y-4 mt-5"></form>
+        <div class="flex items-center gap-4 mt-6">
           <button class="btn btn-primary" id="btn-predict">Predict</button>
-          <span class="muted" id="predict-status"></span>
+          <span class="text-caption text-muted num" id="latency"></span>
         </div>
-        <div id="disagree" class="banner" hidden></div>
-        <div class="cards two" id="prediction-cards"></div>
-        <p class="footnote">LogReg reports a probability. The QSVM reports an SVM decision score, which is not a probability; it is compared with its own threshold. Both thresholds were chosen on inner-validation rows, never on test data. Final configurations: LogReg on all 95 features (hold-out ROC-AUC 0.892) and QSVM with angle encoding on PCA-8 (hold-out 0.854).</p>
+        <p id="disagree" class="mt-6 text-body" hidden></p>
+        <div id="prediction" class="grid grid-cols-2 gap-8 mt-4"></div>
+        <p class="caption">Logistic regression (all 95 features, ~14k training rows) reports a probability. The QSVM (angle encoding, 8 qubits, PCA-8, 1,200 training rows) reports an SVM decision score, which is not a probability. Each is compared with its own threshold, chosen on inner-validation rows. Tick = threshold; dot = this record.</p>
       </section>
 
-      <!-- 2. Inside the pipeline -->
-      <section id="pipeline" class="section" hidden>
+      <!-- 2 ------------------------------------------------------------ -->
+      <section id="pipeline" class="pt-24">
         <h1>Inside the pipeline</h1>
-        <p class="lead">The current record, traced through every stage of the quantum-kernel path with the real numbers. Switch the encoding to see the circuit and the prediction change. Angle encoding is the final, evaluated model.</p>
-        <div class="error" id="pipe-error" hidden></div>
-        <div class="toolbar">
-          <div class="segmented" id="enc-switch" role="group" aria-label="Encoding">
-            <button data-enc="angle" class="on">Angle</button>
-            <button data-enc="amplitude">Amplitude</button>
-            <button data-enc="zz">ZZ feature map</button>
-            <button data-enc="reupload">Re-uploading</button>
-          </div>
-          <span class="muted" id="pipe-status"></span>
+        <p class="lede mt-3">The same record, traced through every stage of the quantum-kernel path with the actual numbers. Switch the encoding to watch the circuit and the prediction change. Angle encoding is the final evaluated model; the others were fitted on the same 1,200 rows for comparison.</p>
+        <div id="pipe-error" class="error" hidden></div>
+        <div class="seg inline-flex border border-line rounded overflow-hidden" id="enc-switch">
+          <button data-enc="angle" class="on">Angle</button>
+          <button data-enc="amplitude">Amplitude</button>
+          <button data-enc="zz">ZZ feature map</button>
+          <button data-enc="reupload">Re-uploading</button>
         </div>
-        <div class="cards three" id="enc-summary"></div>
-        <div class="card">
-          <h3>Circuit <span class="muted" id="circuit-caption"></span></h3>
-          <div class="circuit" id="circuit"></div>
-        </div>
-        <ol class="stages" id="stages"></ol>
+        <div id="enc-summary" class="mt-5"></div>
+        <figure class="mt-6">
+          <div class="raised p-4 overflow-x-auto" id="circuit"></div>
+          <figcaption class="caption" id="circuit-caption">Circuit drawn server-side with PennyLane <span class="num">qml.draw_mpl()</span>.</figcaption>
+        </figure>
+        <ol id="stages" class="mt-10 space-y-10"></ol>
       </section>
 
-      <!-- 3. Privacy explorer -->
-      <section id="privacy" class="section" hidden>
+      <!-- 3 ------------------------------------------------------------ -->
+      <section id="privacy" class="pt-24">
         <h1>Privacy explorer</h1>
-        <p class="lead">Differential privacy (DP-SGD, Opacus) adds clipped, noisy updates during training. Smaller ε means stronger privacy. Move the slider across the budgets that were actually measured. The quantum circuit gives no privacy itself; the guarantee comes only from DP-SGD.</p>
-        <div class="error" id="priv-error" hidden></div>
-        <div class="slider-row">
-          <label for="eps-slider">Privacy budget ε</label>
-          <input type="range" id="eps-slider" min="0" max="5" step="1" value="3">
-          <span class="eps-value" id="eps-value">ε = 4</span>
+        <p class="lede mt-3">Differential privacy (DP-SGD via Opacus) clips each record's gradient and adds calibrated noise during training; ε is the privacy budget, smaller is stronger. The slider moves across the budgets that were actually measured. The quantum circuit provides no privacy — the guarantee comes only from DP-SGD.</p>
+        <div id="priv-error" class="error" hidden></div>
+        <div class="flex items-center gap-6">
+          <input type="range" id="eps" min="0" max="5" step="1" value="3" class="w-80">
+          <span class="num text-h2" id="eps-label">ε = 4</span>
         </div>
-        <div class="cards two" id="priv-cards"></div>
-        <div class="card">
-          <h3>Privacy–utility curve <span class="muted">(ROC-AUC, mean ± std over 10 cross-validation folds)</span></h3>
-          <div id="priv-chart" class="chart"></div>
-          <div id="priv-legend" class="legend"></div>
-        </div>
-        <div class="card headline" id="priv-headline"></div>
-        <div class="card" id="priv-table-card">
-          <h3>All arms at this ε</h3>
-          <div id="priv-table"></div>
-        </div>
+        <div id="priv-readout" class="grid grid-cols-2 gap-8 mt-6"></div>
+        <figure class="mt-8">
+          <div id="priv-chart"></div>
+          <div id="priv-legend" class="flex flex-wrap gap-x-6 gap-y-1 text-caption text-muted mt-2"></div>
+          <figcaption class="caption">ROC-AUC, mean ± std over 10 cross-validation folds; δ = 10⁻⁵. ε is calibrated and reported by Opacus's RDP accountant. The vertical rule marks the selected ε.</figcaption>
+        </figure>
+        <div id="priv-headline" class="mt-10"></div>
       </section>
 
-      <!-- 4. Results -->
-      <section id="results" class="section" hidden>
+      <!-- 4 ------------------------------------------------------------ -->
+      <section id="results" class="pt-24">
         <h1>Results</h1>
-        <p class="lead">Read directly from <code>results/tables</code> and <code>results/figures</code>; nothing on this page is recomputed.</p>
-        <div class="error" id="res-error" hidden></div>
-        <div class="card"><h3>Quantum vs classical on identical rows and features (ROC-AUC, 15 folds)</h3><div id="tbl-qvc"></div></div>
-        <div class="card"><h3>Cross-validation vs the locked hold-out (scored once)</h3><div id="tbl-holdout"></div></div>
-        <div class="card"><h3>Tuned classical baselines (full data, all 95 features)</h3><div id="tbl-classical"></div></div>
-        <div id="figures" class="figures"></div>
+        <p class="lede mt-3">Read directly from <span class="num text-small">results/tables</span> and <span class="num text-small">results/figures</span>; nothing here is recomputed.</p>
+        <div id="res-error" class="error" hidden></div>
+        <h2 class="mt-8">Quantum vs classical, identical rows and features</h2>
+        <div id="tbl-qvc" class="mt-3"></div>
+        <p class="caption">ROC-AUC over 15 folds, paired Wilcoxon signed-rank, Holm-adjusted. "Quantum wins" counts folds where the quantum model scored higher.</p>
+        <h2 class="mt-12">Cross-validation beside the locked hold-out</h2>
+        <div id="tbl-holdout" class="mt-3"></div>
+        <p class="caption">The 4,358-row hold-out was scored exactly once; every CV mean lies inside its 95% interval.</p>
+        <div id="figures" class="mt-12 space-y-12"></div>
       </section>
-    </main>
-  </div>
-  <script src="app.js?v=2"></script>
+    </div>
+  </main>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
