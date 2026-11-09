@@ -77,3 +77,59 @@ also works offline. Inter and JetBrains Mono are served locally. The Tailwind Pl
 
 Dependencies beyond the pipeline (pinned in `requirements.txt`): `fastapi==0.115.6`, `uvicorn==0.32.1`,
 `watchfiles==0.24.0` (makes `--reload` use file notifications instead of polling `.venv`).
+
+---
+
+# HOWTO — the "three schools" story demo (for the project review)
+
+A four-screen walkthrough for a non-technical audience. It **replays a real federated run** from
+Experiment 4; nothing is simulated or trained at launch.
+
+```powershell
+.venv\Scripts\activate
+uvicorn story:app --port 8001
+```
+
+Open **http://127.0.0.1:8001/**. Use **Next** to move between screens; on screen 2 press
+**Start federated training** (Next unlocks when the replay finishes). Fully offline.
+
+First time only (or if `results/story/story.json` is missing):
+
+```powershell
+python scripts/build_story_data.py     # ~2 min: "trained alone" runs + replay data
+```
+
+Without that file the page still opens and says what to run.
+
+## What is being replayed
+
+- Experiment 4, logistic regression, 3 clients split by U.S. state (non-IID), client-side DP-SGD at
+  ε = 4, outer fold r0f0. The three "schools" are those three clients: real NSCH 2024 records, one
+  third each (16–18 states per school). The school names are invented.
+- Accuracy per round: the recorded validation ROC-AUC of that run (30 rounds), measured on 3,487 records
+  never used for training. The curve is shown as recorded — it fluctuates under DP noise and ends at
+  **0.855** (the final model; not the best round).
+- Privacy meter: ε after each round, recomputed with Opacus's RDP accountant from the run's own noise
+  multiplier (σ = 1.22), sampling rate and steps; the final value equals the logged ε = 3.994.
+- Model update size: 96 weights × 8 bytes = **768 bytes (0.8 KB)** per school per round.
+
+## "Trained alone" baseline (run 9 Nov 2026)
+
+Each school trains logistic regression on only its own rows (own preprocessing), scored on the same
+3,487 test records:
+
+| | School 1 | School 2 | School 3 |
+|---|---|---|---|
+| Alone, same DP (ε = 4) — shown in the demo | 0.829 | 0.829 | 0.840 |
+| Alone, no privacy (for reference) | 0.866 | 0.867 | 0.871 |
+| Together (FedAvg + DP, ε = 4) | 0.855 | | |
+
+Across all 10 Experiment 4 test splits: alone with DP 0.819 ± 0.024, together 0.860 ± 0.011; together
+was better in 10 of 10 splits (paired Wilcoxon p = 0.002). **The comparison only holds at equal
+privacy:** a school alone without DP (0.860 on average) matches the private shared model. The demo
+says "with the same privacy protection" for that reason. Raw runs: `results/story_alone_runs.csv`.
+
+## Timing (measured)
+
+Replay animation 20 s (30 rounds; the first three slow, the rest fast). Full walkthrough with
+presenter-style pauses: ~86 s.

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Three Schools, One Model</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%228%22 cy=%228%22 r=%226%22 fill=%22%234269d0%22/%3E%3C/svg%3E">
+  <style>
+    @font-face { font-family: "Inter"; font-weight: 400; src: url("/vendor/fonts/inter-latin-400.woff2") format("woff2"); }
+    @font-face { font-family: "Inter"; font-weight: 500; src: url("/vendor/fonts/inter-latin-500.woff2") format("woff2"); }
+    @font-face { font-family: "Inter"; font-weight: 600; src: url("/vendor/fonts/inter-latin-600.woff2") format("woff2"); }
+    @font-face { font-family: "JetBrains Mono"; font-weight: 400; src: url("/vendor/fonts/jetbrains-mono-latin-400.woff2") format("woff2"); }
+    @font-face { font-family: "JetBrains Mono"; font-weight: 500; src: url("/vendor/fonts/jetbrains-mono-latin-500.woff2") format("woff2"); }
+  </style>
+  <!-- Tailwind Play CDN, local pinned copy (3.4.16) so the demo works offline -->
+  <script src="/vendor/tailwind-play-3.4.16.js"></script>
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: { ink: "#1b1e23", muted: "#6b6f76", line: "#e4e4e7", accent: "#4269d0", quantum: "#6cc5b0", safe: "#3ca951" },
+      fontFamily: { sans: ["Inter", "system-ui", "sans-serif"], mono: ["JetBrains Mono", "Consolas", "monospace"] },
+    } } };
+  </script>
+  <style type="text/tailwindcss">
+    @layer base {
+      body { @apply bg-white text-ink font-sans antialiased text-[18px]; }
+      .num { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
+    }
+    @layer components {
+      .card { @apply border border-line rounded-lg bg-white p-6; }
+      .btn { @apply inline-flex items-center h-12 px-6 rounded-lg border border-line bg-white text-[18px] text-ink hover:border-ink; }
+      .btn-primary { @apply bg-accent border-accent text-white hover:bg-[#3557b8] hover:border-[#3557b8]; }
+      .small { @apply text-[16px] text-muted; }
+      .school.training { @apply border-accent; }
+    }
+    .school { transition: border-color 150ms; }
+  </style>
+</head>
+<body>
+  <div class="min-h-screen flex flex-col">
+    <header class="h-16 border-b border-line flex items-center justify-between px-10">
+      <span class="text-[18px] font-semibold">Three schools, one model</span>
+      <span class="small"><span class="num" id="step-label">1 / 4</span></span>
+    </header>
+
+    <main class="flex-1 px-10 pt-6 pb-28">
+      <div class="max-w-[1180px] mx-auto">
+        <div id="data-error" class="border border-[#f1c9bf] text-[#b4462f] rounded-lg px-5 py-4 mb-8 text-[18px]" hidden></div>
+
+        <!-- 1. The problem -->
+        <section data-screen="1">
+          <h1 class="text-[36px] font-semibold tracking-tight">The problem</h1>
+          <p class="small mt-2 mb-10">Three schools each hold student wellbeing survey data. None of them is allowed to share it.</p>
+          <div class="grid grid-cols-3 gap-6" id="s1-schools"></div>
+          <p class="text-[40px] font-semibold tracking-tight mt-14 leading-tight">Three schools. Three weak models.<br>No way to combine them.</p>
+          <p class="small mt-6" id="s1-note"></p>
+        </section>
+
+        <!-- 2. Training together -->
+        <section data-screen="2" hidden>
+          <div class="flex items-end justify-between">
+            <div>
+              <h1 class="text-[36px] font-semibold tracking-tight">Training together</h1>
+              <p class="small mt-2">Each school trains on its own data. Only model updates travel to the server — never student records.</p>
+            </div>
+            <button class="btn btn-primary" id="btn-start">Start federated training</button>
+          </div>
+          <div class="grid grid-cols-5 gap-4 mt-4">
+            <div class="col-span-3 flex flex-col gap-4">
+              <div class="card p-3">
+                <svg id="diagram" viewBox="0 0 700 330" class="w-full h-auto" role="img" aria-label="Three schools sending model updates to a server"></svg>
+              </div>
+              <div class="card py-4">
+                <div class="text-[18px] font-medium mb-2">Training log</div>
+                <div id="log" class="num text-[16px] leading-snug h-[128px] overflow-y-auto space-y-1"></div>
+              </div>
+            </div>
+            <div class="col-span-2 flex flex-col gap-4">
+              <div class="card border-safe text-center py-3">
+                <div class="text-[20px] text-safe font-semibold">Student records sent</div>
+                <div class="num text-[64px] leading-none text-safe mt-1" id="records-sent">0</div>
+                <div class="small mt-1">in every round, from every school</div>
+              </div>
+              <div class="card py-3">
+                <div class="flex items-baseline justify-between">
+                  <span class="text-[18px] font-medium">Privacy budget used</span>
+                  <span class="num text-[20px]" id="eps-text">0.0 / 4.0</span>
+                </div>
+                <div class="h-3 bg-[#f4f4f5] border border-line rounded-full mt-3 overflow-hidden"><div id="eps-bar" class="h-full bg-accent" style="width:0%"></div></div>
+                <div class="small mt-2">ε: lower means stronger privacy</div>
+              </div>
+              <div class="card py-4">
+                <div class="flex items-baseline justify-between">
+                  <span class="text-[18px] font-medium">Shared model accuracy (AUC)</span>
+                  <span class="num text-[18px]" id="auc-now">–</span>
+                </div>
+                <svg id="chart" viewBox="0 0 460 165" class="w-full h-auto mt-1"></svg>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. The result -->
+        <section data-screen="3" hidden>
+          <h1 class="text-[36px] font-semibold tracking-tight">The result</h1>
+          <p class="small mt-2 mb-10">The same privacy protection (ε = 4) applies to the schools alone and together.</p>
+          <div class="grid grid-cols-3 gap-6" id="s3-numbers"></div>
+          <p class="text-[32px] font-semibold tracking-tight mt-12 leading-snug max-w-[1000px]">Every school now has a model none of them could have built alone with the same privacy protection, and no student record ever left the building.</p>
+          <p class="small mt-6 max-w-[1000px]" id="s3-verified"></p>
+        </section>
+
+        <!-- 4. Did quantum help? -->
+        <section data-screen="4" hidden>
+          <h1 class="text-[36px] font-semibold tracking-tight">Did quantum help?</h1>
+          <p class="small mt-2 mb-12">Both models trained on the same 1,500 student records with the same 8 features, tested 15 times.</p>
+          <div class="space-y-8 max-w-[1000px]" id="s4-bars"></div>
+          <p class="text-[32px] font-semibold tracking-tight mt-14 leading-snug max-w-[1000px]">We tested whether a quantum model does better on this data. It does not. Knowing that is the result.</p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="fixed bottom-0 inset-x-0 h-20 bg-white border-t border-line flex items-center justify-between px-10">
+      <button class="btn" id="btn-back">Back</button>
+      <span class="small">Real data: NSCH 2024 public survey, ages 12–17. Every number is from a recorded experiment.</span>
+      <button class="btn btn-primary" id="btn-next">Next</button>
+    </footer>
+  </div>
+  <script src="story.js?v=5"></script>
+</body>
+</html>
