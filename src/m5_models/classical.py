@@ -17,7 +17,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
 
-CLASSICAL_MODELS = ("logreg", "random_forest", "xgboost", "mlp")
+CLASSICAL_MODELS = ("logreg", "random_forest", "xgboost", "mlp", "svm")
 
 
 def positive_weight(y: np.ndarray) -> float:
@@ -117,6 +117,34 @@ class TorchMLPClassifier(BaseEstimator, ClassifierMixin):
         return (self.predict_proba(X)[:, 1] >= 0.5).astype(int)
 
 
+class SVMClassifier(BaseEstimator, ClassifierMixin):
+    """Classical RBF-kernel SVM with balanced class weights.
+
+    The classical counterpart of the quantum-kernel SVM: same SVC machinery, the
+    kernel is exp(-gamma * ||x - x'||^2) instead of a quantum state fidelity.
+    Scores are SVM decision values (not probabilities).
+    """
+
+    def __init__(self, C: float = 1.0, gamma: str | float = "scale", seed: int = 0):
+        self.C = C
+        self.gamma = gamma
+        self.seed = seed
+
+    def fit(self, X, y) -> "SVMClassifier":
+        from sklearn.svm import SVC
+
+        self.svc_ = SVC(kernel="rbf", C=self.C, gamma=self.gamma, class_weight="balanced", random_state=self.seed)
+        self.svc_.fit(np.asarray(X, dtype=float), np.asarray(y))
+        self.classes_ = np.array([0, 1])
+        return self
+
+    def decision_scores(self, X) -> np.ndarray:
+        return self.svc_.decision_function(np.asarray(X, dtype=float))
+
+    def n_parameters(self) -> int:
+        return int(self.svc_.dual_coef_.size + 1)
+
+
 def make_classical(
     name: str, y_train: np.ndarray, seed: int = 0, n_jobs: int = 4, **overrides
 ):
@@ -140,6 +168,8 @@ def make_classical(
         return XGBClassifier(**{**params, **overrides})
     if name == "mlp":
         return TorchMLPClassifier(seed=seed, **overrides)
+    if name == "svm":
+        return SVMClassifier(seed=seed, **overrides)
     raise ValueError(f"unknown classical model {name!r}; choose from {CLASSICAL_MODELS}")
 
 

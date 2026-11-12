@@ -1,0 +1,65 @@
+# Instrumented re-run of the Experiment 4 setup (by-state clients, eps = 4) on 5 folds, to MEASURE payload size,
+# client training time and server aggregation time per round. 2 concurrent workers.
+project:
+  name: exp7-nsch2024-federated-cost
+  seed: 2026
+  output_dir: results
+  n_jobs: 2
+data:
+  loader: nsch
+  paths:
+  - data/raw/nsch_2024/nsch_2024e_topical.dta
+  target: depression_current
+  min_age: 12
+  max_age: 17
+split:
+  holdout_fraction: 0.2
+cv:
+  n_splits: 5
+  n_repeats: 1
+subsample:
+  n: 1500
+tuning:
+  inner_val_fraction: 0.2
+experiment:
+  epsilons:
+  - 4
+  delta: 1.0e-05
+  feature_sets:
+    pca4:
+      method: pca
+      k: 4
+    all95:
+      method: all
+  arms:
+    vqc_sub:
+      label: VQC re-upload 4q (1.2k rows, PCA-4)
+      kind: vqc
+      family: quantum
+      regime: subsample
+      feature_set: pca4
+      learning_rate: 0.05
+      epochs: 30
+      batch_size: 128
+      model_params:
+        encoding: reupload
+        n_qubits: 4
+        n_layers: 2
+    logreg_full:
+      label: LogReg (full 11k rows, all 95 features)
+      kind: logreg
+      family: classical
+      regime: full
+      feature_set: all95
+      learning_rate: 0.05
+      epochs: 30
+      batch_size: 256
+  clients:
+  - 3
+  - 5
+  - 10
+  partitions:
+  - by_state
+  rounds: 30
+  local_epochs: 1
+  reference_run: results/exp3-nsch2024-privacy-utility-20261108-165618

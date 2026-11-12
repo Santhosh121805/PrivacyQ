@@ -1,0 +1,50 @@
+# VQC trained with COBYLA on the identical Experiment 2 folds and features as the Adam VQC.
+project:
+  name: exp2-nsch2024-vqc-cobyla
+  seed: 2026
+  output_dir: results
+  n_jobs: 2
+data:
+  loader: nsch
+  paths:
+  - data/raw/nsch_2024/nsch_2024e_topical.dta
+  target: depression_current
+  min_age: 12
+  max_age: 17
+split:
+  holdout_fraction: 0.2
+cv:
+  n_splits: 5
+  n_repeats: 3
+subsample:
+  n: 1500
+tuning:
+  inner_val_fraction: 0.2
+experiment:
+  regimes:
+  - subsample
+  feature_sets:
+    pca4:
+      method: pca
+      k: 4
+    pca8:
+      method: pca
+      k: 8
+    all95:
+      method: all
+  classical_models: []
+  quantum:
+    vqc_cobyla:
+      feature_set: pca4
+      encoding: reupload
+      n_qubits: 4
+      optimizer: cobyla
+      maxiter: 300
+      init_scale: 0.1
+      grid:
+        n_layers:
+        - 1
+        - 2
+base_params: {}
+grids: {}
+skip_report: true

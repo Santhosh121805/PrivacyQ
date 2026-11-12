@@ -8,7 +8,9 @@ Every ``Encoding`` exposes:
   2**n - 1 for amplitude; one amplitude slot is reserved for a constant).
 - ``input_scale``: "angle" (features min-max scaled to [0, pi] on training
   rows) or "standard" (standardized features, used by amplitude encoding).
-- ``prepare(X)``: final numpy-side preparation (amplitude appends the constant).
+- ``prepare(X)``: final numpy-side preparation (amplitude appends the constant;
+  basis binarises each angle-scaled feature at the fixed midpoint pi/2 of its
+  [0, pi] range — no data-dependent threshold).
 - ``feature_map(x)``: the data-only circuit (used by the quantum kernel).
 - ``block(x)``: one upload of the data, interleaved with trainable layers by
   variational models when ``reupload`` is True.
@@ -24,7 +26,7 @@ import numpy as np
 import pennylane as qml
 
 MIN_QUBITS, MAX_QUBITS = 4, 12
-ENCODING_NAMES = ("angle", "amplitude", "zz", "reupload")
+ENCODING_NAMES = ("angle", "amplitude", "zz", "reupload", "basis")
 NATIVE_GATES = {"RX", "RY", "RZ", "CNOT", "Hadamard", "GlobalPhase"}
 
 
@@ -72,6 +74,8 @@ class Encoding:
             return np.hstack([X, np.ones((X.shape[0], 1))])
         if X.shape[1] != self.n_qubits:
             raise ValueError(f"{self.name} encoding expects {self.n_qubits} features")
+        if self.name == "basis":
+            return (X >= np.pi / 2).astype(float)
         return X
 
     def feature_map(self, x) -> None:
@@ -81,6 +85,10 @@ class Encoding:
             qml.AngleEmbedding(x, wires=wires, rotation="Y")
         elif self.name == "amplitude":
             qml.AmplitudeEmbedding(x, wires=wires, normalize=True, pad_with=0.0)
+        elif self.name == "basis":
+            # |b> = X^{b_1} ... X^{b_n} |0...0>; RX(pi*b) equals X^b up to a global phase and broadcasts.
+            for w in wires:
+                qml.RX(np.pi * x[..., w], wires=w)
         elif self.name == "zz":
             for _ in range(self.reps):
                 for w in wires:

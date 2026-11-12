@@ -94,3 +94,42 @@ def test_corrected_ttest_is_more_conservative_than_plain():
     corrected = corrected_resampled_ttest(a, b, 0.25)["p"]
     assert corrected > plain
     assert list(holm([0.01, 0.04, 0.03])) == pytest.approx([0.03, 0.06, 0.06])
+
+
+def test_basis_encoding_prepares_the_computational_basis_state():
+    import pennylane as qml
+
+    enc = make_encoding("basis", 4)
+    x = np.array([[0.2, 2.0, 3.1, 1.0]])            # angle-scaled features in [0, pi]
+    bits = enc.prepare(x)[0]
+    np.testing.assert_array_equal(bits, [0, 1, 1, 0])  # thresholded at pi/2
+
+    @qml.qnode(qml.device("default.qubit", wires=4))
+    def state(b):
+        enc.feature_map(b)
+        return qml.probs(wires=range(4))
+
+    probs = state(bits)
+    assert probs[int("0110", 2)] == pytest.approx(1.0)
+    assert encoding_resources(enc)["n_gates"] == 4
+
+
+def test_basis_kernel_is_one_for_equal_bitstrings_and_zero_otherwise():
+    from src.m5_models.quantum import QuantumKernelSVC
+
+    X = np.array([[0.1, 0.1, 3.0, 3.0], [0.2, 0.3, 2.9, 2.0], [3.0, 0.1, 0.1, 3.0]] * 4)
+    y = np.array([0, 1, 0] * 4)
+    m = QuantumKernelSVC(encoding="basis", n_qubits=4).fit(X, y)
+    K = m._kernel(m.train_states_, m.train_states_)
+    np.testing.assert_allclose(K[0, 1], 1.0, atol=1e-9)   # same bits
+    np.testing.assert_allclose(K[0, 2], 0.0, atol=1e-9)   # different bits
+
+
+def test_vqc_cobyla_optimiser_reduces_loss():
+    X, y = _toy(4)
+    model = VQCClassifier(encoding="angle", n_qubits=4, n_layers=1, optimizer="cobyla", maxiter=40, seed=0).fit(X, y)
+    assert model.n_evaluations_ <= 41 and len(model.loss_history_) == model.n_evaluations_
+    assert min(model.loss_history_) < model.loss_history_[0]
+    assert np.isfinite(model.decision_scores(X)).all()
+    with pytest.raises(ValueError):
+        VQCClassifier(optimizer="sgd").fit(X, y)

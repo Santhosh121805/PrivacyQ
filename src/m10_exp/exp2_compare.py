@@ -41,7 +41,7 @@ from src.m10_exp.common import (
 )
 from src.m10_exp.tuning import inner_split, scores_of, select_and_fit, stratified_subsample
 
-QUANTUM = {"qsvm": QuantumKernelSVC, "vqc": VQCClassifier, "hybrid": HybridQNNClassifier}
+QUANTUM = {"qsvm": QuantumKernelSVC, "vqc": VQCClassifier, "vqc_cobyla": VQCClassifier, "hybrid": HybridQNNClassifier}
 
 
 def feature_matrices(spec: dict, X_in, y_in, others, seed):

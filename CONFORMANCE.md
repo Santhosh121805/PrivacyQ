@@ -14,7 +14,7 @@ Status values:
 Paths are relative to the repository root. `results/` is git-ignored and produced by the commands in
 `README.md`; the run directories referenced are those listed in `configs/final_report.yaml`.
 
-_Last updated: 2026-11-12, after Priority 1 and Priority 2 items 1–2._
+_Last updated: 2026-11-12, after Priority 1 and Priority 2 items 1, 2, 4 and 5._
 
 ## Pipeline flow as built
 
@@ -117,7 +117,7 @@ privacy only.
 | Sub-item | Status | Evidence | Note |
 |---|---|---|---|
 | Classical optimiser: Adam | BUILT | `src/m5_models/quantum.py`, `src/m7_privacy/dp_training.py` | |
-| Classical optimiser: COBYLA | PHASE-2 | — | Scheduled: Priority 2, item 5. |
+| Classical optimiser: COBYLA | BUILT | `src/m5_models/quantum.py` (`VQCClassifier(optimizer="cobyla")`), `tests/test_phase2_quantum.py::test_vqc_cobyla_optimiser_reduces_loss`, `results/exp2-nsch2024-vqc-cobyla-20261112-121718/comparison.md` | SciPy COBYLA, 300 loss evaluations, full batch. VQC re-upload PCA-4, 15 folds: 0.799 ± 0.041 vs Adam 0.814 ± 0.012 (Wilcoxon p = 0.11, not significant); less stable; 12.7 s vs 44.8 s per fit. |
 | Loss function: classification | BUILT | `src/m5_models/quantum.py` | Class-weighted binary cross-entropy. |
 | Loss function: regression | PHASE-2 | — | No continuous target in the task. |
 | Update / evaluate loop | BUILT | `src/m5_models/quantum.py` (`_TorchQuantumBase.fit`) | Early stopping on inner validation. |
@@ -151,7 +151,7 @@ privacy only.
 | Sub-item | Status | Evidence | Note |
 |---|---|---|---|
 | Logistic regression | BUILT | `src/m5_models/classical.py`, Exp 2 | |
-| SVM (classical) | PHASE-2 | — | Scheduled: Priority 2, item 4. |
+| SVM (classical) | BUILT | `src/m5_models/classical.py` (`SVMClassifier`), `tests/test_phase1_pipeline.py`, `results/exp2-nsch2024-svm-baseline-20261112-121554/comparison.md` | RBF kernel, C tuned on inner-val, γ fixed at sklearn "scale"; same 15 folds as Exp 2. PCA-8 / 1.2k rows: 0.838 ± 0.016, below QSVM 0.847 (13/15 folds, Wilcoxon p = 0.026, Nadeau–Bengio p = 0.36, not significant) and below LogReg 0.851 (0/15 folds). Full data, all 95 features: 0.880 vs LogReg 0.888. |
 | Random forest | PARTIAL | `results/phase1-nsch2024-depression-*` | Run in Phase 1, then excluded from all results on supervisor instruction. |
 | BERT + ML | PHASE-2 | — | Requires text data. |
 | Deep learning (LSTM, CNN) | PHASE-2 | — | Require sequence data; the data is tabular. An MLP baseline is built instead. |
@@ -213,3 +213,4 @@ privacy only.
 - 2026-11-12: Priority 1 — input-stage privacy (k-anonymity, local DP) built and measured (Experiment 5); flow section rewritten.
 - 2026-11-12: Priority 2 item 2 — re-identification risk built and measured.
 - 2026-11-12: Priority 2 item 1 — membership inference test built and measured (Experiment 6).
+- 2026-11-12: Priority 2 items 4 and 5 — classical SVM baseline and COBYLA optimiser built and measured on the Exp 2 folds.

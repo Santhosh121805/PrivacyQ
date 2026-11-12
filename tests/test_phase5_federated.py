@@ -64,3 +64,18 @@ def test_dp_fedavg_trains_and_accounts_per_client(epsilon):
         assert out["epsilon_spent_max"] is None
     else:
         assert all(e == pytest.approx(2.0, rel=0.05) for e in out["client_epsilons"])
+
+
+def test_fedavg_records_measured_payload_and_timings():
+    rng = np.random.default_rng(2)
+    X = rng.normal(size=(300, 6))
+    y = (X[:, 0] > 0.5).astype(int)
+    parts = stratified_iid_partition(y, 3, 0)
+    out = fedavg_train("logreg", {}, [(X[p], y[p]) for p in parts], rounds=2, local_epochs=1, learning_rate=0.05,
+                       sample_rate=0.1, epsilon=None, delta=1e-5, max_grad_norm=1.0, seed=0)
+    h = out["history"]
+    for col in ("payload_bytes_per_update", "payload_bytes_round", "client_seconds_max", "client_seconds_total",
+                "aggregation_seconds"):
+        assert col in h and (h[col] >= 0).all()
+    assert (h.payload_bytes_per_update > out["n_params"] * 8).all()      # real serialisation adds framing overhead
+    assert (h.client_seconds_total >= h.client_seconds_max).all()

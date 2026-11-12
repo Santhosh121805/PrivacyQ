@@ -17,6 +17,8 @@ the server sees individual (already DP-noised) client updates.
 from __future__ import annotations
 
 import copy
+import io
+import time
 import warnings
 
 import numpy as np
@@ -109,6 +111,16 @@ class _Client:
         return None if self.engine is None else float(self.engine.accountant.get_epsilon(delta=delta))
 
 
+def _serialise(state: dict) -> bytes:
+    buf = io.BytesIO()
+    torch.save(state, buf)
+    return buf.getvalue()
+
+
+def _deserialise(blob: bytes) -> dict:
+    return torch.load(io.BytesIO(blob), weights_only=True)
+
+
 def fedavg_train(kind: str, model_params: dict, clients: list[tuple[np.ndarray, np.ndarray]], *,
                  rounds: int, local_epochs: int, learning_rate: float, sample_rate: float,
                  epsilon: float | None, delta: float, max_grad_norm: float, seed: int,
@@ -129,11 +141,22 @@ def fedavg_train(kind: str, model_params: dict, clients: list[tuple[np.ndarray, 
     history = []
     for r in range(1, rounds + 1):
         state = {k: v.clone() for k, v in global_module.state_dict().items()}
-        updates = [w.train(state, local_epochs) for w in workers]
-        averaged = {k: sum(u[k] * (s / sizes.sum()) for u, s in zip(updates, sizes)) for k in state}
+        client_seconds, updates = [], []
+        for w in workers:                                   # measured wall-clock local training per client
+            t0 = time.perf_counter()
+            updates.append(w.train(state, local_epochs))
+            client_seconds.append(time.perf_counter() - t0)
+        payload = [len(_serialise(u)) for u in updates]     # measured serialised update size (what would be sent)
+        t0 = time.perf_counter()                            # measured server work: deserialise + weighted average
+        received = [_deserialise(_serialise(u)) for u in updates]
+        averaged = {k: sum(u[k] * (s / sizes.sum()) for u, s in zip(received, sizes)) for k in state}
         global_module.load_state_dict(averaged)
+        aggregation_seconds = time.perf_counter() - t0
         bytes_round = 2 * len(workers) * n_params * BYTES_PER_PARAM  # global down + update up, every client
-        entry = {"round": r, "bytes": bytes_round, "cumulative_bytes": bytes_round * r}
+        entry = {"round": r, "bytes": bytes_round, "cumulative_bytes": bytes_round * r,
+                 "payload_bytes_per_update": int(max(payload)), "payload_bytes_round": int(2 * sum(payload)),
+                 "client_seconds_max": max(client_seconds), "client_seconds_total": sum(client_seconds),
+                 "aggregation_seconds": aggregation_seconds}
         if evaluate is not None:
             entry.update(evaluate(global_module))
         history.append(entry)

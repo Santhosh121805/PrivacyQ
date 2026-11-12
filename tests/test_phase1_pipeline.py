@@ -71,12 +71,19 @@ def test_metrics_penalise_always_negative_classifier():
     assert m["accuracy"] == 0.9 and m["balanced_accuracy"] == 0.5 and m["recall"] == 0.0
 
 
-@pytest.mark.parametrize("name", ["logreg", "random_forest", "xgboost", "mlp"])
+@pytest.mark.parametrize("name", ["logreg", "random_forest", "xgboost", "mlp", "svm"])
 def test_classical_baselines_fit_and_score(name):
     rng = np.random.default_rng(1)
     X = rng.normal(size=(300, 5))
     y = (X[:, 0] + X[:, 1] * X[:, 2] > 1.2).astype(int)
     overrides = {"random_forest": {"n_estimators": 20}, "mlp": {"epochs": 3}}.get(name, {})
     model = make_classical(name, y, seed=0, n_jobs=1, **overrides).fit(X, y)
-    p = model.predict_proba(X)[:, 1]
-    assert p.shape == (300,) and np.all((p >= 0) & (p <= 1))
+    from sklearn.metrics import roc_auc_score
+
+    from src.m10_exp.tuning import scores_of
+
+    p = scores_of(model, X)
+    assert p.shape == (300,) and np.isfinite(p).all()
+    if name != "svm":  # SVM returns decision values, not probabilities
+        assert np.all((p >= 0) & (p <= 1))
+    assert roc_auc_score(y, p) > 0.6

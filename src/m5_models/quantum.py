@@ -182,9 +182,19 @@ class _VQCModule(torch.nn.Module):
 
 
 class VQCClassifier(_TorchQuantumBase):
+    """VQC trained with Adam (default) or COBYLA.
+
+    ``optimizer="cobyla"``: gradient-free constrained optimisation by linear approximation
+    (SciPy), minimising the same positive-class-weighted BCE over the full training batch,
+    with at most ``maxiter`` loss evaluations. No early stopping (the final parameters are kept);
+    ``learning_rate``, ``epochs`` and ``batch_size`` are ignored.
+    """
+
     def __init__(self, encoding: str = "angle", n_qubits: int = 4, n_layers: int = 2,
                  learning_rate: float = 0.05, epochs: int = 30, batch_size: int = 64,
-                 init_scale: float = 0.1, seed: int = 0):
+                 init_scale: float = 0.1, seed: int = 0, optimizer: str = "adam", maxiter: int = 300):
+        self.optimizer = optimizer
+        self.maxiter = maxiter
         self.encoding = encoding
         self.n_qubits = n_qubits
         self.n_layers = n_layers
@@ -200,6 +210,36 @@ class VQCClassifier(_TorchQuantumBase):
 
     def _build(self, n_inputs: int) -> torch.nn.Module:
         return _VQCModule(make_encoding(self.encoding, self.n_qubits), self.n_layers, self.init_scale)
+
+    def fit(self, X, y, eval_set=None):
+        if self.optimizer == "adam":
+            return super().fit(X, y, eval_set=eval_set)
+        if self.optimizer != "cobyla":
+            raise ValueError("optimizer must be 'adam' or 'cobyla'")
+        from scipy.optimize import minimize
+
+        torch.manual_seed(self.seed)
+        X_t, y_t = self._prepare(X), torch.as_tensor(np.asarray(y), dtype=DTYPE)
+        self.module_ = self._build(X_t.shape[1])
+        loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor(positive_weight(y), dtype=DTYPE))
+        params = list(self.module_.parameters())
+        x0 = torch.nn.utils.parameters_to_vector(params).detach().numpy().copy()
+        self.loss_history_ = []
+
+        def objective(theta):
+            with torch.no_grad():
+                torch.nn.utils.vector_to_parameters(torch.as_tensor(theta, dtype=DTYPE), params)
+                loss = float(loss_fn(self.module_(X_t), y_t))
+            self.loss_history_.append(loss)
+            return loss
+
+        res = minimize(objective, x0, method="COBYLA", options={"maxiter": int(self.maxiter), "rhobeg": 0.5})
+        with torch.no_grad():
+            torch.nn.utils.vector_to_parameters(torch.as_tensor(res.x, dtype=DTYPE), params)
+        self.n_evaluations_ = int(res.nfev)
+        self.best_epoch_ = None
+        self.classes_ = np.array([0, 1])
+        return self
 
 
 class _HybridModule(torch.nn.Module):
@@ -245,7 +285,7 @@ class HybridQNNClassifier(_TorchQuantumBase):
         return _HybridModule(n_inputs, make_encoding(self.encoding, self.n_qubits), self.n_layers, self.init_scale)
 
 
-QUANTUM_MODELS = {"qsvm": QuantumKernelSVC, "vqc": VQCClassifier, "hybrid": HybridQNNClassifier}
+QUANTUM_MODELS = {"qsvm": QuantumKernelSVC, "vqc": VQCClassifier, "vqc_cobyla": VQCClassifier, "hybrid": HybridQNNClassifier}
 
 
 def vqc_resources(encoding: str, n_qubits: int, n_layers: int) -> dict:
