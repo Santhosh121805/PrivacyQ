@@ -351,7 +351,42 @@ def build(config_path: str) -> Path:
         w.text("Every CV mean lies inside the hold-out 95% interval; hold-out AUC is 0.004–0.007 higher, consistent with "
                "the final models training on more rows than a CV fold. The CV protocol does not overestimate performance. "
                "Threshold-dependent metrics (recall, balanced accuracy) move more than AUC because the threshold is "
-               "chosen on a small inner-validation split.")
+               "chosen on a small inner-validation split. The hold-out gap between the best model and the DP model "
+               "(0.892 → 0.861) is not all privacy cost: the two are trained differently (tuned solver vs SGD). On the "
+               "10 shared CV folds the gap is 0.032 = 0.016 from SGD training without noise + 0.016 from DP noise at "
+               "ε = 4, and the latter is not statistically significant (Holm p = 0.33).")
+
+    if "holdout_multiclass" in runs:
+        hm = pd.read_csv(runs["holdout_multiclass"] / "holdout_multiclass_metrics.csv").set_index("model")
+        e9, e9b = pd.read_csv(runs["exp9"] / "fold_metrics.csv"), pd.read_csv(runs["exp9b"] / "fold_metrics.csv")
+        spec = {"xgboost_full_all95": ("XGBoost, full data, all 95 features", e9, "xgboost", "full", "all95"),
+                "logreg_full_all95": ("LogReg, full data, all 95 features", e9, "logreg", "full", "all95"),
+                "qsvm_angle_pca8_1500rows": ("QSVM angle, PCA-8, 1,500 rows", e9, "qsvm", "subsample", "pca8"),
+                "vqc_ovr_reupload_pca4_1500rows": ("VQC one-vs-rest, PCA-4, 1,500 rows", e9b, "vqc", "subsample", "pca4")}
+        rows = []
+        for k, (label, d, m, r, f) in spec.items():
+            g, h = d[(d.model == m) & (d.regime == r) & (d.feature_set == f)], hm.loc[k]
+            rows.append({"Configuration": label,
+                         "CV macro-F1": f"{g.macro_f1.mean():.3f} ± {g.macro_f1.std(ddof=1):.3f}",
+                         "Hold-out macro-F1": f"{h.three_class_macro_f1:.3f}",
+                         "CV macro AUC": f"{g.macro_ovr_auc.mean():.3f} ± {g.macro_ovr_auc.std(ddof=1):.3f}",
+                         "Hold-out macro AUC [95% CI]": f"{h.three_class_macro_ovr_auc:.3f} [{h.three_class_macro_ovr_auc_ci95_low:.3f}, {h.three_class_macro_ovr_auc_ci95_high:.3f}]",
+                         "CV depression-vs-rest AUC": f"{g.auc_depression_vs_rest.mean():.3f}",
+                         "Hold-out depression-vs-rest AUC [95% CI]": f"{h.binary_depression_roc_auc:.3f} [{h.binary_depression_auc_ci95_low:.3f}, {h.binary_depression_auc_ci95_high:.3f}]"})
+        h0 = hm.iloc[0]
+        w.text("## 8. Three-class task on the locked hold-out (scored once, pre-specified rule)",
+               "Classes: none / anxiety only / depression (with or without anxiety), from the \"currently has\" items. "
+               "The hold-out rule was committed before scoring: three-class metrics on the "
+               f"{int(h0.n_scored_three_class):,} hold-out rows with a determined label (none {int(h0.n_three_class_none):,}, "
+               f"anxiety only {int(h0.n_three_class_anxiety_only):,}, depression {int(h0.n_three_class_depression):,}); "
+               f"binary depression-vs-rest metrics on all {int(h0.n_scored_binary):,} hold-out rows ({int(h0.n_binary_pos)} positives). "
+               "Each configuration was trained on the development rows with a determined label using the cross-validation "
+               "protocol, then scored once; the script refuses to run again. CV columns: Experiment 9 / 9b, 15 folds. "
+               "CI = 2,000-sample bootstrap.")
+        w.table(pd.DataFrame(rows), "Three-class task: cross-validation vs locked hold-out", "holdout_multiclass")
+        w.text("Every cross-validation mean lies inside the corresponding hold-out 95% interval, for the three-class macro "
+               "AUC and for depression-vs-rest AUC. On the hold-out, as in cross-validation, the classical models are ahead "
+               "of both quantum models; no hold-out difference between models was tested for significance.")
 
     w.text("## Limitations",
            "- **Label bias.** The target is caregiver-reported, provider-diagnosed depression. Much depression is never "
@@ -380,6 +415,9 @@ def build(config_path: str) -> Path:
            "- **Federated preprocessing is centralised.** In Experiment 4 the imputer, scaler and PCA are fitted once on "
            "the pooled client rows, which a real federation could not do; clients would need federated or public-data "
            "preprocessing. The threshold is also chosen on central inner-validation rows.",
+           "- **Input-stage privacy is Experiment 5 only.** k-anonymity and local DP on the inputs were built and "
+           "evaluated in Experiment 5 (see CONFORMANCE.md); Experiments 1–4 and every table in this file use no "
+           "input-stage privacy.",
            "- **Scope cuts made to finish:** Experiment 1 uses 10 folds and excludes the Hybrid QNN; Experiments 3–4 "
            "use 10 folds; Experiment 4 runs at ε = 4 only with two arms; RandomForest dropped on supervisor instruction.")
     w.text("## Run directories", *[f"- {k}: `{v}`" for k, v in runs.items()])

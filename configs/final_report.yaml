@@ -8,3 +8,6 @@ runs:
   exp3_sensitivity: results/exp3-sensitivity-logreg-clipping-20261108-170152
   exp4: results/exp4-nsch2024-federated-dp-20261108-170320
   holdout: results/holdout-20261108-173801
+  exp9: results/exp9-nsch2024-multiclass-20261112-140242
+  exp9b: results/exp9b-nsch2024-multiclass-vqc-20261112-140937
+  holdout_multiclass: results/holdout-multiclass-20261112-171606
