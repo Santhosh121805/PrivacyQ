@@ -1,0 +1,164 @@
+# Experiment 8b: angle vs ZZ feature-map QSVM under the same simulated hardware noise, 4 qubits, PCA-4,
+# identical 15 Experiment 2 folds. REDUCED from 8 to 4 qubits: the full density-matrix simulation needed for ZZ
+# (no factorisation) took 1.35 s per row at 8 qubits, and at 6 qubits a single fold ran over an hour per noise
+# level with single-threaded workers. Nothing else is reduced: same folds, rows, noise settings and shots.
+# ZZ uses the full mixed-state path; angle uses the exact factorised path (equal to the full path, tested).
+project:
+  name: exp8b-nsch2024-hardware-noise-zz-vs-angle-4q
+  seed: 2026
+  output_dir: results
+  n_jobs: 4
+data:
+  loader: nsch
+  paths:
+  - data/raw/nsch_2024/nsch_2024e_topical.dta
+  target: depression_current
+  min_age: 12
+  max_age: 17
+split:
+  holdout_fraction: 0.2
+cv:
+  n_splits: 5
+  n_repeats: 3
+subsample:
+  n: 1500
+tuning:
+  inner_val_fraction: 0.2
+experiment:
+  regimes:
+  - subsample
+  feature_sets:
+    pca4:
+      method: pca
+      k: 4
+  classical_models: []
+  quantum:
+    qsvm_angle_ideal:
+      feature_set: pca4
+      encoding: angle
+      n_qubits: 4
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+      class: qsvm
+      task_group: angle_ideal
+    qsvm_angle_noise1_exact:
+      feature_set: pca4
+      encoding: angle
+      n_qubits: 4
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+      class: qsvm_noisy
+      noise_scale: 1.0
+      shots: null
+      task_group: angle_noisy
+    qsvm_angle_noise1_shots4096:
+      feature_set: pca4
+      encoding: angle
+      n_qubits: 4
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+      class: qsvm_noisy
+      noise_scale: 1.0
+      shots: 4096
+      task_group: angle_noisy
+    qsvm_angle_noise1_shots1024:
+      feature_set: pca4
+      encoding: angle
+      n_qubits: 4
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+      class: qsvm_noisy
+      noise_scale: 1.0
+      shots: 1024
+      task_group: angle_noisy
+    qsvm_angle_noise10_shots4096:
+      feature_set: pca4
+      encoding: angle
+      n_qubits: 4
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+      class: qsvm_noisy
+      noise_scale: 10.0
+      shots: 4096
+      task_group: angle_noisy
+    qsvm_zz_ideal:
+      feature_set: pca4
+      encoding: zz
+      n_qubits: 4
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+      class: qsvm
+      task_group: zz_ideal
+    qsvm_zz_noise1_exact:
+      feature_set: pca4
+      encoding: zz
+      n_qubits: 4
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+      class: qsvm_noisy
+      noise_scale: 1.0
+      shots: null
+      task_group: zz_noise1
+    qsvm_zz_noise1_shots4096:
+      feature_set: pca4
+      encoding: zz
+      n_qubits: 4
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+      class: qsvm_noisy
+      noise_scale: 1.0
+      shots: 4096
+      task_group: zz_noise1
+    qsvm_zz_noise1_shots1024:
+      feature_set: pca4
+      encoding: zz
+      n_qubits: 4
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+      class: qsvm_noisy
+      noise_scale: 1.0
+      shots: 1024
+      task_group: zz_noise1
+    qsvm_zz_noise10_shots4096:
+      feature_set: pca4
+      encoding: zz
+      n_qubits: 4
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+      class: qsvm_noisy
+      noise_scale: 10.0
+      shots: 4096
+      task_group: zz_noise10
+base_params: {}
+grids: {}
+skip_report: true

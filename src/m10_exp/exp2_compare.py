@@ -67,7 +67,7 @@ def run_task(task: dict) -> list[dict]:
         if model_name in task["quantum"]:
             q = task["quantum"][model_name]
             cls = QUANTUM[q.get("class", model_name)]   # "class" lets several arms share one model class
-            fixed = {k: v for k, v in q.items() if k not in ("feature_set", "grid", "class")}
+            fixed = {k: v for k, v in q.items() if k not in ("feature_set", "grid", "class", "task_group")}
 
             def factory(cls=cls, fixed=fixed, **p):
                 return cls(seed=seed, **fixed, **p)
@@ -141,11 +141,18 @@ def build_tasks(config, loader, frame, folds, labels):
                              for m in exp["classical_models"]]
                 tasks.extend(classical)
                 if regime == "subsample":
+                    # Arms sharing a "task_group" run in one task, so they can reuse cached kernels.
+                    groups: dict[str, list[str]] = {}
                     for qname, q in exp["quantum"].items():
                         if q["feature_set"] == fs_name:
-                            tasks.append({**common, "feature_set": fs_name, "feature_spec": spec, "models": [qname]})
+                            groups.setdefault(q.get("task_group", qname), []).append(qname)
+                    for names in groups.values():
+                        tasks.append({**common, "feature_set": fs_name, "feature_spec": spec, "models": names})
     cost = {"hybrid": 0, "vqc": 1, "mlp": 2, "random_forest": 3, "xgboost": 4, "qsvm": 5, "logreg": 6}
-    return sorted(tasks, key=lambda t: (cost.get(t["models"][0], 9), t["regime"] != "full"))
+    def rank(t):  # slowest first; full density-matrix noisy arms are the slowest of all
+        name = t["models"][0]
+        return (-1 if "zz_noise" in name else cost.get(name, 9), t["regime"] != "full")
+    return sorted(tasks, key=rank)
 
 
 def run(config_path: str) -> Path:
