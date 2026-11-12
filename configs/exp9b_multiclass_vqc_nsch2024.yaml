@@ -1,0 +1,84 @@
+# Experiment 9b: three-class one-vs-rest VQC (Exp 2 VQC setup: re-uploading, 4 qubits, PCA-4, same grid)
+# with classical baselines on the identical PCA-4 subsample folds.
+project:
+  name: exp9b-nsch2024-multiclass-vqc
+  seed: 2026
+  output_dir: results
+  n_jobs: 3
+data:
+  loader: nsch
+  paths:
+  - data/raw/nsch_2024/nsch_2024e_topical.dta
+  target: depression_current
+  min_age: 12
+  max_age: 17
+split:
+  holdout_fraction: 0.2
+cv:
+  n_splits: 5
+  n_repeats: 3
+subsample:
+  n: 1500
+tuning:
+  inner_val_fraction: 0.2
+check_folds_against: results/exp2-nsch2024-quantum-vs-classical-20261108-165426
+experiment:
+  feature_sets:
+    pca4:
+      method: pca
+      k: 4
+  models:
+    vqc:
+      feature_sets:
+      - pca4
+      regimes:
+      - subsample
+      encoding: reupload
+      n_qubits: 4
+      epochs: 30
+      batch_size: 64
+      init_scale: 0.1
+      grid:
+        learning_rate:
+        - 0.01
+        - 0.05
+        n_layers:
+        - 1
+        - 2
+    logreg:
+      feature_sets:
+      - pca4
+      regimes:
+      - subsample
+      grid:
+        C:
+        - 0.01
+        - 0.1
+        - 1.0
+        - 10.0
+    svm:
+      feature_sets:
+      - pca4
+      regimes:
+      - subsample
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+    xgboost:
+      feature_sets:
+      - pca4
+      regimes:
+      - subsample
+      grid:
+        max_depth:
+        - 2
+        - 4
+        - 6
+        learning_rate:
+        - 0.03
+        - 0.1
+  regimes:
+  - subsample
+paired_test: {model: vqc, feature_set: pca4}

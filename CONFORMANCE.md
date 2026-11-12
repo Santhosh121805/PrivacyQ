@@ -140,7 +140,8 @@ privacy only.
 
 | Sub-item | Status | Evidence | Note |
 |---|---|---|---|
-| Mental health state classification | PARTIAL | `src/m1_data/nsch.py` (`TARGETS`) | Binary: currently diagnosed depression vs not. Multi-class scheduled: Priority 3, item 8. |
+| Mental health state classification: binary | BUILT | `src/m1_data/nsch.py` (`TARGETS`), Exp 1–8 | Currently diagnosed depression (K2Q32B) vs not; 21,789 adolescents aged 12–17. |
+| Mental health state classification: three classes | BUILT | `src/m1_data/nsch.py` (`three_class_labels`), `src/m5_models/multiclass.py`, `src/m8_eval/evaluation.py` (`multiclass_metrics`), `src/m10_exp/exp9_multiclass.py`, `tests/test_multiclass.py` (7 tests), `results/exp9-nsch2024-multiclass-20261112-140242/multiclass_report.md`, `results/exp9b-nsch2024-multiclass-vqc-20261112-140937/multiclass_report.md` | none / anxiety only / depression (with or without anxiety), both from the "currently has" (B) items K2Q32B, K2Q33B; merging none + anxiety only gives the binary target exactly. Same 21,789 rows, hold-out and 15 folds as Exp 2; 165 depression-negative rows with undetermined anxiety removed from training/validation (not imputed, not counted as "no"). Classes 78.0 / 12.0 / 10.0%. Class-weighted; headline macro-F1 and macro one-vs-rest AUC. Best: XGBoost full all-95 macro-F1 0.548, macro AUC 0.822. Subsample PCA-8: QSVM macro AUC 0.762 vs LogReg 0.774 (QSVM lower, Holm p 0.0009). VQC one-vs-rest (PCA-4) 0.744 vs LogReg 0.753 (Holm p 0.055). No stress variable exists in NSCH 2024, so stress is not a class. |
 | Risk level prediction | PARTIAL | all experiments | Binary risk score with a threshold; no graded levels. |
 | Topic and trend analysis | PHASE-2 | — | Requires text data. |
 | Emotion and sentiment analysis | PHASE-2 | — | Requires text data. |
@@ -217,4 +218,5 @@ privacy only.
 - 2026-11-12: Priority 2 item 3 — basis encoding built and swept on the Exp 1 folds; merged encoding report written.
 - 2026-11-12: Priority 2 item 6 — measured payload, client time, server aggregation time and rounds to converge (Experiment 7).
 - 2026-11-12: Priority 3 item 7 — best configuration re-run under a simulated hardware noise model (Experiment 8).
+- 2026-11-12: Priority 3 item 8 — three-class task (none / anxiety only / depression), classical, QSVM and one-vs-rest VQC (Experiments 9, 9b).
 - 2026-11-12: Priority 3 item 10 — Bloch-sphere state visualisation of real encoded records (angle vs ZZ).

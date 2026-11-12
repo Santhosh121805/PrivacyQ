@@ -1,0 +1,34 @@
+# Experiment 9: three-class task (none / anxiety only / depression with or without anxiety).
+# Same population, hold-out and 15 outer folds as Experiment 2 (checked against that run).
+project:
+  name: exp9-nsch2024-multiclass
+  seed: 2026
+  output_dir: results
+  n_jobs: 3
+data:
+  loader: nsch
+  paths:
+  - data/raw/nsch_2024/nsch_2024e_topical.dta
+  target: depression_current
+  min_age: 12
+  max_age: 17
+split:
+  holdout_fraction: 0.2
+cv:
+  n_splits: 5
+  n_repeats: 3
+subsample:
+  n: 1500
+tuning:
+  inner_val_fraction: 0.2
+check_folds_against: results/exp2-nsch2024-quantum-vs-classical-20261108-165426
+experiment:
+  feature_sets:
+    pca8: {method: pca, k: 8}
+    all95: {method: all}
+  models:
+    logreg:  {feature_sets: [pca8, all95], regimes: [subsample, full], grid: {C: [0.01, 0.1, 1.0, 10.0]}}
+    svm:     {feature_sets: [pca8, all95], regimes: [subsample, full], grid: {C: [0.1, 1.0, 10.0]}}
+    xgboost: {feature_sets: [pca8, all95], regimes: [subsample, full], grid: {max_depth: [2, 4, 6], learning_rate: [0.03, 0.1]}}
+    qsvm:    {feature_sets: [pca8], regimes: [subsample], encoding: angle, n_qubits: 8, grid: {C: [0.1, 1.0, 10.0]}}
+  regimes: [subsample, full]

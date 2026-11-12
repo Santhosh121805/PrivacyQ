@@ -3,6 +3,7 @@
 from .evaluation import (
     HEADLINE_METRICS,
     binary_metrics,
+    multiclass_metrics,
     accuracy,
     compute_communication_cost,
     compute_compute_cost,
@@ -12,6 +13,7 @@ from .evaluation import (
 __all__ = [
     "HEADLINE_METRICS",
     "binary_metrics",
+    "multiclass_metrics",
     "accuracy",
     "utility_metrics",
     "compute_communication_cost",

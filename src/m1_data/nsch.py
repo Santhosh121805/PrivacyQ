@@ -199,3 +199,46 @@ def feature_dictionary() -> pd.DataFrame:
         [(name, kind, desc) for name, (kind, desc) in FEATURES.items()],
         columns=["variable", "kind", "description"],
     )
+
+
+def _current(ever: pd.Series, current: pd.Series) -> pd.Series:
+    """Same rule as the binary loader: ever=no -> 0 (current is skipped by design);
+    ever=yes & current=no -> 0; ever=yes & current=yes -> 1; anything else -> NaN (undetermined)."""
+    label = pd.Series(np.nan, index=ever.index)
+    label[ever == 2] = 0
+    label[(ever == 1) & (current == 2)] = 0
+    label[(ever == 1) & (current == 1)] = 1
+    return label
+
+
+def three_class_from_codes(dep_ever, dep_cur, anx_ever, anx_cur) -> pd.Series:
+    """0 = none, 1 = anxiety only, 2 = depression (with or without anxiety); NaN when undetermined.
+
+    Both conditions use the "currently has" (B) variant: K2Q32B depression, K2Q33B anxiety.
+    A depression-positive row is class 2 whatever its anxiety answer, so it is never undetermined;
+    a depression-negative row with undetermined anxiety cannot be placed in 0 or 1 and is NaN.
+    Merging classes 0 and 1 gives the binary depression_current target exactly."""
+    dep = _current(pd.Series(dep_ever), pd.Series(dep_cur))
+    anx = _current(pd.Series(anx_ever), pd.Series(anx_cur))
+    out = pd.Series(np.nan, index=dep.index)
+    out[dep == 1] = 2
+    out[(dep == 0) & (anx == 0)] = 0
+    out[(dep == 0) & (anx == 1)] = 1
+    return out
+
+
+def three_class_labels(loader: NSCHLoader) -> np.ndarray:
+    """Three-class label aligned row-for-row with ``loader.load()`` (depression_current target),
+    NaN where anxiety is undetermined among depression-negative rows."""
+    if loader.target != "depression_current":
+        raise ValueError("three-class labels are aligned with the depression_current loader")
+    frames = []
+    for path in loader.paths:
+        raw = pd.read_stata(path, convert_categoricals=False,
+                            columns=["sc_age_years", "k2q32a", "k2q32b", "k2q33a", "k2q33b"])
+        raw.columns = raw.columns.str.lower()
+        frames.append(raw)
+    raw = pd.concat(frames, ignore_index=True)
+    raw = raw[raw["sc_age_years"].between(loader.min_age, loader.max_age)]
+    raw = raw[_current(raw["k2q32a"], raw["k2q32b"]).notna()]          # same rows as load()
+    return three_class_from_codes(raw["k2q32a"], raw["k2q32b"], raw["k2q33a"], raw["k2q33b"]).to_numpy()

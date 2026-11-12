@@ -70,3 +70,23 @@ def binary_metrics(y_true: np.ndarray, y_score: np.ndarray, threshold: float = 0
         "predicted_positive_rate": float(predictions.mean()),
         "prevalence": float(labels.mean()),
     }
+
+
+def multiclass_metrics(y_true: np.ndarray, class_scores: np.ndarray, y_pred: np.ndarray,
+                       class_names: tuple[str, ...]) -> dict[str, float]:
+    """Imbalance-aware multi-class metrics. Headline: macro-F1 and macro one-vs-rest ROC-AUC
+    (mean over classes of the AUC of that class's score, class vs rest). Balanced accuracy is
+    the macro-averaged recall. Plain accuracy is deliberately not reported."""
+    y_true, y_pred = np.asarray(y_true), np.asarray(y_pred)
+    scores = np.asarray(class_scores, dtype=float)
+    out = {"macro_f1": float(f1_score(y_true, y_pred, average="macro", zero_division=0)),
+           "balanced_accuracy": float(recall_score(y_true, y_pred, average="macro", zero_division=0))}
+    aucs = []
+    for k, name in enumerate(class_names):
+        auc = float(roc_auc_score(y_true == k, scores[:, k]))
+        aucs.append(auc)
+        out[f"auc_{name}_vs_rest"] = auc
+        out[f"recall_{name}"] = float(recall_score(y_true == k, y_pred == k, zero_division=0))
+        out[f"f1_{name}"] = float(f1_score(y_true == k, y_pred == k, zero_division=0))
+    out["macro_ovr_auc"] = float(np.mean(aucs))
+    return out
