@@ -16,7 +16,7 @@ from src.m3_features.features import FeatureTransformer
 from src.m4_encoding import make_encoding
 from src.m5_models import make_model
 from src.m6_federated import partition_frame
-from src.m7_privacy import PrivacyReport, secure_aggregation_stub
+from src.m7_privacy import PrivacyReport, secure_aggregation_status
 from src.m8_eval import utility_metrics
 from src.m9_audit import loss_threshold_membership_inference
 
@@ -157,7 +157,7 @@ def run_experiment(config_path: str | Path) -> dict:
         "federated_partitions": len(partitions),
         "privacy": privacy.as_dict(),
         "audit": {"loss_threshold_membership_inference": election_loss.tolist()},
-        "secure_aggregation": secure_aggregation_stub(partitions),
+        "secure_aggregation": secure_aggregation_status(used=False),
     }
 
     with (run_dir / "results.json").open("w", encoding="utf-8") as handle:

@@ -71,7 +71,8 @@ def run_task(task: dict) -> dict:
                        local_epochs=exp["local_epochs"], learning_rate=arm["learning_rate"],
                        sample_rate=arm["batch_size"] / len(y), epsilon=task["epsilon"],
                        delta=float(exp["delta"]), max_grad_norm=arm.get("max_grad_norm", 1.0),
-                       seed=task["seed"], prepare=prepare, evaluate=evaluate)
+                       seed=task["seed"], prepare=prepare, evaluate=evaluate,
+                       secure_aggregation=bool(exp.get("secure_aggregation", False)))
     seconds = time.perf_counter() - t0
     threshold = youden_threshold(task["y_iv"], scores(out["module"], B))
     final = scores(out["module"], C)
@@ -88,6 +89,7 @@ def run_task(task: dict) -> dict:
         "noise_multiplier_mean": (float(np.mean(out["noise_multipliers"])) if task["epsilon"] else None),
         **binary_metrics(task["y_ov"], final, threshold=threshold), "threshold": threshold,
         "rounds": exp["rounds"], "local_epochs": exp["local_epochs"], "n_params": out["n_params"],
+        "secure_aggregation": out["secure_aggregation"], "secagg_setup_seconds": out["secagg_setup_seconds"],
         "bytes_per_round": int(out["history"]["bytes"].iloc[0]),
         "total_bytes": int(out["history"]["cumulative_bytes"].iloc[-1]),
         "client_size_min": int(sizes.min()), "client_size_max": int(sizes.max()),

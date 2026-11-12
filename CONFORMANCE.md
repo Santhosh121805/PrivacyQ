@@ -14,7 +14,7 @@ Status values:
 Paths are relative to the repository root. `results/` is git-ignored and produced by the commands in
 `README.md`; the run directories referenced are those listed in `configs/final_report.yaml`.
 
-_Last updated: 2026-11-12, after Priority 1, Priority 2 and Priority 3 item 7._
+_Last updated: 2026-11-12, after Priority 1, Priority 2 and Priority 3 (items 7–11)._
 
 ## Pipeline flow as built
 
@@ -34,7 +34,7 @@ Privacy therefore operates at **two points**, both belonging to box 4:
 | Input (before encoding) | Local DP: Laplace noise on each training record's 8 encoder-input features | ε_input (pure ε-LDP, δ = 0), noise scale | `src/m7_privacy/input_privacy.py` (`LaplaceLDP`) |
 | Training | DP-SGD | ε_training, δ = 10⁻⁵ (Opacus RDP accountant) | `src/m7_privacy/dp_training.py` |
 | Training | Federated averaging | — (data stays on clients) | `src/m6_federated/fedavg.py` |
-| Training | Secure aggregation | — | PHASE-2 (stub); scheduled Priority 3, item 9 |
+| Training | Secure aggregation: pairwise Diffie–Hellman masks; server sees only masked vectors and recovers only the weighted sum (optional, `secure_aggregation: true`) | — (hides individual updates; not a DP budget) | `src/m7_privacy/secure_aggregation.py`, `src/m6_federated/fedavg.py` |
 
 Both budgets are stored as separate columns (`epsilon_input`, `epsilon_training`) in
 `results/exp5-nsch2024-input-privacy-20261112-120542/fold_metrics.csv`. They are not combined into one number:
@@ -87,7 +87,7 @@ privacy only.
 |---|---|---|---|
 | Differential privacy (training, DP-SGD) | BUILT | `src/m7_privacy/dp_training.py`, `src/m7_privacy/accounting.py`, `tests/test_phase4_dp.py`, Exp 3 results | Opacus DP-SGD; ε from Opacus's RDP accountant only. |
 | Federated simulation | BUILT | `src/m6_federated/fedavg.py`, `tests/test_phase5_federated.py`, Exp 4 results | FedAvg, 3/5/10 clients, IID and by-state, client-side DP. |
-| Secure aggregation | PHASE-2 | `src/m7_privacy/secure_aggregation.py` (stub that reports "not implemented") | Scheduled: Priority 3, item 9. |
+| Secure aggregation | BUILT | `src/m7_privacy/secure_aggregation.py`, `src/m6_federated/fedavg.py` (`secure_aggregation=True`), `tests/test_secure_aggregation.py` (8 tests), `configs/exp7b_secure_aggregation_nsch2024.yaml`, `results/exp7b-nsch2024-federated-secure-aggregation-20261112-153004/`, `scripts/secagg_overhead.py`, `results/secagg_overhead/overhead.md` | Pairwise additive masking (Bonawitz et al. core): 2048-bit MODP Diffie–Hellman (RFC 3526 group 14, checked against the RFC closed form), SHA-256/SHAKE-256 per-round masks, fixed point mod 2^64; client sizes masked too. Tests: the sum equals plain FedAvg; a client's masked vector is uniform (balanced bits), uncorrelated with its update, and consistent with any other update; server + 3 of 5 clients colluding recover only the 2 honest clients' sum. Exp 7b (Exp 7 setup, secure aggregation on): AUC and balanced accuracy identical to Exp 7 in 30/30 runs. Measured cost: one-off key setup 0.5 / 1.5 / 6.1 s for 3 / 5 / 10 clients; masking 0.10–0.16 ms per client per round; no measurable extra server time per round. **Not implemented:** dropout recovery (every client must report every round), public-key authentication (honest-but-curious server only), defence against malicious clients. Not DP: the formal guarantee is still DP-SGD. |
 | Homomorphic encryption | PHASE-2 | — | Computationally impractical at this scale; a toy version would misrepresent its cost. |
 | Privacy risk analysis (membership inference test) | BUILT | `src/m9_audit/membership.py`, `tests/test_membership.py`, `src/m10_exp/exp6_membership.py`, `results/exp6-nsch2024-membership-inference-20261112-120934/` | Loss-threshold attack, 5 folds. See box 12. (`src/m9_audit/audit.py` is an older unused helper, not part of this test.) |
 | Input-stage privacy: k-anonymity | BUILT | `src/m7_privacy/input_privacy.py`, `tests/test_input_privacy.py`, `results/exp5-nsch2024-input-privacy-20261112-120542/` | k = 5 achieved on every fold's training rows; suppresses 13.0 % of rows on full data, 43.5 % on 1.2k-row subsamples; no measurable AUC cost (e.g. LogReg full 0.853 → 0.858). |
@@ -221,5 +221,6 @@ privacy only.
 - 2026-11-12: Priority 3 item 7 — best configuration re-run under a simulated hardware noise model (Experiment 8).
 - 2026-11-12: ZZ feature-map QSVM under the same noise model (Experiment 8b, 4 qubits): angle robust, ZZ degrades; VQC under noise marked PHASE-2.
 - 2026-11-12: Priority 3 item 8 — three-class task (none / anxiety only / depression), classical, QSVM and one-vs-rest VQC (Experiments 9, 9b).
+- 2026-11-12: Priority 3 item 9 — secure aggregation (pairwise DH masks) built, wired into FedAvg, verified identical results (Experiment 7b), overhead measured.
 - 2026-11-12: Priority 3 item 10 — Bloch-sphere state visualisation of real encoded records (angle vs ZZ).
 - 2026-11-12: Priority 3 item 11 — UMAP and autoencoder reduction through the Experiment 2 comparison (Experiment 10).
