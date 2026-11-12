@@ -50,6 +50,25 @@ MODP_2048_P = int(
 MODP_2048_G = 2
 SCALE_BITS = 24
 _LIMIT = 2.0 ** (63 - SCALE_BITS)        # |encoded sum| must stay below 2^63
+MARGIN_BITS = 8                          # default safety margin: worst-case sum at least 2^8 below 2^63
+
+
+def headroom_bits(n_clients: int, max_abs_entry: float) -> float:
+    """Bits between the worst-case |sum of encoded entries| and the signed 64-bit limit 2^63.
+
+    Every client sends entries with |value| <= max_abs_entry (enforced client-side), each encoded as
+    round(value * 2^SCALE_BITS), so |sum| <= n_clients * (max_abs_entry * 2^SCALE_BITS + 1/2)."""
+    worst = n_clients * (float(max_abs_entry) * 2.0**SCALE_BITS + 0.5)
+    return 63.0 - float(np.log2(worst))
+
+
+def check_capacity(n_clients: int, max_abs_entry: float, margin_bits: float = MARGIN_BITS) -> float:
+    """Raise OverflowError unless the worst-case masked sum stays ``margin_bits`` below 2^63."""
+    room = headroom_bits(n_clients, max_abs_entry)
+    if room < margin_bits:
+        raise OverflowError(f"secure-aggregation sum could overflow: {room:.1f} bits of headroom for "
+                            f"{n_clients} clients with |entry| <= {max_abs_entry:g}; need >= {margin_bits} bits")
+    return room
 
 
 def encode(values: np.ndarray) -> np.ndarray:
@@ -64,8 +83,9 @@ def decode(field: np.ndarray) -> np.ndarray:
 
 
 class SecAggClient:
-    def __init__(self, client_id: int, rng: secrets.SystemRandom | None = None):
+    def __init__(self, client_id: int, rng: secrets.SystemRandom | None = None, max_abs_entry: float | None = None):
         self.id = int(client_id)
+        self.max_abs_entry = max_abs_entry
         self._sk = (rng or secrets.SystemRandom()).randrange(2, MODP_2048_P - 2)
         self.public_key = pow(MODP_2048_G, self._sk, MODP_2048_P)
         self._secrets: dict[int, bytes] = {}
@@ -86,7 +106,10 @@ class SecAggClient:
         return np.frombuffer(hashlib.shake_256(seed).digest(8 * n), dtype=np.uint64).copy()
 
     def masked(self, values: np.ndarray, round_: int) -> np.ndarray:
-        """Masked fixed-point encoding of ``values`` (what the server receives)."""
+        """Masked fixed-point encoding of ``values`` (what the server receives). Refuses values above the
+        declared per-entry bound, which is what makes the capacity check a guarantee."""
+        if self.max_abs_entry is not None and np.any(np.abs(np.asarray(values, dtype=float)) > self.max_abs_entry):
+            raise OverflowError(f"client {self.id}: an entry exceeds the declared bound {self.max_abs_entry:g}")
         y = encode(values)
         for j in self._secrets:
             m = self._mask(j, round_, y.size)
@@ -102,9 +125,16 @@ def unmask_sum(masked_updates: list[np.ndarray]) -> np.ndarray:
     return decode(total)
 
 
-def setup(n_clients: int, rng: secrets.SystemRandom | None = None) -> list[SecAggClient]:
-    """Key generation and pairwise agreement for ``n_clients`` (public keys relayed by the server)."""
-    clients = [SecAggClient(i, rng) for i in range(n_clients)]
+def setup(n_clients: int, rng: secrets.SystemRandom | None = None, max_abs_entry: float | None = None,
+          margin_bits: float = MARGIN_BITS) -> list[SecAggClient]:
+    """Key generation and pairwise agreement for ``n_clients`` (public keys relayed by the server).
+
+    With ``max_abs_entry`` (a public bound on every entry a client sends, i.e. max client size x max |weight|),
+    the capacity is checked first (OverflowError unless the worst-case sum keeps ``margin_bits`` of headroom)
+    and every client refuses entries above the bound."""
+    if max_abs_entry is not None:
+        check_capacity(n_clients, max_abs_entry, margin_bits)
+    clients = [SecAggClient(i, rng, max_abs_entry) for i in range(n_clients)]
     keys = {c.id: c.public_key for c in clients}
     for c in clients:
         c.agree(keys)

@@ -127,3 +127,77 @@ def test_masks_cancel_exactly_in_the_integer_domain():
         total_masked += m
         total_plain += p
     assert np.array_equal(total_masked, total_plain)
+
+
+# Measured in Experiment 7c (results/exp7c-nsch2024-secagg-bound-measurement-20261112-164738, a deterministic
+# re-run of Experiment 7 that reproduced its AUC exactly): largest number of clients 10, largest client size
+# 3,786 rows, largest |weight| in any client update 8.936 (largest |n_i * w| sent 33,435; largest update L2 10.24).
+EXP7_MAX_CLIENTS, EXP7_MAX_CLIENT_SIZE, EXP7_MAX_ABS_WEIGHT = 10, 3786, 8.936
+REQUIRED_MARGIN_BITS = 8          # stated safety margin: worst-case sum at least 2^8 = 256x below 2^63
+
+
+def test_negative_values_round_trip_in_twos_complement():
+    from src.m7_privacy.secure_aggregation import SCALE_BITS
+
+    exact = np.array([-1.0, -0.5, -2.0**-24, -3.75, -(2.0**38), 2.0**38, 0.0, -123456.0])   # multiples of 2^-24
+    assert np.array_equal(decode(encode(exact)), exact)
+    enc = encode(np.array([-1.0, -(2.0**38)]))
+    assert enc.dtype == np.uint64 and enc[0] == np.uint64(2**64 - 2**24)          # two's complement of -2^24
+    rng = np.random.default_rng(5)
+    x = -np.abs(rng.normal(scale=50.0, size=1000))
+    assert np.max(np.abs(decode(encode(x)) - x)) <= 2.0 ** -(SCALE_BITS + 1)       # rounding only
+    vecs = [-np.abs(rng.normal(size=40)) for _ in range(4)]                      # all-negative updates, masked
+    clients = setup(4)
+    masked = [c.masked(v, round_=1) for c, v in zip(clients, vecs)]
+    assert np.array_equal(unmask_sum(masked), decode(sum(encode(v) for v in vecs)))
+
+
+def test_exp7_worst_case_cannot_overflow_with_the_stated_margin():
+    from src.m7_privacy.secure_aggregation import check_capacity, headroom_bits
+
+    worst_entry = EXP7_MAX_CLIENT_SIZE * EXP7_MAX_ABS_WEIGHT
+    room = check_capacity(EXP7_MAX_CLIENTS, worst_entry, margin_bits=REQUIRED_MARGIN_BITS)
+    assert room == pytest.approx(headroom_bits(EXP7_MAX_CLIENTS, worst_entry)) and room > 20
+    # End to end at the extreme: every client sends the largest magnitude in every coordinate, same sign
+    # (the worst case for the sum), then mixed signs; the masked sum must decode exactly.
+    for signs in (np.ones(64), np.where(np.arange(64) % 2, 1.0, -1.0)):
+        vec = signs * worst_entry
+        clients = setup(EXP7_MAX_CLIENTS, max_abs_entry=worst_entry)
+        masked = [c.masked(vec, round_=3) for c in clients]
+        total = unmask_sum(masked)
+        assert np.array_equal(total, decode(encode(vec)) * EXP7_MAX_CLIENTS)
+        assert np.allclose(total, vec * EXP7_MAX_CLIENTS, rtol=0, atol=EXP7_MAX_CLIENTS * 2.0 ** -25)
+    # The bound FedAvg declares by default (|w| <= 1e3, largest client size) also keeps the margin.
+    assert check_capacity(EXP7_MAX_CLIENTS, EXP7_MAX_CLIENT_SIZE * 1e3) >= REQUIRED_MARGIN_BITS
+
+
+def test_code_raises_when_the_bound_would_be_exceeded():
+    from src.m7_privacy.secure_aggregation import check_capacity
+
+    with pytest.raises(OverflowError):                       # declared bound too large for 63 bits + margin
+        check_capacity(10, 2.0 ** 33, margin_bits=REQUIRED_MARGIN_BITS)
+    with pytest.raises(OverflowError):
+        setup(10, max_abs_entry=2.0 ** 33)
+    clients = setup(3, max_abs_entry=100.0)                  # a client value above its declared bound
+    with pytest.raises(OverflowError):
+        clients[0].masked(np.array([1.0, -100.5]), round_=1)
+    clients[0].masked(np.array([1.0, -100.0]), round_=1)    # at the bound is allowed
+    with pytest.raises(OverflowError):                       # single value outside the fixed-point range
+        encode(np.array([2.0 ** 39]))
+
+
+def test_fedavg_refuses_a_weight_bound_that_could_overflow():
+    rng = np.random.default_rng(2)
+    X = rng.normal(size=(300, 6))
+    y = (X[:, 0] > 0.5).astype(int)
+    parts = stratified_iid_partition(y, 3, 0)
+    with pytest.raises(OverflowError):
+        fedavg_train("logreg", {}, [(X[p], y[p]) for p in parts], rounds=1, local_epochs=1, learning_rate=0.05,
+                     sample_rate=0.1, epsilon=None, delta=1e-5, max_grad_norm=1.0, seed=0,
+                     secure_aggregation=True, secagg_max_abs_weight=1e12)
+    # A real update larger than the declared bound: with learning rate 1.0 the weights reach |w| ~ 12 in round 1
+    # (measured), above a declared |w| <= 1, so the clients refuse to send.
+    with pytest.raises(OverflowError):
+        fedavg_train("logreg", {}, [(X[p], y[p]) for p in parts], rounds=1, local_epochs=2, learning_rate=1.0,
+                     sample_rate=0.1, epsilon=None, delta=1e-5, max_grad_norm=1.0, seed=0,
+                     secure_aggregation=True, secagg_max_abs_weight=1.0)

@@ -129,7 +129,8 @@ def _deserialise(blob: bytes) -> dict:
 def fedavg_train(kind: str, model_params: dict, clients: list[tuple[np.ndarray, np.ndarray]], *,
                  rounds: int, local_epochs: int, learning_rate: float, sample_rate: float,
                  epsilon: float | None, delta: float, max_grad_norm: float, seed: int,
-                 prepare=lambda X: X, evaluate=None, secure_aggregation: bool = False) -> dict:
+                 prepare=lambda X: X, evaluate=None, secure_aggregation: bool = False,
+                 secagg_max_client_size: int | None = None, secagg_max_abs_weight: float = 1e3) -> dict:
     """Run FedAvg. Returns the final global module, per-round history and privacy summary."""
     torch.manual_seed(seed)
     prepared = [(np.asarray(prepare(X), dtype=float), np.asarray(y)) for X, y in clients]
@@ -146,7 +147,10 @@ def fedavg_train(kind: str, model_params: dict, clients: list[tuple[np.ndarray, 
     secagg, secagg_setup_seconds = None, None
     if secure_aggregation:
         t0 = time.perf_counter()                            # measured: DH key generation + pairwise agreement
-        secagg = secagg_setup(len(workers))
+        # Public bounds declared before training: every entry a client sends is n_i * w (|.| <= max size x max |w|)
+        # or n_i itself; setup refuses the configuration unless the worst-case sum fits 2^63 with the margin.
+        cap = int(secagg_max_client_size or sizes.max())
+        secagg = secagg_setup(len(workers), max_abs_entry=cap * max(float(secagg_max_abs_weight), 1.0))
         secagg_setup_seconds = time.perf_counter() - t0
     history = []
     for r in range(1, rounds + 1):
@@ -157,6 +161,10 @@ def fedavg_train(kind: str, model_params: dict, clients: list[tuple[np.ndarray, 
             updates.append(w.train(state, local_epochs))
             client_seconds.append(time.perf_counter() - t0)
         masking_seconds = 0.0
+        flat_all = [torch.cat([u[k].reshape(-1) for k in state]).numpy() for u in updates]
+        max_abs_weight = float(max(np.max(np.abs(v)) for v in flat_all))                 # measured, every round
+        max_abs_entry = float(max(n * np.max(np.abs(v)) for v, n in zip(flat_all, sizes)))
+        update_l2_max = float(max(np.linalg.norm(v) for v in flat_all))
         if secagg is None:
             payload = [len(_serialise(u)) for u in updates]     # measured serialised update size (what would be sent)
             t0 = time.perf_counter()                            # measured server work: deserialise + weighted average
@@ -190,7 +198,9 @@ def fedavg_train(kind: str, model_params: dict, clients: list[tuple[np.ndarray, 
         entry = {"round": r, "bytes": bytes_round, "cumulative_bytes": bytes_round * r,
                  "payload_bytes_per_update": int(max(payload)), "payload_bytes_round": int(2 * sum(payload)),
                  "client_seconds_max": max(client_seconds), "client_seconds_total": sum(client_seconds),
-                 "aggregation_seconds": aggregation_seconds, "masking_seconds_max": masking_seconds}
+                 "aggregation_seconds": aggregation_seconds, "masking_seconds_max": masking_seconds,
+                 "max_abs_weight": max_abs_weight, "max_abs_encoded_entry": max(max_abs_entry, float(sizes.max())),
+                 "update_l2_max": update_l2_max}
         if evaluate is not None:
             entry.update(evaluate(global_module))
         history.append(entry)
