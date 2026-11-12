@@ -51,3 +51,54 @@ def test_multiclass_models_learn_three_imbalanced_classes(name):
     assert scores.shape == (100, 3)
     m = multiclass_metrics(y[200:], scores, model.predict(X[200:]), CLASS_NAMES)
     assert m["macro_ovr_auc"] > 0.7
+
+
+def test_holdout_rule_three_class_excludes_undetermined_binary_uses_all_rows():
+    from src.m10_exp.exp9_multiclass import HOLDOUT_POLICY, holdout_scoring_rows
+
+    y3 = np.array([0, 1, 2, NAN, 0, NAN, 2, 1], dtype=float)
+    holdout = np.array([1, 3, 4, 5, 6])
+    assert HOLDOUT_POLICY == {"three_class_metrics": "exclude_undetermined", "binary_depression_metrics": "all_rows"}
+    assert holdout_scoring_rows(holdout, y3, "three_class_metrics").tolist() == [1, 4, 6]
+    assert holdout_scoring_rows(holdout, y3, "binary_depression_metrics").tolist() == [1, 3, 4, 5, 6]
+    with pytest.raises(ValueError):
+        holdout_scoring_rows(holdout, y3, "accuracy")
+
+
+@pytest.mark.parametrize("path", ["configs/exp9_multiclass_nsch2024.yaml", "configs/exp9b_multiclass_vqc_nsch2024.yaml"])
+def test_exp9_configs_carry_the_prespecified_holdout_rule_and_others_are_refused(path):
+    import copy
+
+    import yaml
+
+    from src.m10_exp.exp9_multiclass import check_holdout_policy
+
+    config = yaml.safe_load(open(path, encoding="utf-8"))
+    check_holdout_policy(config)                                   # passes as committed
+    for bad in ({"three_class_metrics": "all_rows", "binary_depression_metrics": "all_rows"}, None):
+        altered = copy.deepcopy(config)
+        if bad is None:
+            altered.pop("holdout_policy")
+        else:
+            altered["holdout_policy"] = bad
+        with pytest.raises(ValueError):
+            check_holdout_policy(altered)
+
+
+def test_undetermined_rows_have_a_defined_binary_label():
+    # The rule relies on this: whenever the three-class label is undetermined, the binary depression label
+    # (same rule as the binary loader) is determined and negative. Checked over every code combination.
+    import itertools
+
+    import pandas as pd
+
+    from src.m1_data.nsch import _current
+
+    codes = [1, 2, NAN, 6]                                         # yes, no, missing, an invalid code
+    combos = list(itertools.product(codes, repeat=4))
+    de, dc, ae, ac = (list(c) for c in zip(*combos))
+    y3 = three_class_from_codes(de, dc, ae, ac).to_numpy()
+    dep = _current(pd.Series(de, dtype=float), pd.Series(dc, dtype=float)).to_numpy()
+    undetermined_with_dep_label = np.isnan(y3) & ~np.isnan(dep)
+    assert undetermined_with_dep_label.any()
+    assert (dep[undetermined_with_dep_label] == 0).all()

@@ -32,3 +32,10 @@ experiment:
     xgboost: {feature_sets: [pca8, all95], regimes: [subsample, full], grid: {max_depth: [2, 4, 6], learning_rate: [0.03, 0.1]}}
     qsvm:    {feature_sets: [pca8], regimes: [subsample], encoding: angle, n_qubits: 8, grid: {C: [0.1, 1.0, 10.0]}}
   regimes: [subsample, full]
+# Pre-specified hold-out rule (fixed before any multi-class hold-out scoring; enforced by
+# src/m10_exp/exp9_multiclass.py::check_holdout_policy). 24 of the 4,358 hold-out rows have undetermined
+# anxiety (all depression-negative): three-class metrics exclude them (4,334 rows scored);
+# binary depression-vs-rest metrics use all 4,358 hold-out rows.
+holdout_policy:
+  three_class_metrics: exclude_undetermined
+  binary_depression_metrics: all_rows

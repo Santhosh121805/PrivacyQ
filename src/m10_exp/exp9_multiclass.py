@@ -45,6 +45,29 @@ from src.m10_exp.tuning import grid_points, inner_split, stratified_subsample
 
 METRICS = ["macro_f1", "macro_ovr_auc", "balanced_accuracy"]
 
+# Pre-specified hold-out rule (committed before any multi-class hold-out scoring; also in the Exp 9 config and
+# CONFORMANCE.md). The 24 hold-out rows whose anxiety status is undetermined are all depression-negative, so:
+#   - three-class metrics are scored on hold-out rows with a determined three-class label only;
+#   - binary depression metrics (class "depression" vs rest) are scored on ALL hold-out rows.
+HOLDOUT_POLICY = {"three_class_metrics": "exclude_undetermined", "binary_depression_metrics": "all_rows"}
+
+
+def holdout_scoring_rows(holdout: np.ndarray, y3: np.ndarray, family: str) -> np.ndarray:
+    """Hold-out row positions to score for a metric family under ``HOLDOUT_POLICY``."""
+    holdout = np.asarray(holdout)
+    if family == "three_class_metrics":
+        return holdout[~np.isnan(y3[holdout])]
+    if family == "binary_depression_metrics":
+        return holdout
+    raise ValueError(f"unknown metric family {family!r}; choose from {sorted(HOLDOUT_POLICY)}")
+
+
+def check_holdout_policy(config: dict) -> None:
+    """Refuse to run if the config's hold-out policy differs from the pre-specified one."""
+    declared = config.get("holdout_policy")
+    if declared != HOLDOUT_POLICY:
+        raise ValueError(f"holdout_policy in config ({declared}) differs from the pre-specified {HOLDOUT_POLICY}")
+
 
 def _macro_auc(model, X, y) -> float:
     return multiclass_metrics(y, model.class_scores(X), model.predict(X), CLASS_NAMES)["macro_ovr_auc"]
@@ -184,6 +207,7 @@ def write_report(run_dir: Path, results: pd.DataFrame, config: dict, population:
 def run(config_path: str) -> Path:
     limit_worker_threads()
     config = load_config(config_path)
+    check_holdout_policy(config)
     seed = int(config["project"]["seed"])
     loader, frame = load_dataset(config)
     labels = frame[loader.label_column].to_numpy(dtype=int)
