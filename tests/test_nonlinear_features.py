@@ -24,3 +24,19 @@ def test_autoencoder_reconstruction_loss_decreases():
     ft = FeatureTransformer(d_prime=3, method="autoencoder", seed=0).fit(X, np.zeros(256))
     h = ft.reducer.loss_history_
     assert h[-1] < 0.8 * h[0]
+
+
+@pytest.mark.parametrize("method", ["umap", "autoencoder"])
+def test_feature_matrices_fit_reducer_on_inner_train_rows_only(method):
+    # src/m10_exp/exp2_compare.py::feature_matrices is what every fold task calls: it fits on X_in
+    # (the fold's inner-train rows) and only transforms the inner-val / outer-val rows. Changing the
+    # other rows must therefore leave the inner-train features, and the transform of a fixed row, unchanged.
+    from src.m10_exp.exp2_compare import feature_matrices
+
+    rng = np.random.default_rng(3)
+    X_in, y_in = rng.normal(size=(150, 10)), rng.integers(0, 2, 150)
+    probe = rng.normal(size=(5, 10))
+    spec = {"method": method, "k": 3}
+    a1, p1, _ = feature_matrices(spec, X_in, y_in, [probe, rng.normal(size=(60, 10))], seed=0)
+    a2, p2, _ = feature_matrices(spec, X_in, y_in, [probe, rng.normal(loc=5.0, size=(90, 10))], seed=0)
+    assert np.allclose(a1, a2) and np.allclose(p1, p2)
