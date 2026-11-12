@@ -1,9 +1,12 @@
 """Secure aggregation by pairwise additive masking (the masking core of Bonawitz et al., CCS 2017).
 
-What it guarantees: the server receives, from each client, only a masked vector that is uniformly
-distributed mod 2^64 on its own; the masks cancel in the sum, so the server learns the weighted
-sum of client updates (and the total row count) and nothing else about any one client, as long as
-it does not collude with all other clients. A coalition of the server and some clients learns
+What it provides: the server receives, from each client, only a masked vector. The masks come from a
+cryptographic PRG (SHAKE-256) keyed by Diffie-Hellman secrets the server does not know, so each masked
+vector is computationally indistinguishable from random to the server (checked statistically by the
+tests, which cannot prove it). Updates are encoded as fixed-point integers and masked and summed
+modulo 2^64, so the masks cancel exactly (bit for bit) in the sum: the server learns the weighted
+sum of client updates (and the total row count) and, under the cryptographic assumptions, nothing
+else about any one client, as long as it does not collude with all other clients. A coalition of the server and some clients learns
 only the sum of the remaining honest clients' updates (tested in ``tests/test_secure_aggregation.py``).
 
 Protocol, per run and per round:

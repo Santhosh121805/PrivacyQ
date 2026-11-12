@@ -44,7 +44,7 @@ def test_server_view_of_one_client_reveals_nothing_about_its_update():
     truth = encode(np.append(sizes[0] * vecs[0], sizes[0]))
     # A naive decode of what the server holds is nowhere near the client's true contribution.
     assert np.median(np.abs(decode(y0) - decode(truth))) > 1e9
-    # Every bit of the masked words is balanced (uniform mod 2^64), independent of the input.
+    # Statistical check (not a proof): every bit of the masked words is balanced, as for random words.
     bits = np.unpackbits(y0.view(np.uint8)).reshape(-1, 64).mean(axis=0)
     assert np.all(np.abs(bits - 0.5) < 0.06)
     # And uncorrelated with the true update.
@@ -53,7 +53,7 @@ def test_server_view_of_one_client_reveals_nothing_about_its_update():
 
 def test_identical_server_view_is_consistent_with_any_update():
     # For client 0's masked vector y0 and ANY alternative update x', there is a mask (a different
-    # pairwise secret) giving the same y0: masks are uniform mod 2^64, so y0 alone carries no information.
+    # pairwise secret) giving the same y0: y0 alone does not pin down the update (the mask is unknown).
     vecs, sizes = _vectors(n_clients=2, dim=10)
     clients = setup(2)
     _, seen = secure_weighted_average(clients, vecs, sizes, round_=3)
@@ -112,3 +112,18 @@ def test_fedavg_with_secure_aggregation_matches_plain_fedavg(epsilon):
     for a, b in zip(plain["module"].state_dict().values(), secure["module"].state_dict().values()):
         assert np.max(np.abs(a.numpy() - b.numpy())) < 1e-5
     assert (secure["history"].masking_seconds_max > 0).all()
+
+
+def test_masks_cancel_exactly_in_the_integer_domain():
+    # Fixed point mod 2^64: the sum of the masked words equals the sum of the unmasked encodings bit for bit.
+    vecs, sizes = _vectors(n_clients=6, dim=300)
+    clients = setup(6)
+    plain = [encode(np.append(n * v, n)) for v, n in zip(vecs, sizes)]
+    masked = [c.masked(np.append(n * v, n), round_=7) for c, v, n in zip(clients, vecs, sizes)]
+    assert masked[0].dtype == np.uint64
+    assert not any(np.array_equal(m, p) for m, p in zip(masked, plain))
+    total_masked, total_plain = np.zeros(301, np.uint64), np.zeros(301, np.uint64)
+    for m, p in zip(masked, plain):
+        total_masked += m
+        total_plain += p
+    assert np.array_equal(total_masked, total_plain)
