@@ -192,7 +192,7 @@ privacy only.
 | Feature visualisation | PARTIAL | Phase 1 `mi_selected_features.csv` | MI-selected features listed; no feature-importance plot. |
 | Attention visualisation | PHASE-2 | — | No attention model (no text data). |
 | Quantum state visualisation: statevector | BUILT | `api.py` (`/api/inspect`), PrivacyQ Inspect page | Probabilities of all 2ⁿ basis states for a real record. |
-| Quantum state visualisation: Bloch sphere | PHASE-2 | — | Scheduled: Priority 3, item 10. |
+| Quantum state visualisation: Bloch sphere | BUILT | `src/m8_eval/state_viz.py`, `tests/test_state_viz.py` (3 tests), `scripts/state_visualisation.py`, `results/state_visualisation/bloch_angle_vs_zz.png`, `bloch_summary.md` | Exact single-qubit Bloch vectors of 1,200 real training records (Exp 2 fold 1, PCA-8), coloured by label, angle vs ZZ. Angle: all states pure (|r| = 1.000). ZZ: entangled, mean |r| 0.47–0.71 per qubit. Class-mean distance up to 0.51 (angle, qubit 1). Descriptive only. |
 | Research report and insights | BUILT | `results/RESULTS.md`, `README.md`, `results/VIVA.md` | |
 
 ## Box 15: Key outcomes
@@ -217,3 +217,4 @@ privacy only.
 - 2026-11-12: Priority 2 item 3 — basis encoding built and swept on the Exp 1 folds; merged encoding report written.
 - 2026-11-12: Priority 2 item 6 — measured payload, client time, server aggregation time and rounds to converge (Experiment 7).
 - 2026-11-12: Priority 3 item 7 — best configuration re-run under a simulated hardware noise model (Experiment 8).
+- 2026-11-12: Priority 3 item 10 — Bloch-sphere state visualisation of real encoded records (angle vs ZZ).
