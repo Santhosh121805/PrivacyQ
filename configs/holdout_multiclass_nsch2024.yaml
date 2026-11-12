@@ -1,0 +1,36 @@
+# One-shot multi-class hold-out evaluation (REAL NSCH 2024). Configurations fixed here BEFORE scoring:
+# the best cross-validated classical model, the binary headline model, and the two quantum models of Exp 9 / 9b,
+# each with exactly its cross-validation setup. Scored once; the script refuses to run again (lock file).
+project: {name: holdout-multiclass, seed: 2026, output_dir: results}
+data:
+  loader: nsch
+  paths: [data/raw/nsch_2024/nsch_2024e_topical.dta]
+  target: depression_current
+  min_age: 12
+  max_age: 17
+split: {holdout_fraction: 0.2}
+tuning: {inner_val_fraction: 0.2}
+holdout_policy:
+  three_class_metrics: exclude_undetermined
+  binary_depression_metrics: all_rows
+models:
+  xgboost_full_all95:
+    model: xgboost
+    features: {method: all}
+    grid: {max_depth: [2, 4, 6], learning_rate: [0.03, 0.1]}
+  logreg_full_all95:
+    model: logreg
+    features: {method: all}
+    grid: {C: [0.01, 0.1, 1.0, 10.0]}
+  qsvm_angle_pca8_1500rows:
+    model: qsvm
+    subsample: 1500
+    features: {method: pca, k: 8}
+    params: {encoding: angle, n_qubits: 8}
+    grid: {C: [0.1, 1.0, 10.0]}
+  vqc_ovr_reupload_pca4_1500rows:
+    model: vqc
+    subsample: 1500
+    features: {method: pca, k: 4}
+    params: {encoding: reupload, n_qubits: 4, epochs: 30, batch_size: 64, init_scale: 0.1}
+    grid: {learning_rate: [0.01, 0.05], n_layers: [1, 2]}
