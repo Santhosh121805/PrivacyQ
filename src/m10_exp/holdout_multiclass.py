@@ -69,7 +69,9 @@ def fit_selected(spec, seed, A, y_tr, B, y_iv):
     return best
 
 
-def run(config_path: str) -> Path:
+def run(config_path: str, dry_run_dir: str | None = None) -> Path:
+    """``dry_run_dir``: exercise every code path WITHOUT touching the hold-out: a pseudo hold-out is carved
+    from the development rows, grids are cut to their first point, the VQC trains 2 epochs, no lock is written."""
     import torch
 
     torch.manual_seed(0)
@@ -78,21 +80,33 @@ def run(config_path: str) -> Path:
     seed = int(cfg["project"]["seed"])
     loader, frame = load_dataset(cfg)
     lock = Path(cfg["project"]["output_dir"]) / f"HOLDOUT_EVALUATED_MULTICLASS_{loader.source_tag().replace(':', '_')}.lock"
-    if lock.exists():
+    if lock.exists() and dry_run_dir is None:
         raise SystemExit(f"multi-class hold-out already evaluated ({lock.read_text().strip()}); refusing to re-score")
     labels = frame[loader.label_column].to_numpy(dtype=int)
     y3 = three_class_labels(loader)
     det = ~np.isnan(y3)
     y = np.where(det, y3, -1).astype(int)
     dev, hold = holdout_split(labels, float(cfg["split"]["holdout_fraction"]), seed)
+    if dry_run_dir is not None:                               # pseudo hold-out from development rows only
+        rng = np.random.default_rng(seed + 1)
+        pseudo = np.sort(rng.choice(dev, size=len(dev) // 5, replace=False))
+        dev, hold = np.setdiff1d(dev, pseudo), pseudo
+        for spec in cfg["models"].values():
+            spec["grid"] = {k: v[:1] for k, v in (spec.get("grid") or {}).items()}
+            if spec["model"] == "vqc":
+                spec.setdefault("params", {})["epochs"] = 2
     dev_det = dev[det[dev]]
     rows3 = holdout_scoring_rows(hold, y3, "three_class_metrics")
     rows_bin = holdout_scoring_rows(hold, y3, "binary_depression_metrics")
-    out = Path(cfg["project"]["output_dir"]) / f"holdout-multiclass-{time.strftime('%Y%m%d-%H%M%S')}"
+    if dry_run_dir is not None:
+        out = Path(dry_run_dir) / f"DRYRUN-holdout-multiclass-{time.strftime('%Y%m%d-%H%M%S')}"
+    else:
+        out = Path(cfg["project"]["output_dir"]) / f"holdout-multiclass-{time.strftime('%Y%m%d-%H%M%S')}"
     out.mkdir(parents=True)
     shutil.copy(config_path, out / "config.yaml")
     write_json(out / "environment.json", environment_record(cfg))
-    lock.write_text(f"{out}\n", encoding="utf-8")
+    if dry_run_dir is None:
+        lock.write_text(f"{out}\n", encoding="utf-8")
     frac = float(cfg["tuning"]["inner_val_fraction"])
     pos3 = np.searchsorted(hold, rows3)                      # positions of the scored rows inside the hold-out
     results = []
@@ -137,7 +151,9 @@ def run(config_path: str) -> Path:
 def main() -> None:
     parser = argparse.ArgumentParser(description="One-shot multi-class hold-out evaluation")
     parser.add_argument("--config", required=True)
-    run(parser.parse_args().config)
+    parser.add_argument("--dry-run-dir", help="exercise the code on a pseudo hold-out from dev rows; no lock")
+    args = parser.parse_args()
+    run(args.config, args.dry_run_dir)
 
 
 if __name__ == "__main__":
