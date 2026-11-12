@@ -88,7 +88,7 @@ def results_md_families() -> list[pd.DataFrame]:
                      "p_nb_t": corrected_resampled_ttest(x, y, ratio)["p"], "wilcoxon_p": wilcoxon_p(x, y)})
     s = add_holm(pd.DataFrame(rows), None).assign(experiment="RESULTS.md Table 7 (Exp 3 clipping sensitivity)",
                                                   family="whole table")
-    cols = ["experiment", "family", "comparison", "effect", "p_nb_t_holm", "wilcoxon_p_holm"]
+    cols = ["experiment", "family", "comparison", "effect", "p_nb_t", "p_nb_t_holm", "wilcoxon_p", "wilcoxon_p_holm"]
     return [t[cols], s[cols]]
 
 
@@ -99,10 +99,13 @@ def main():
         label = df[ids].astype(str).agg(" · ".join, axis=1)
         for prim, sens, fam in tests:
             ok = df[prim].notna()
+            raw_p = prim.replace("_holm_in_config", "").replace("_holm", "")
+            raw_w = sens.replace("_holm_in_config", "").replace("_holm", "")
             frames.append(pd.DataFrame({"experiment": exp, "family": fam, "comparison": label[ok],
                                         "effect": df.loc[ok, eff] if fam != "drop difference" else
                                         df.loc[ok, "quantum_auc_drop"] - df.loc[ok, "classical_auc_drop"],
-                                        "p_nb_t_holm": df.loc[ok, prim], "wilcoxon_p_holm": df.loc[ok, sens]}))
+                                        "p_nb_t": df.loc[ok, raw_p], "p_nb_t_holm": df.loc[ok, prim],
+                                        "wilcoxon_p": df.loc[ok, raw_w], "wilcoxon_p_holm": df.loc[ok, sens]}))
     frames += results_md_families()
     audit = pd.concat(frames, ignore_index=True)
     audit["significant_wilcoxon_holm (old)"] = audit.wilcoxon_p_holm < ALPHA
@@ -115,24 +118,54 @@ def main():
     by_exp = audit.groupby("experiment", sort=False).agg(comparisons=("changed", "size"), changed=("changed", "sum"),
                                                          sig_old=("significant_wilcoxon_holm (old)", "sum"),
                                                          sig_new=("significant_nb_t_holm (new primary)", "sum"))
-    lines = ["# Significance audit: Wilcoxon-Holm (old primary) vs Nadeau–Bengio corrected t, Holm (new primary)", "",
-             f"{len(audit)} comparisons across all experiments, same Holm families for both tests, alpha = {ALPHA}. "
-             f"Decisions change for {len(ch)}: {int((ch['significant_wilcoxon_holm (old)'] & ~ch['significant_nb_t_holm (new primary)']).sum())} "
-             f"were significant and no longer are; {int((~ch['significant_wilcoxon_holm (old)'] & ch['significant_nb_t_holm (new primary)']).sum())} "
-             "were not and now are.", "",
-             "| Experiment | Comparisons | Significant (old, Wilcoxon-Holm) | Significant (new, NB-t-Holm) | Changed |",
-             "|---|---|---|---|---|"]
+    lost = int((ch["significant_wilcoxon_holm (old)"] & ~ch["significant_nb_t_holm (new primary)"]).sum())
+    gained = int((~ch["significant_wilcoxon_holm (old)"] & ch["significant_nb_t_holm (new primary)"]).sum())
+    n_sig_new = int(audit["significant_nb_t_holm (new primary)"].sum())
+    lines = ["# Significance audit: what survives a correct test", "",
+             f"The project makes {len(audit)} paired comparisons (the Experiment 1 tables with and without basis encoding, "
+             "and the RESULTS.md re-adjustments, are counted separately), each over only 10–15 cross-validation folds. "
+             "With so few folds most differences between configurations are not statistically resolvable: they are "
+             "smaller than the fold-to-fold variation once the overlap between CV training sets is taken into account. "
+             "The Wilcoxon test behind the earlier report labels ignores that overlap and so overstated what could be "
+             "concluded; on 10 folds it also has a p-value floor (about 0.002) that decides some verdicts by the fold "
+             f"count rather than the data. Under the Nadeau–Bengio corrected t with Holm adjustment, {n_sig_new} "
+             "comparisons are significant: that subset is robust to a correct test and a multiplicity adjustment, and it "
+             "is what the reports now state.", "",
+             f"{len(ch)} of {len(audit)} decisions differ between the two tests (same Holm families, alpha = {ALPHA}): "
+             f"{lost} that Wilcoxon called significant are not resolvable under the corrected test, and {gained} that "
+             "Wilcoxon could not resolve (mostly because of its floor) are. Superseded reports are kept as "
+             "`*.superseded-sig-20261112.*`.", "",
+             "## Load-bearing comparisons", "",
+             "The project's main conclusion (no quantum advantage on identical rows and features) rests on these "
+             "comparisons (RESULTS.md Table 4, 15 folds). Each holds under both tests.", "",
+             "| Comparison | Effect | NB-t p | NB-t Holm p (primary) | Wilcoxon p | Wilcoxon Holm p (sensitivity) | Conclusion |",
+             "|---|---|---|---|---|---|---|"]
+    t4 = audit[audit.experiment.str.startswith("RESULTS.md Table 4")]
+    load = [("qsvm/subsample/pca8 vs logreg/subsample/pca8 · roc_auc", "QSVM vs LogReg (ROC-AUC)"),
+            ("vqc/subsample/pca4 vs logreg/subsample/pca4 · roc_auc", "VQC vs LogReg (ROC-AUC)"),
+            ("hybrid/subsample/all95 vs logreg/subsample/all95 · roc_auc", "Hybrid vs LogReg (ROC-AUC)"),
+            ("hybrid/subsample/all95 vs logreg/subsample/all95 · balanced_accuracy", "Hybrid vs LogReg (balanced accuracy)")]
+    for comp, name in load:
+        r = t4[t4.comparison == comp].iloc[0]
+        held = r["significant_wilcoxon_holm (old)"] == r["significant_nb_t_holm (new primary)"]
+        verdict = "significant" if r["significant_nb_t_holm (new primary)"] else "not significant (tie)"
+        lines.append(f"| {name} | {r.effect:+.3f} | {r.p_nb_t:.3g} | {r.p_nb_t_holm:.3g} | {r.wilcoxon_p:.3g} | "
+                     f"{r.wilcoxon_p_holm:.3g} | {verdict}; {'same under both tests' if held else 'DIFFERS between tests'} |")
+    lines += ["", "## Decisions by experiment", "",
+              "| Experiment | Comparisons | Significant (Wilcoxon-Holm) | Significant (NB-t-Holm, primary) | Differ |",
+              "|---|---|---|---|---|"]
     for e, r in by_exp.iterrows():
         lines.append(f"| {e} | {r.comparisons} | {r.sig_old} | {r.sig_new} | {r.changed} |")
-    lines += ["", "## Every comparison whose conclusion changes", "",
-              "| Experiment | Family | Comparison | Effect | NB-t Holm p (new) | Wilcoxon Holm p (old) | Old → new |",
-              "|---|---|---|---|---|---|---|"]
+    lines += ["", "## Every comparison whose decision differs (old and new p-values side by side)", "",
+              "| Experiment | Family | Comparison | Effect | NB-t p | NB-t Holm p (new primary) | Wilcoxon p | "
+              "Wilcoxon Holm p (old label) | Old → new |",
+              "|---|---|---|---|---|---|---|---|---|"]
     for _, r in ch.iterrows():
-        arrow = "significant → not significant" if r["significant_wilcoxon_holm (old)"] else "not significant → significant"
-        lines.append(f"| {r.experiment} | {r.family} | {r.comparison} | {r.effect:+.3f} | {r.p_nb_t_holm:.3g} | "
-                     f"{r.wilcoxon_p_holm:.3g} | {arrow} |")
+        arrow = "significant → not resolvable" if r["significant_wilcoxon_holm (old)"] else "not resolvable → significant"
+        lines.append(f"| {r.experiment} | {r.family} | {r.comparison} | {r.effect:+.3f} | {r.p_nb_t:.3g} | "
+                     f"{r.p_nb_t_holm:.3g} | {r.wilcoxon_p:.3g} | {r.wilcoxon_p_holm:.3g} | {arrow} |")
     (out / "changed.md").write_text("\n".join(lines), encoding="utf-8")
-    print("\n".join(lines[:4 + len(by_exp) + 3]))
+    print("\n".join(lines[:16]))
     print(f"changed rows: {len(ch)}")
 
 
