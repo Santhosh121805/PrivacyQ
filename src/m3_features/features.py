@@ -6,6 +6,10 @@ from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectKBest, mutual_info_classif
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
+from src.m3_features.nonlinear import AutoencoderReducer, UMAPReducer
+
+NONLINEAR = {"umap": UMAPReducer, "autoencoder": AutoencoderReducer}
+
 
 class FeatureTransformer:
     """Fit feature transformations on training data and reuse them unchanged."""
@@ -21,7 +25,9 @@ class FeatureTransformer:
     ) -> None:
         """``method="mi"``: keep the top-``d_prime`` features by mutual information.
         ``method="pca"``: project all standardized features onto ``d_prime``
-        principal components. ``method=None`` keeps the legacy behaviour
+        principal components. ``method="umap"`` / ``"autoencoder"``: non-linear,
+        unsupervised reduction of all standardized features to ``d_prime``
+        dimensions (src/m3_features/nonlinear.py). ``method=None`` keeps the legacy behaviour
         (MI pre-selection, then PCA when ``use_pca``). All statistics are fitted
         on the rows passed to ``fit`` only.
 
@@ -34,10 +40,11 @@ class FeatureTransformer:
         if output not in ("angle", "standard"):
             raise ValueError("output must be 'angle' or 'standard'")
         self.output = output
-        if method not in (None, "mi", "pca"):
-            raise ValueError("method must be None, 'mi' or 'pca'")
+        if method not in (None, "mi", "pca", *NONLINEAR):
+            raise ValueError("method must be None, 'mi', 'pca', 'umap' or 'autoencoder'")
         if method is not None:
             use_pca = method == "pca"
+        self.reducer = NONLINEAR[method](d_prime, seed=seed) if method in NONLINEAR else None
         self.method = method
         self.d_prime = d_prime
         self.use_pca = use_pca
@@ -62,7 +69,7 @@ class FeatureTransformer:
         selected_count = self.n_selected
         if self.method == "mi":
             selected_count = self.d_prime
-        elif self.method == "pca":
+        elif self.method == "pca" or self.reducer is not None:
             selected_count = values.shape[1]
         if selected_count is None:
             selected_count = min(values.shape[1], self.d_prime * (2 if self.use_pca else 1))
@@ -76,7 +83,10 @@ class FeatureTransformer:
         else:
             self.selector.set_params(k=selected_count)
             selected = self.selector.fit_transform(standardized, labels)
-        reduced = self.pca.fit_transform(selected) if self.pca is not None else selected
+        if self.reducer is not None:
+            reduced = self.reducer.fit_transform(selected)
+        else:
+            reduced = self.pca.fit_transform(selected) if self.pca is not None else selected
         self.angle_scaler.fit(reduced)
         self.is_fitted_ = True
         return self
@@ -89,7 +99,10 @@ class FeatureTransformer:
             raise ValueError("input feature count differs from fitted training data")
         standardized = self.scaler.transform(values)
         selected = self.selector.transform(standardized) if self.selector is not None else standardized
-        reduced = self.pca.transform(selected) if self.pca is not None else selected
+        if self.reducer is not None:
+            reduced = self.reducer.transform(selected)
+        else:
+            reduced = self.pca.transform(selected) if self.pca is not None else selected
         if self.output == "standard":
             return reduced
         return self.angle_scaler.transform(reduced)

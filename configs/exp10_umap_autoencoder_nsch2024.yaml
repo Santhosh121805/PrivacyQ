@@ -1,0 +1,86 @@
+# Experiment 10: UMAP-8 and autoencoder-8 (95 -> 32 -> 8 -> 32 -> 95) vs PCA-8 through the Experiment 2 comparison
+# (same 15 folds; reducers fitted on inner-train rows only; QSVM angle 8 qubits vs LogReg and RBF-SVM on identical features).
+# The pca8 arms reproduce Experiment 2.
+project:
+  name: exp10-nsch2024-umap-autoencoder
+  seed: 2026
+  output_dir: results
+  n_jobs: 4
+data:
+  loader: nsch
+  paths:
+  - data/raw/nsch_2024/nsch_2024e_topical.dta
+  target: depression_current
+  min_age: 12
+  max_age: 17
+split:
+  holdout_fraction: 0.2
+cv:
+  n_splits: 5
+  n_repeats: 3
+subsample:
+  n: 1500
+tuning:
+  inner_val_fraction: 0.2
+experiment:
+  regimes:
+  - subsample
+  - full
+  feature_sets:
+    pca8:
+      method: pca
+      k: 8
+    umap8:
+      method: umap
+      k: 8
+    ae8:
+      method: autoencoder
+      k: 8
+  classical_models:
+  - logreg
+  - svm
+  quantum:
+    qsvm_pca8:
+      class: qsvm
+      feature_set: pca8
+      encoding: angle
+      n_qubits: 8
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+    qsvm_umap8:
+      class: qsvm
+      feature_set: umap8
+      encoding: angle
+      n_qubits: 8
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+    qsvm_ae8:
+      class: qsvm
+      feature_set: ae8
+      encoding: angle
+      n_qubits: 8
+      grid:
+        C:
+        - 0.1
+        - 1.0
+        - 10.0
+base_params: {}
+grids:
+  logreg:
+    C:
+    - 0.01
+    - 0.1
+    - 1.0
+    - 10.0
+  svm:
+    C:
+    - 0.1
+    - 1.0
+    - 10.0
+skip_report: true

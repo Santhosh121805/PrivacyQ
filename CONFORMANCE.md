@@ -79,7 +79,7 @@ privacy only.
 | Structured features: physiological signals | PHASE-2 | — | No physiological data in NSCH. |
 | Dimensionality reduction: PCA | BUILT | `src/m3_features/features.py`, `tests/test_phase1_pipeline.py` | Fitted inside each fold. |
 | Dimensionality reduction: mutual information | BUILT | `src/m3_features/features.py` | Not named in the diagram; used in the encoding sweep. |
-| Dimensionality reduction: UMAP, autoencoder | PHASE-2 | — | Scheduled: Priority 3, item 11. |
+| Dimensionality reduction: UMAP, autoencoder | BUILT | `src/m3_features/nonlinear.py`, `src/m3_features/features.py` (`method="umap"/"autoencoder"`), `tests/test_nonlinear_features.py` (3 tests), `configs/exp10_umap_autoencoder_nsch2024.yaml`, `results/exp10-nsch2024-umap-autoencoder-20261112-143551/reduction_report.md` | Both fitted on inner-train rows only, through the Exp 2 comparison on the same 15 folds. ROC-AUC (subsample): QSVM PCA 0.847 / AE 0.837 / UMAP 0.774; LogReg 0.851 / 0.836 / 0.768; RBF-SVM 0.838 / 0.833 / 0.777. UMAP significantly below PCA for every model (0/15 wins). Autoencoder below PCA for LogReg only. QSVM vs classical not significantly different on either reduction. |
 
 ## Box 4: Privacy-preserving mechanisms
 
@@ -220,3 +220,4 @@ privacy only.
 - 2026-11-12: Priority 3 item 7 — best configuration re-run under a simulated hardware noise model (Experiment 8).
 - 2026-11-12: Priority 3 item 8 — three-class task (none / anxiety only / depression), classical, QSVM and one-vs-rest VQC (Experiments 9, 9b).
 - 2026-11-12: Priority 3 item 10 — Bloch-sphere state visualisation of real encoded records (angle vs ZZ).
+- 2026-11-12: Priority 3 item 11 — UMAP and autoencoder reduction through the Experiment 2 comparison (Experiment 10).

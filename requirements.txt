@@ -12,3 +12,7 @@ opacus==1.5.2
 fastapi==0.115.6
 uvicorn==0.32.1
 watchfiles==0.24.0
+umap-learn==0.5.7
+numba==0.60.0
+llvmlite==0.43.0
+pynndescent==0.5.13
