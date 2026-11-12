@@ -16,3 +16,7 @@ umap-learn==0.5.7
 numba==0.60.0
 llvmlite==0.43.0
 pynndescent==0.5.13
+qiskit==1.4.4
+rustworkx==0.18.1
+symengine==0.13.0
+stevedore==5.8.0

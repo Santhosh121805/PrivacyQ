@@ -14,7 +14,7 @@ Status values:
 Paths are relative to the repository root. `results/` is git-ignored and produced by the commands in
 `README.md`; the run directories referenced are those listed in `configs/final_report.yaml`.
 
-_Last updated: 2026-11-12, after Priority 1, Priority 2 and Priority 3 (items 7–11)._
+_Last updated: 2026-11-12, after Priorities 1–4 (items 1–12) and the review corrections._
 
 ## Pipeline flow as built
 
@@ -127,7 +127,7 @@ privacy only.
 | Sub-item | Status | Evidence | Note |
 |---|---|---|---|
 | PennyLane | BUILT | all quantum code | |
-| Qiskit | PHASE-2 | — | Scheduled: Priority 4, item 12. |
+| Qiskit | BUILT (cross-check) | `src/m5_models/qiskit_vqc.py`, `tests/test_qiskit_vqc.py` (7 tests), `scripts/qiskit_crosscheck.py`, `results/qiskit_crosscheck/crosscheck.md` | Independent Qiskit 1.4.4 implementation of the VQC forward pass (re-uploading and angle encodings, strongly-entangling layers, ⟨Z₀⟩ readout), written gate for gate without PennyLane. Tests: equal to PennyLane to 1e-12 for 5 encoding/qubit/layer settings and for a trained model. On all 15 Exp 2 folds (PennyLane refit reproduces Exp 2 ROC-AUC exactly): max |score difference| 9.8e-15 over 52,293 validation rows; ROC-AUC, balanced accuracy and thresholded predictions identical in 15/15 folds. Scope: Qiskit evaluates trained parameters; training stays in PennyLane (torch backprop). QSVM, hybrid QNN and noisy circuits are not reimplemented in Qiskit. |
 | Cirq, TensorFlow Quantum | PHASE-2 | — | Redundant with PennyLane and Qiskit; would add no finding. |
 | Noise simulation (realistic hardware): QSVM | BUILT | `src/m5_models/noisy_kernel.py`, `tests/test_noisy_kernel.py` (7 tests, incl. exact match of both paths to the end-to-end `default.mixed` compute-uncompute circuit), `configs/exp8_noise_nsch2024.yaml`, `configs/exp8b_noise_zz_nsch2024.yaml`, `results/exp8-nsch2024-hardware-noise-20261112-125925/noise_report.md`, `results/exp8b-nsch2024-hardware-noise-zz-vs-angle-4q-20261112-144158/noise_report.md` | Kernel estimated as on hardware (compute-uncompute, P(all 0), finite shots) on `default.mixed` with T1/T2, one- and two-qubit depolarising gate error, readout error. **Angle kernel:** none of the noisy settings differs significantly from the noise-free baseline (paired Wilcoxon, Holm) — at 8 qubits (Exp 8) 0.847 → 0.845–0.850, and at 4 qubits (Exp 8b) 0.835 → 0.832–0.836. **ZZ kernel (Exp 8b, 4 qubits):** differs significantly from its noise-free baseline at realistic noise with 1,024 shots (0.793 → 0.786, Holm p 0.003) and at 10x noise (→ 0.769, 0/15 wins, Holm p 0.0007); not at realistic noise with exact or 4,096-shot estimation. **4-qubit caveat:** the Exp 8b results (angle and ZZ) are at 4 qubits, reduced from 8, and cannot be compared directly with the 8-qubit results or the 8-qubit noise-free headline (QSVM 0.847). Why reduced: measured 1.35 s per row for one noisy 8-qubit ZZ state (micro-benchmark); a 6-qubit run (renamed `results/exp8b-superseded-6q-stopped-20261112-140154`) finished none of its ZZ-noise tasks in 38.7 min on a shared machine. The "over an hour per fold" and "about 5 hours" figures given earlier were **estimates** (extrapolated), not measurements. Noise model assumed (representative published values), not a device calibration; no real hardware; idle decoherence, crosstalk and leakage not modelled. |
 | Noise simulation: VQC | PHASE-2 | — | Not run. Training a variational circuit on a mixed-state simulator needs a density-matrix forward and backward pass for every optimiser step and row (thousands of steps per fold), which is far more expensive than the kernel; and the outcome is predictable from Exp 8b — the VQC's entangling layers carry two-qubit error like ZZ. |
@@ -222,6 +222,7 @@ privacy only.
 - 2026-11-12: ZZ feature-map QSVM under the same noise model (Experiment 8b, 4 qubits): angle robust, ZZ degrades; VQC under noise marked PHASE-2.
 - 2026-11-12: Priority 3 item 8 — three-class task (none / anxiety only / depression), classical, QSVM and one-vs-rest VQC (Experiments 9, 9b).
 - 2026-11-12: Priority 3 item 9 — secure aggregation (pairwise DH masks) built, wired into FedAvg, verified identical results (Experiment 7b), overhead measured.
+- 2026-11-12: Priority 4 item 12 — independent Qiskit VQC forward pass; identical to PennyLane on all 15 Exp 2 folds.
 - 2026-11-12: Corrections after review: noise statements scoped to angle vs ZZ; 4-qubit caveat; 6-qubit timing figures marked as estimates; multi-class hold-out handling and macro-F1 for all rows; secure-aggregation exactness and wording; UMAP/AE per-fold fitting documented and tested.
 - 2026-11-12: Priority 3 item 10 — Bloch-sphere state visualisation of real encoded records (angle vs ZZ).
 - 2026-11-12: Priority 3 item 11 — UMAP and autoencoder reduction through the Experiment 2 comparison (Experiment 10).
