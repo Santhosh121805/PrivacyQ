@@ -13,13 +13,13 @@
 
 - `m1_data`: seeded synthetic generator and loader interface.
 - `m2_preprocess`: cleaning, imputation, categorical encoding, identifier removal, and k-anonymity helper.
-- `m3_features`: train-only scaling, mutual-information selection, optional PCA, and angle scaling.
+- `m3_features`: train-only scaling, mutual-information selection, PCA, UMAP and autoencoder reduction, and angle scaling.
 - `m4_encoding`: angle, amplitude, and ZZ feature maps.
-- `m5_models`: variational circuit, classical baselines, and quantum-kernel stub.
+- `m5_models`: variational circuit, quantum kernel (statevector and noisy `default.mixed`), three-class models, Qiskit cross-check, and classical baselines.
 - `m6_federated`: IID/Dirichlet partitions and in-process weighted FedAvg.
-- `m7_privacy`: per-example DP-SGD, RDP accounting, and secure-aggregation stub.
+- `m7_privacy`: per-example DP-SGD, RDP accounting, input-stage k-anonymity and local DP, and pairwise-masked secure aggregation.
 - `m8_eval`: utility metrics and compute/communication cost.
-- `m9_audit`: loss-threshold membership inference and gradient-inversion stub.
+- `m9_audit`: loss-threshold membership inference, re-identification risk, and a gradient-inversion stub (reports "not implemented").
 - `m10_exp`: YAML-driven runner and result logging.
 
 ## Commands

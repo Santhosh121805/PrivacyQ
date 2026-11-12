@@ -61,16 +61,16 @@ All numbers are from `results/RESULTS.md` (real NSCH 2024 data, mean over folds)
    quantum kernel SVM the swing was 4–7 points. Simple angle / re-uploading encodings won;
    the entangling ZZ map and amplitude encoding were worst.
 3. **No quantum advantage.** On identical rows and features, the best quantum kernel
-   (0.847) was statistically tied with logistic regression (0.851, Holm p = 0.30) and beat
-   XGBoost/MLP on those small reduced inputs; the VQC (0.814) and hybrid QNN (0.784) were
-   significantly worse than logistic regression. All quantum models were far below the
+   (0.847) was statistically tied with logistic regression (0.851, Holm p = 0.70) and was not
+   significantly different from XGBoost or the MLP on those small reduced inputs; the VQC (0.814)
+   and hybrid QNN (0.784) were significantly worse than logistic regression (Holm p = 0.012 and 0.041). All quantum models were far below the
    full-data classical models (0.888), mostly because of the 1,500-row, 4–8-feature limit.
 4. **Privacy costs accuracy, and quantum does not degrade differently once the classical
    baseline is set up fairly.** Under DP-SGD the VQC kept 0.805 ROC-AUC at ε = 4 (0.653 at
    ε = 0.5). With the shared clipping norm of 1, logistic regression on the same rows looked
    much worse under DP, but a sensitivity check with clipping norm 10 showed that was an
    artefact: logistic regression then matched the VQC at ε = 4 and was higher at ε = 0.5
-   (0.758 vs 0.653; Wilcoxon p = 0.02, not significant after Holm correction, p = 0.10). Logistic regression on the full data stayed best at every ε (0.802 at
+   (0.758 vs 0.653; not significant: Holm p = 0.64; Wilcoxon sensitivity check Holm p = 0.10). Logistic regression on the full data stayed best at every ε (0.802 at
    ε = 0.5, 0.856 at ε = 4).
 5. **Federated + DP works for the classical model, not for the small quantum one.** With
    FedAvg and client-side DP at ε = 4, full-data logistic regression matched centralised DP
@@ -102,8 +102,11 @@ guarantee always comes from DP-SGD, never from the quantum circuit.
 - Headline metrics: **balanced accuracy, recall, ROC-AUC** (plus PR-AUC). Plain
   accuracy is reported but never used as a headline.
 - Significance: paired over folds, using the Nadeau–Bengio corrected resampled
-  t-test (fold scores are correlated because training sets overlap), with
-  Wilcoxon signed-rank as a check and Holm correction across comparisons.
+  t-test (fold scores are correlated because training sets overlap), Holm-adjusted
+  within each family of comparisons; Wilcoxon signed-rank (Holm-adjusted) is reported
+  as a sensitivity check. Unless stated otherwise every p-value in this repository is
+  the Holm-adjusted corrected t. Rationale and audit: top of `results/RESULTS.md` and
+  `results/significance/changed.md`.
 
 ## Method notes
 
@@ -145,6 +148,8 @@ synthetic-only smoke runner.
 
 ## Known stubs and limits
 
-Secure aggregation and gradient-inversion auditing are explicit stubs. RandomForest was
-dropped from all results on supervisor instruction. See the Limitations section of
+Gradient-inversion auditing is an explicit stub that reports "not implemented". Secure aggregation is
+implemented (pairwise-masked, `src/m7_privacy/secure_aggregation.py`) but was not used in Experiments 3–4.
+Input-stage privacy (k-anonymity, local DP) is evaluated in Experiment 5 only. RandomForest was dropped from
+all results on supervisor instruction. Status of every architecture-diagram item: `CONFORMANCE.md`. See the Limitations section of
 `results/RESULTS.md`.

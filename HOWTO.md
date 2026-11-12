@@ -129,7 +129,7 @@ Each school trains logistic regression on only its own rows (own preprocessing),
 | Together (FedAvg + DP, ε = 4) | 0.855 | | |
 
 Across all 10 Experiment 4 test splits: alone with DP 0.819 ± 0.024, together 0.860 ± 0.011; together
-was better in 10 of 10 splits (paired Wilcoxon p = 0.002). **The comparison only holds at equal
+was better in 10 of 10 splits (Nadeau–Bengio corrected t p = 0.006; Wilcoxon sensitivity check p = 0.002). **The comparison only holds at equal
 privacy:** a school alone without DP (0.860 on average) matches the private shared model. The demo
 says "with the same privacy protection" for that reason. Raw runs: `results/story_alone_runs.csv`.
 

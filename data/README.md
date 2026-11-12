@@ -10,7 +10,9 @@ file is git-ignored.
 - **Source:** https://www2.census.gov/programs-surveys/nsch/datasets/2024/nsch_2024_topical_Stata.zip
 - **Fetch:** `python scripts/download_nsch.py 2024` → `data/raw/nsch_2024/nsch_2024e_topical.dta`
 - **SHA-256 of the zip downloaded 2026-11-04:** `a12d1839cae8b843884e7fb5b520835844ee6304c496ba7873d7f8a4152fe2e0`
-- **Population used:** selected children aged 12–17 (21,960 of 51,375 records).
+- **Population used:** 21,789 adolescents aged 12–17 with a determinable depression label. Of the 51,375
+  records, 21,960 are aged 12–17; the 171 whose depression answer is missing (K2Q32A missing, or K2Q32A = 1 with
+  K2Q32B missing) are dropped. 21,789 is the population of every experiment.
 - **Target `depression_current`:** caregiver reports a provider ever said the child
   has depression (K2Q32A = 1) *and* the child currently has it (K2Q32B = 1).
   Never-diagnosed and past-only children are 0; unknown status is dropped.
