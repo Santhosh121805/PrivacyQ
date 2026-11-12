@@ -1,7 +1,9 @@
 # Experiment 8b: angle vs ZZ feature-map QSVM under the same simulated hardware noise, 4 qubits, PCA-4,
-# identical 15 Experiment 2 folds. REDUCED from 8 to 4 qubits: the full density-matrix simulation needed for ZZ
-# (no factorisation) took 1.35 s per row at 8 qubits, and at 6 qubits a single fold ran over an hour per noise
-# level with single-threaded workers. Nothing else is reduced: same folds, rows, noise settings and shots.
+# identical 15 Experiment 2 folds. REDUCED from 8 to 4 qubits because the full density-matrix simulation needed
+# for ZZ (no factorisation) was too slow. Measured: 1.35 s per row at 8 qubits (micro-benchmark, multithreaded);
+# a 6-qubit run finished none of its ZZ-noise tasks in 38.7 min of wall time on a shared machine. The earlier
+# "over an hour per fold" / "about 5 hours" figures were extrapolations, not measurements (see the run's
+# noise_report.md). Nothing else is reduced: same folds, rows, noise settings and shots.
 # ZZ uses the full mixed-state path; angle uses the exact factorised path (equal to the full path, tested).
 project:
   name: exp8b-nsch2024-hardware-noise-zz-vs-angle-4q
