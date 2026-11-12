@@ -83,7 +83,7 @@ async function renderOverview() {
   const tests = o.tests;
   const cards = [
     ["Hold-out ROC-AUC", f(o.holdout_auc, 3), "best classical, untouched test set"],
-    ["AUC cost of privacy", f(o.privacy_cost, 3), `at ε ≈ 4 on the hold-out (${f(o.holdout_auc, 3)} → ${f(o.dp4_holdout_auc, 3)})`],
+    ["Best model → DP model (ε ≈ 4)", f(o.privacy_cost, 3), `hold-out AUC gap (${f(o.holdout_auc, 3)} → ${f(o.dp4_holdout_auc, 3)}); in cross-validation about half is the DP noise (0.016, not significant) and half the switch to SGD training`],
     ["Quantum vs classical", `${f(o.qsvm_auc, 3)}/${f(o.logreg_matched_auc, 3)}`, `matched conditions, not significant (Holm p = ${f(o.qvc_holm_p, 2)})`],
     ["Tests passing", tests ? String(tests.passed) : "–",
       tests ? (tests.failed === 0 ? `full suite green · recorded ${tests.recorded.slice(0, 10)}` : `${tests.failed} failing · recorded ${tests.recorded.slice(0, 10)}`)
@@ -124,7 +124,7 @@ async function renderOverview() {
     + "Every number comes from experiments already run on the NSCH 2024 public-use file; combinations that were never run are flagged and replaced by the nearest measured one. "
     + "It is a planning aid for model builders, not a screening or diagnostic tool.";
   $("ov-found").textContent = `No quantum model beat logistic regression: the best, a quantum-kernel SVM, tied it on identical rows and features (${f(o.qsvm_auc, 3)} vs ${f(o.logreg_matched_auc, 3)}, not significant). `
-    + `Differential privacy at ε ≈ 4 costs about ${f(o.privacy_cost, 3)} ROC-AUC for the best classical model on the untouched hold-out, and federation across up to 10 sites costs nothing further for it. `
+    + `On the untouched hold-out the private model (DP-SGD, ε ≈ 4) scores ${f(o.privacy_cost, 3)} ROC-AUC below the best non-private model. Cross-validation splits that gap about evenly: 0.016 from training the model by SGD instead of the tuned solver, and 0.016 from the DP noise itself, which is not statistically significant. Federation across up to 10 sites costs nothing further. `
     + "Small quantum models degrade sharply when their 1.2k training rows are split across sites, because each site has too few records for the privacy noise.";
 }
 

@@ -63,7 +63,11 @@ Configurations are deep-linkable, e.g.
   gradient descent, so DP-SGD and FedAvg do not apply. The tool says this instead of inventing a number.
 - **Logistic regression under DP** is shown with the pre-declared clipping norm of 1; the panel also states
   the post-hoc clipping-10 sensitivity result, which closes the apparent gap to the VQC.
-- **Privacy cost on the hold-out** is 0.8924 → 0.8609 = **0.0316**, displayed as 0.032 (three decimals).
+- **Best-model-to-DP-model gap on the hold-out** is 0.8924 → 0.8609 = **0.0316**, displayed as 0.032 (three decimals).
+  It is not all privacy cost: the two models are trained differently (tuned sklearn LogReg vs SGD-trained LogReg).
+  On the 10 shared cross-validation folds the gap is 0.032 = 0.016 (SGD training, no noise) + 0.016 (DP noise at
+  ε = 4; not significant, Nadeau–Bengio Holm p = 0.33). No confidence interval was computed for the hold-out difference
+  itself, and the hold-out scores were not saved, so it cannot be added without re-scoring the hold-out.
 - **The QSVM's output is a decision score, not a probability.** Inspect labels it that way.
 - **VQC and Hybrid QNN weights are not cached**, so their Inspect trace uses the QSVM fitted with the same
   encoding and feature count on the same rows; the page says so.
