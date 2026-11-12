@@ -1,0 +1,14 @@
+# Experiment 5: input-stage privacy (k-anonymity + local DP before quantum encoding), REAL NSCH 2024 data.
+project: {name: exp5-nsch2024-input-privacy, seed: 2026, output_dir: results, n_jobs: 6}
+data: {loader: nsch, paths: [data/raw/nsch_2024/nsch_2024e_topical.dta], target: depression_current, min_age: 12, max_age: 17}
+split: {holdout_fraction: 0.2}
+cv: {n_splits: 5, n_repeats: 2}
+subsample: {n: 1500}
+tuning: {inner_val_fraction: 0.2}
+experiment:
+  regimes:
+    subsample: [qsvm, logreg, dp_logreg]   # matched quantum regime (1.2k training rows)
+    full: [logreg]                          # full fold-training rows
+  k_values: [null, 5]
+  eps_inputs: [null, 32, 16, 8, 4]
+  eps_training: 4
