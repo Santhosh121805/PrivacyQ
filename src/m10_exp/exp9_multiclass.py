@@ -5,10 +5,11 @@ variant, combined by ``src.m1_data.nsch.three_class_labels``. Merging classes 0 
 binary depression_current target exactly, so results stay comparable with Experiments 1-8.
 
 Population and splits: the same 21,789 rows as every other experiment. The locked hold-out and
-the 15 outer folds are generated exactly as before (stratified on the binary label, same seed) and
-checked against the Experiment 2 run. The 165 depression-negative rows whose anxiety status is
-undetermined are then removed from each fold's training and validation rows (never imputed or
-counted as "no"); the hold-out is not touched.
+the 15 outer-fold assignments are generated exactly as before (stratified on the binary label, same
+seed) and checked against the Experiment 2 run. Of the 165 depression-negative rows whose anxiety
+status is undetermined, those in the development set (141) are excluded from each fold's training
+and validation rows (never imputed or counted as "no"); the 24 in the hold-out are untouched, and
+the hold-out is not used by this experiment.
 
 Protocol (as Experiment 2): inner-train / inner-val split of the fold's training rows; grid
 point chosen by inner-val macro one-vs-rest ROC-AUC; the chosen inner-train model scored once on
@@ -128,14 +129,22 @@ def write_report(run_dir: Path, results: pd.DataFrame, config: dict, population:
              "without anxiety; merging classes 0 and 1 gives the binary `depression_current` target exactly.", "",
              f"Population: {population['n_rows']:,} adolescents aged 12–17 with a determinable depression label "
              f"(the same rows as Experiments 1–8). {population['n_undetermined']} depression-negative rows have "
-             f"undetermined anxiety (K2Q33A missing, or K2Q33A = yes with K2Q33B missing); they are removed from "
-             f"training and validation rows, not imputed and not counted as 'no'. Class counts of the remaining "
-             f"rows: " + ", ".join(f"{c} {population['counts'][c]:,} ({population['shares'][c]:.1f}%)" for c in CLASS_NAMES)
+             f"undetermined anxiety (K2Q33A missing, or K2Q33A = yes with K2Q33B missing): not imputed and not "
+             f"counted as 'no'. Class counts of the rows with a determined class: "
+             + ", ".join(f"{c} {population['counts'][c]:,} ({population['shares'][c]:.1f}%)" for c in CLASS_NAMES)
              + ".", "",
-             (f"Hold-out and outer folds are identical to `{config['check_folds_against']}` (checked); "
-              if config.get("check_folds_against") else "Folds NOT checked against Experiment 2; ")
-             + "the hold-out is not used. "
-             "All models class-weighted. Plain accuracy is not reported.", "",
+             f"Hold-out: the locked 20% hold-out is the same set of rows as in every other experiment; "
+             f"{population['n_undetermined_in_holdout']} of the {population['n_undetermined']} undetermined rows "
+             f"fall in it. The hold-out is not used in this experiment at all (no training, tuning or scoring), "
+             f"so nothing is removed from it here. The other "
+             f"{population['n_undetermined'] - population['n_undetermined_in_holdout']} undetermined rows are in "
+             f"the development set and are excluded from each fold's training and validation rows.", "",
+             (f"Folds: the outer-fold assignments are identical to `{config['check_folds_against']}` (checked), "
+              f"but the {population['n_undetermined'] - population['n_undetermined_in_holdout']} undetermined "
+              f"development rows are excluded from training and validation, so each fold has slightly fewer rows "
+              f"than in Experiment 2. "
+              if config.get("check_folds_against") else "Folds NOT checked against Experiment 2. ")
+             + "All models class-weighted. Plain accuracy is not reported.", "",
              "| Model | Regime | Features | Macro-F1 | Macro OvR AUC | Balanced acc. | Recall none | Recall anxiety only | Recall depression | Depression-vs-rest AUC |",
              "|---|---|---|---|---|---|---|---|---|---|"]
     for idx, r in summary.iterrows():
