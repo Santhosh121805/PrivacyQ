@@ -14,7 +14,7 @@ Status values:
 Paths are relative to the repository root. `results/` is git-ignored and produced by the commands in
 `README.md`; the run directories referenced are those listed in `configs/final_report.yaml`.
 
-_Last updated: 2026-11-12, after Priority 1 (input-stage privacy) and Priority 2 item 2 (re-identification risk)._
+_Last updated: 2026-11-12, after Priority 1 and Priority 2 items 1–2._
 
 ## Pipeline flow as built
 
@@ -89,7 +89,7 @@ privacy only.
 | Federated simulation | BUILT | `src/m6_federated/fedavg.py`, `tests/test_phase5_federated.py`, Exp 4 results | FedAvg, 3/5/10 clients, IID and by-state, client-side DP. |
 | Secure aggregation | PHASE-2 | `src/m7_privacy/secure_aggregation.py` (stub that reports "not implemented") | Scheduled: Priority 3, item 9. |
 | Homomorphic encryption | PHASE-2 | — | Computationally impractical at this scale; a toy version would misrepresent its cost. |
-| Privacy risk analysis (membership inference test) | PHASE-2 | `src/m9_audit/audit.py` (unused stub) | Scheduled: Priority 2, item 1. |
+| Privacy risk analysis (membership inference test) | BUILT | `src/m9_audit/membership.py`, `tests/test_membership.py`, `src/m10_exp/exp6_membership.py`, `results/exp6-nsch2024-membership-inference-20261112-120934/` | Loss-threshold attack, 5 folds. See box 12. (`src/m9_audit/audit.py` is an older unused helper, not part of this test.) |
 | Input-stage privacy: k-anonymity | BUILT | `src/m7_privacy/input_privacy.py`, `tests/test_input_privacy.py`, `results/exp5-nsch2024-input-privacy-20261112-120542/` | k = 5 achieved on every fold's training rows; suppresses 13.0 % of rows on full data, 43.5 % on 1.2k-row subsamples; no measurable AUC cost (e.g. LogReg full 0.853 → 0.858). |
 | Input-stage privacy: local differential privacy | BUILT | same | Laplace ε-LDP on encoder inputs, ε_input ∈ {32, 16, 8, 4}. Large cost: QSVM 0.848 → 0.821 / 0.709 / 0.570 / 0.500; LogReg full 0.853 → 0.764 at ε_input = 4. Labels are not perturbed. |
 
@@ -170,7 +170,7 @@ privacy only.
 
 | Sub-item | Status | Evidence | Note |
 |---|---|---|---|
-| Membership inference risk | PHASE-2 | — | Scheduled: Priority 2, item 1. |
+| Membership inference risk | BUILT | `src/m9_audit/membership.py`, `tests/test_membership.py`, `results/exp6-nsch2024-membership-inference-20261112-120934/summary.md` | Attack AUC 0.496–0.503 for DP LogReg and DP VQC at every ε ∈ {0.5…8, ∞} and 0.502 for the QSVM: no measurable leakage even without DP. Positive control (overfit MLP) 0.558, so the attack works. Loss-threshold attack only; stronger attacks (e.g. LiRA) not run. |
 | Re-identification risk | BUILT | `src/m9_audit/reidentification.py`, `tests/test_reidentification.py`, `scripts/reidentification_report.py`, `results/reidentification/risk.md` | 17,431 dev rows: 36.8 % unique on 7 raw demographic QIs (62.7 % with state); after k = 5 anonymisation 0.0 % unique, max risk 0.20 — but 22.9 % unique again if the attacker also knows the U.S. state. |
 | Effect of privacy parameters (ε, noise) | BUILT | Exp 3 (`results/exp3-*`), `results/RESULTS.md` Tables 5–7; Exp 5 | Training ε ∈ {0.5, 1, 2, 4, 8, ∞}; input ε ∈ {4, 8, 16, 32, ∞}. |
 | Data utility trade-off | BUILT | same | Privacy–utility curve. |
@@ -212,3 +212,4 @@ privacy only.
 - 2026-11-12: baseline written before the conformance sprint.
 - 2026-11-12: Priority 1 — input-stage privacy (k-anonymity, local DP) built and measured (Experiment 5); flow section rewritten.
 - 2026-11-12: Priority 2 item 2 — re-identification risk built and measured.
+- 2026-11-12: Priority 2 item 1 — membership inference test built and measured (Experiment 6).

@@ -1,0 +1,7 @@
+# Experiment 6: membership inference risk at each privacy level, REAL NSCH 2024 data.
+project: {name: exp6-nsch2024-membership-inference, seed: 2026, output_dir: results, n_jobs: 6}
+data: {loader: nsch, paths: [data/raw/nsch_2024/nsch_2024e_topical.dta], target: depression_current, min_age: 12, max_age: 17}
+cv: {n_splits: 5, n_repeats: 1}
+experiment:
+  arms: [dp_logreg_full, dp_vqc, qsvm, mlp_overfit]
+  epsilons: [0.5, 1, 2, 4, 8, null]
