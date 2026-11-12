@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-from src.m8_eval.stats import corrected_resampled_ttest, holm, wilcoxon_p  # noqa: E402
+from src.m8_eval.stats import add_holm, corrected_resampled_ttest, holm, wilcoxon_p  # noqa: E402
 from src.m10_exp.common import markdown_table, report_header, stamp_synthetic, summarise  # noqa: E402
 
 HEAD = ["balanced_accuracy", "recall", "roc_auc", "pr_auc"]
@@ -46,9 +46,10 @@ def encoding_tests(results: pd.DataFrame) -> pd.DataFrame:
                          "vs": other, "auc_best": means[best], "auc_other": means[other], **t})
     out = pd.DataFrame(rows)
     if len(out):
-        out["wilcoxon_p_holm"] = holm(out["wilcoxon_p"])
-        out["wilcoxon_p_holm_in_config"] = out.groupby(["model", "feature_method", "n_qubits"])[
-            "wilcoxon_p"].transform(lambda p: holm(p.to_numpy()))
+        out = add_holm(out, None)                                   # pre-declared family: the whole table
+        for col in ("p_nb_t", "wilcoxon_p"):                        # secondary family: within one configuration
+            out[col + "_holm_in_config"] = out.groupby(["model", "feature_method", "n_qubits"])[col].transform(
+                lambda p: holm(p.to_numpy()))
     return out
 
 
@@ -79,7 +80,7 @@ def method_tests(results: pd.DataFrame) -> pd.DataFrame:
                      "auc_pca": g[g.feature_method == "pca"].roc_auc.mean(), **t})
     out = pd.DataFrame(rows)
     if len(out):
-        out["wilcoxon_p_holm"] = holm(out["wilcoxon_p"])
+        out = add_holm(out, None)
     return out
 
 
@@ -162,10 +163,11 @@ def write_report(run_dir: Path, results: pd.DataFrame, resources: pd.DataFrame, 
         f"(positives {counts.n_val_pos.min()}–{counts.n_val_pos.max()}).",
         "",
         "Hyperparameters, early-stopping epoch and decision threshold (Youden J) are selected on inner-val only. "
-        "Significance: two-sided Wilcoxon signed-rank test on paired per-fold ROC-AUC (primary; Holm-adjusted "
-        "within each table). The Nadeau–Bengio corrected resampled t-test "
-        f"(test/train ratio {_ratio(results):.3f}) is reported as a more conservative secondary check, because "
-        "CV folds share training rows. CI = 95% interval of the mean paired difference from the corrected t.",
+        "Significance on paired per-fold ROC-AUC. Primary: Nadeau–Bengio corrected resampled t-test "
+        f"(test/train ratio {_ratio(results):.3f}; CV folds share training rows), Holm-adjusted over the whole table "
+        "(`p_nb_t_holm`; `significant` = p_nb_t_holm < 0.05). Sensitivity check: two-sided Wilcoxon signed-rank, "
+        "Holm-adjusted the same way (`wilcoxon_p_holm`). CI = 95% interval of the mean paired difference from the "
+        "corrected t.",
         "",
         f"**Best quantum setup by mean ROC-AUC:** {best.model} / {best.encoding} / {best.feature_method} / "
         f"{int(best.n_qubits)} qubits — ROC-AUC {best.roc_auc_mean:.3f} ± {best.roc_auc_std:.3f}, "
@@ -179,14 +181,16 @@ def write_report(run_dir: Path, results: pd.DataFrame, resources: pd.DataFrame, 
                            "worst_encoding", "worst_auc", "auc_swing", "auc_swing_pct_of_worst", "bal_acc_swing"]), "",
         "## Best encoding vs each alternative (paired ROC-AUC)", "",
         _fmt_tests(enc_t, ["model", "feature_method", "n_qubits", "best", "vs", "mean_diff",
-                           "ci95_low", "ci95_high", "wilcoxon_p", "wilcoxon_p_holm", "wilcoxon_p_holm_in_config", "p_nb_t"]), "",
+                           "ci95_low", "ci95_high", "p_nb_t", "p_nb_t_holm", "p_nb_t_holm_in_config", "significant",
+                           "wilcoxon_p", "wilcoxon_p_holm", "wilcoxon_p_holm_in_config"]), "",
         f"Note: with k = {results.groupby(['repeat', 'fold']).ngroups} paired folds the smallest attainable two-sided "
         f"Wilcoxon p is {2 / 2 ** results.groupby(['repeat', 'fold']).ngroups:.4f} (all folds agree). Holm over the "
-        "whole table (pre-declared, `wilcoxon_p_holm`) therefore cannot fall below that floor times the family size; "
-        "`wilcoxon_p_holm_in_config` (secondary, family = the 3 comparisons within one model/feature/qubit "
-        "configuration) is shown for interpretation.", "",
+        "whole table therefore cannot fall below that floor times the family size (this limits the Wilcoxon "
+        "sensitivity check, not the primary t). `*_holm_in_config` (secondary family = the comparisons within one "
+        "model/feature/qubit configuration) is shown for interpretation.", "",
         "## MI vs PCA (paired ROC-AUC, positive = MI better)", "",
-        _fmt_tests(meth_t, ["model", "encoding", "n_qubits", "auc_mi", "auc_pca", "mean_diff", "wilcoxon_p", "wilcoxon_p_holm", "p_nb_t"]), "",
+        _fmt_tests(meth_t, ["model", "encoding", "n_qubits", "auc_mi", "auc_pca", "mean_diff", "p_nb_t", "p_nb_t_holm",
+                            "significant", "wilcoxon_p", "wilcoxon_p_holm"]), "",
         "## Circuit cost (decomposed to RX/RY/RZ/CNOT/H)", "",
         _fmt_tests(resources.astype(object).where(resources.notna(), ""), list(resources.columns)), "",
         "## Training cost (mean per fold; tuning = all grid points)", "",

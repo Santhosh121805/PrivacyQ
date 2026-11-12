@@ -216,7 +216,7 @@
         <h1>Evidence</h1>
         <p class="page-lede">The experiment tables and figures exactly as saved in results/; nothing on this page is recomputed.</p>
         <div id="ev-error" class="error mb-4" hidden></div>
-        <div class="card"><h2>Classical vs quantum at matched conditions</h2><p class="help mt-2">ROC-AUC, 15 folds, same 1,500-row subsample and features; paired Wilcoxon, Holm-adjusted.</p><div class="mt-4 overflow-x-auto" id="ev-matched"></div></div>
+        <div class="card"><h2>Classical vs quantum at matched conditions</h2><p class="help mt-2">ROC-AUC, 15 folds, same 1,500-row subsample and features; paired Nadeau–Bengio corrected t-test, Holm-adjusted (Wilcoxon as a sensitivity check).</p><div class="mt-4 overflow-x-auto" id="ev-matched"></div></div>
         <div class="card mt-4"><h2>Cross-validation beside the locked hold-out</h2><p class="help mt-2">The 4,358-row hold-out was scored exactly once.</p><div class="mt-4 overflow-x-auto" id="ev-holdout"></div></div>
         <div class="card mt-4"><h2>Encoding sweep</h2><p class="help mt-2">ROC-AUC, mean ± std over 10 folds: QSVM and VQC × encoding × qubits × feature selection.</p><div class="mt-4 overflow-x-auto" id="ev-encodings"></div></div>
         <div class="space-y-8 mt-8" id="ev-figures"></div>

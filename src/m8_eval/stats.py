@@ -3,8 +3,9 @@
 Fold scores from (repeated) K-fold CV are not independent: training sets
 overlap, so a plain paired t-test is anti-conservative. The primary test here
 is the Nadeau-Bengio corrected resampled t-test, which inflates the variance by
-(1/k + n_test/n_train). The Wilcoxon signed-rank test is reported alongside as
-a non-parametric check. Holm's method controls the family-wise error rate when
+(1/k + n_test/n_train); it is the PRIMARY test in every report (Holm-adjusted, column
+``p_nb_t_holm``). The Wilcoxon signed-rank test is reported alongside as
+a non-parametric sensitivity check (``wilcoxon_p_holm``). Holm's method controls the family-wise error rate when
 several comparisons are reported together.
 """
 
@@ -48,3 +49,28 @@ def holm(pvalues) -> np.ndarray:
         running = max(running, (len(p) - rank) * p[index])
         adjusted[index] = min(1.0, running)
     return adjusted
+
+
+PRIMARY = "p_nb_t_holm"          # primary decision column everywhere (alpha = 0.05)
+SENSITIVITY = "wilcoxon_p_holm"  # reported alongside as a sensitivity check
+
+
+def add_holm(df, groups: list[str] | None, p_col: str = "p_nb_t", w_col: str = "wilcoxon_p"):
+    """Holm-adjust the primary (Nadeau-Bengio corrected t) and sensitivity (Wilcoxon) p-values within
+    the same families (``groups``; None = the whole table is one family). Adds ``p_nb_t_holm``,
+    ``wilcoxon_p_holm`` and ``significant`` (primary, Holm-adjusted p < 0.05)."""
+    df = df.copy()
+    for src, dst in ((p_col, PRIMARY), (w_col, SENSITIVITY)):
+        if src not in df:
+            continue
+        if groups:
+            df[dst] = df.groupby(groups)[src].transform(lambda p: holm(p.to_numpy()))
+        else:
+            df[dst] = holm(df[src].to_numpy())
+    df["significant"] = df[PRIMARY] < 0.05
+    return df
+
+
+def test_train_ratio(frame) -> float:
+    """n_test / n_train for the Nadeau-Bengio correction, from per-fold row counts."""
+    return float(frame["n_val"].mean() / frame["n_fold_train"].mean())

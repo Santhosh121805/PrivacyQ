@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-from src.m8_eval.stats import holm, wilcoxon_p  # noqa: E402
+from src.m8_eval.stats import add_holm, corrected_resampled_ttest, holm, test_train_ratio, wilcoxon_p  # noqa: E402
 from src.m10_exp.common import report_header, stamp_synthetic  # noqa: E402
 
 HEAD = ["roc_auc", "balanced_accuracy", "recall"]
@@ -51,6 +51,7 @@ def _pairs(results, a_arm, a_eps, b_arm, b_eps, metric="roc_auc"):
 
 
 def cost_of_privacy(results: pd.DataFrame) -> pd.DataFrame:
+    ratio = test_train_ratio(results)
     rows = []
     for arm in results.arm.unique():
         for eps in eps_order(results[results.arm == arm].target_epsilon):
@@ -60,34 +61,36 @@ def cost_of_privacy(results: pd.DataFrame) -> pd.DataFrame:
                 x, ref = _pairs(results, arm, eps, arm, "inf", metric)
                 rows.append({"arm": arm, "epsilon": eps, "metric": metric, "private_mean": x.mean(),
                              "nonprivate_mean": ref.mean(), "change": (x - ref).mean(),
-                             "wilcoxon_p": wilcoxon_p(x, ref)})
-    out = pd.DataFrame(rows)
-    out["wilcoxon_p_holm"] = out.groupby(["arm", "metric"])["wilcoxon_p"].transform(lambda p: holm(p.to_numpy()))
-    return out
+                             "p_nb_t": corrected_resampled_ttest(x, ref, ratio)["p"], "wilcoxon_p": wilcoxon_p(x, ref)})
+    return add_holm(pd.DataFrame(rows), ["arm", "metric"])
 
 
 def quantum_vs_classical(results: pd.DataFrame, pairs: list[list[str]]) -> pd.DataFrame:
+    ratio = test_train_ratio(results)
     rows = []
     for q_arm, c_arm in pairs:
         for eps in eps_order(results[results.arm == q_arm].target_epsilon):
             xq, xc = _pairs(results, q_arm, eps, c_arm, eps)
             row = {"quantum": q_arm, "classical": c_arm, "epsilon": eps, "quantum_auc": xq.mean(),
                    "classical_auc": xc.mean(), "auc_diff": (xq - xc).mean(), "quantum_wins": int((xq > xc).sum()),
-                   "k": len(xq), "wilcoxon_p": wilcoxon_p(xq, xc)}
+                   "k": len(xq), "p_nb_t": corrected_resampled_ttest(xq, xc, ratio)["p"], "wilcoxon_p": wilcoxon_p(xq, xc)}
             if eps != "inf":  # degradation relative to each model's own non-private AUC
                 dq = _series(results, q_arm, eps) - _series(results, q_arm, "inf")
                 dc = _series(results, c_arm, eps) - _series(results, c_arm, "inf")
                 idx = dq.dropna().index.intersection(dc.dropna().index).sort_values()
                 dq, dc = dq[idx].to_numpy(), dc[idx].to_numpy()
                 row.update({"quantum_auc_drop": -dq.mean(), "classical_auc_drop": -dc.mean(),
+                            "drop_diff_p_nb_t": corrected_resampled_ttest(dq, dc, ratio)["p"],
                             "drop_diff_wilcoxon_p": wilcoxon_p(dq, dc)})
             rows.append(row)
     out = pd.DataFrame(rows)
-    for col in ("wilcoxon_p", "drop_diff_wilcoxon_p"):
+    for col in ("p_nb_t", "wilcoxon_p", "drop_diff_p_nb_t", "drop_diff_wilcoxon_p"):
         if col in out:
             mask = out[col].notna()
             out.loc[mask, col + "_holm"] = out[mask].groupby(["quantum", "classical"])[col].transform(
                 lambda p: holm(p.to_numpy()))
+    if "p_nb_t_holm" in out:
+        out["significant"] = out["p_nb_t_holm"] < 0.05
     return out
 
 
@@ -133,7 +136,7 @@ def _fmt(df: pd.DataFrame) -> str:
         for c in cols:
             v = r[c]
             if isinstance(v, (float, np.floating)):
-                cells.append("" if pd.isna(v) else (f"{v:.2g}" if "wilcoxon" in c else f"{v:.3f}"))
+                cells.append("" if pd.isna(v) else (f"{v:.2g}" if ("wilcoxon" in c or "p_nb_t" in c) else f"{v:.3f}"))
             else:
                 cells.append(str(v))
         lines.append("| " + " | ".join(cells) + " |")
@@ -178,11 +181,15 @@ def write_report(run_dir: Path, results: pd.DataFrame, loader, config: dict) -> 
                               for a, s in exp["arms"].items()), "",
         "![privacy-utility curve](privacy_utility_curve.png)", "",
         "## Utility by ε (mean / std over folds)", "", _fmt(table), "",
-        "## Cost of privacy: each ε vs the same arm at ε = ∞ (paired Wilcoxon, Holm within arm × metric)", "",
+        "Significance (all tables): primary = Nadeau–Bengio corrected resampled t (`p_nb_t`), Holm-adjusted "
+        "(`p_nb_t_holm`; `significant` = p_nb_t_holm < 0.05); sensitivity check = Wilcoxon signed-rank, Holm-adjusted "
+        "(`wilcoxon_p_holm`). Same Holm families for both.", "",
+        "## Cost of privacy: each ε vs the same arm at ε = ∞ (Holm within arm × metric)", "",
         _fmt(cost), "",
         "## Quantum vs classical at each ε, and whether quantum degrades differently", "",
         "`auc_drop` = mean fold-wise loss of ROC-AUC relative to the arm's own ε = ∞ model; "
-        "`drop_diff_wilcoxon_p` tests whether the quantum drop differs from the classical drop on the same folds.", "",
+        "`drop_diff_p_nb_t` (primary) and `drop_diff_wilcoxon_p` (sensitivity) test whether the quantum drop differs "
+        "from the classical drop on the same folds (Holm within the quantum/classical pair).", "",
         _fmt(qvc), "",
     ]
     (run_dir / "summary.md").write_text("\n".join(lines), encoding="utf-8")

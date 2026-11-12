@@ -1,8 +1,11 @@
 """Pair a supplementary run with the Experiment 2 run (same 15 folds, same seeds) and test it.
 
-Writes <new_run>/comparison.csv and comparison.md: mean ± std of each arm and paired Wilcoxon
-(Holm-adjusted within the table) plus the Nadeau-Bengio corrected t on ROC-AUC, balanced accuracy
-and recall.
+Writes <new_run>/comparison.csv and comparison.md: mean ± std of each arm; primary test = Nadeau-Bengio
+corrected resampled t, Holm-adjusted within each metric over the listed comparisons; sensitivity check =
+Wilcoxon signed-rank, Holm-adjusted the same way; on ROC-AUC, balanced accuracy and recall.
+
+With --from-existing, the comparison pairs are read from <new_run>/comparison.csv (to recompute an earlier
+comparison with the current tests).
 
 Usage:
   python scripts/compare_with_exp2.py <new_run_dir> "<a_model>/<regime>/<features>:<b_model>/<regime>/<features>" ...
@@ -17,7 +20,7 @@ sys.path.insert(0, str(ROOT))
 
 import pandas as pd  # noqa: E402
 
-from src.m8_eval.stats import corrected_resampled_ttest, holm, wilcoxon_p  # noqa: E402
+from src.m8_eval.stats import add_holm, corrected_resampled_ttest, wilcoxon_p  # noqa: E402
 from src.m10_exp.common import load_config  # noqa: E402
 
 METRICS = ["roc_auc", "balanced_accuracy", "recall"]
@@ -47,17 +50,24 @@ def main(new_dir: str, pairs: list[str]) -> None:
             rows.append({"a": a_spec, "b": b_spec, "metric": m, "a_mean": x.mean(), "a_std": x.std(ddof=1),
                          "b_mean": y.mean(), "b_std": y.std(ddof=1), "diff": t["mean_diff"], "a_wins": int((x > y).sum()),
                          "k": len(idx), "wilcoxon_p": wilcoxon_p(x, y), "p_nb_t": t["p"]})
-    out = pd.DataFrame(rows)
-    out["wilcoxon_p_holm"] = out.groupby("metric")["wilcoxon_p"].transform(lambda p: holm(p.to_numpy()))
+    out = add_holm(pd.DataFrame(rows), ["metric"])
     out.to_csv(Path(new_dir) / "comparison.csv", index=False)
-    lines = ["| A | B | Metric | A (mean ± std) | B (mean ± std) | A − B | A wins | Wilcoxon p | Holm p | NB-t p |",
-             "|---|---|---|---|---|---|---|---|---|---|"]
+    lines = ["Primary: Nadeau–Bengio corrected resampled t, Holm within metric (significant = Holm p < 0.05). "
+             "Sensitivity: Wilcoxon signed-rank, Holm within metric.", "",
+             "| A | B | Metric | A (mean ± std) | B (mean ± std) | A − B | A wins | NB-t p | NB-t Holm p (primary) | "
+             "Significant | Wilcoxon p | Wilcoxon Holm p (sensitivity) |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for _, r in out.iterrows():
         lines.append(f"| {r.a} | {r.b} | {r.metric} | {r.a_mean:.3f} ± {r.a_std:.3f} | {r.b_mean:.3f} ± {r.b_std:.3f} | "
-                     f"{r['diff']:+.3f} | {r.a_wins}/{r.k} | {r.wilcoxon_p:.3g} | {r.wilcoxon_p_holm:.3g} | {r.p_nb_t:.3g} |")
+                     f"{r['diff']:+.3f} | {r.a_wins}/{r.k} | {r.p_nb_t:.3g} | {r.p_nb_t_holm:.3g} | "
+                     f"{'yes' if r.significant else 'no'} | {r.wilcoxon_p:.3g} | {r.wilcoxon_p_holm:.3g} |")
     (Path(new_dir) / "comparison.md").write_text("\n".join(lines), encoding="utf-8")
     print("\n".join(lines))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2:])
+    if sys.argv[2:] == ["--from-existing"]:
+        prev = pd.read_csv(Path(sys.argv[1]) / "comparison.csv")
+        main(sys.argv[1], list(dict.fromkeys(f"{a}:{b}" for a, b in zip(prev.a, prev.b))))
+    else:
+        main(sys.argv[1], sys.argv[2:])

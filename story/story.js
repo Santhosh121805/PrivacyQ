@@ -65,13 +65,13 @@ function renderStatic() {
     const t = data.ten_folds;
     $("s3-verified").textContent = `Verified on ${fmtInt(r.n_val)} student records that were never used for training. `
       + `Repeated on all ${t.k} test splits: alone ${f(t.alone_eps4_mean, 2)} on average, together ${f(t.federated_eps4_mean, 2)}; `
-      + `together was better in ${t.federated_beats_alone_folds} of ${t.k} (p = ${f(t.wilcoxon_p, 3)}).`;
+      + `together was better in ${t.federated_beats_alone_folds} of ${t.k} (corrected t-test p = ${f(t.p_nb_t, 3)}).`;
     // Screen 4
     const q = data.quantum_vs_classical;
     const bar = (label, v, color) => `<div><div class="flex items-baseline justify-between text-[20px]"><span>${label}</span><span class="num text-[48px]">${f(v, 3)}</span></div>
       <div class="h-6 bg-[#f4f4f5] rounded mt-2"><div class="h-6 rounded" style="width:${v * 100}%;background:${color}"></div></div></div>`;
     $("s4-bars").innerHTML = bar("Classical model", q.classical_auc, COLOR.accent) + bar("Quantum model", q.quantum_auc, COLOR.quantum)
-      + `<p class="text-[22px] mt-4">Difference not statistically significant <span class="small">(p = ${f(q.holm_p, 2)}, ${q.k} tests)</span></p>`;
+      + `<p class="text-[22px] mt-4">Difference not statistically significant <span class="small">(corrected t-test, Holm p = ${f(q.holm_p, 2)}, ${q.k} folds)</span></p>`;
   }
 }
 

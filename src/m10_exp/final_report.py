@@ -20,7 +20,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 from src.m10_exp.common import LABEL_LIMITATION, load_config  # noqa: E402
-from src.m8_eval.stats import holm, wilcoxon_p  # noqa: E402
+from src.m8_eval.stats import add_holm, corrected_resampled_ttest, holm, test_train_ratio, wilcoxon_p  # noqa: E402
 
 COLORS = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]  # validated slots 1-4
 MARKERS = ["o", "s", "^", "D"]
@@ -105,8 +105,7 @@ def encoding_table(exp1: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
 
 def comparison_table(exp2: Path) -> pd.DataFrame:
     t = pd.read_csv(exp2 / "tests_same_rows_features.csv")
-    t = t[~t.classical.str.startswith("random_forest")]
-    t["wilcoxon_p_holm"] = t.groupby("metric")["wilcoxon_p"].transform(lambda p: holm(p.to_numpy()))
+    t = add_holm(t[~t.classical.str.startswith("random_forest")], ["metric"])   # family recomputed without RF
     metric = {"roc_auc": "ROC-AUC", "balanced_accuracy": "Balanced acc.", "recall": "Recall"}
     return pd.DataFrame({
         "Quantum": t.quantum.str.split("/").str[0].map(NAMES) + " (" + t.quantum.str.split("/").str[2] + ")",
@@ -114,7 +113,8 @@ def comparison_table(exp2: Path) -> pd.DataFrame:
         "Quantum mean": t.quantum_mean.round(3), "Classical mean": t.classical_mean.round(3),
         "Diff (95% CI)": [f"{d:+.3f} [{lo:+.3f}, {hi:+.3f}]" for d, lo, hi in zip(t.mean_diff, t.ci95_low, t.ci95_high)],
         "Quantum wins": [f"{w}/{k}" for w, k in zip(t.quantum_wins, t.k)],
-        "Wilcoxon p": t.wilcoxon_p.map(pfmt), "Holm p": t.wilcoxon_p_holm.map(pfmt)})
+        "NB-t Holm p (primary)": t.p_nb_t_holm.map(pfmt), "Significant": t.significant.map({True: "yes", False: "no"}),
+        "Wilcoxon Holm p (sensitivity)": t.wilcoxon_p_holm.map(pfmt)})
 
 
 def privacy_tables(exp3: Path, sens: Path) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -133,25 +133,30 @@ def privacy_tables(exp3: Path, sens: Path) -> tuple[pd.DataFrame, pd.DataFrame, 
     q = pd.read_csv(exp3 / "tests_quantum_vs_classical.csv")
     q["eps"] = ["∞" if str(e) in ("inf", "nan") else f"{float(e):g}" for e in q.epsilon]
     deg = pd.DataFrame({"ε": q.eps, "VQC AUC": q.quantum_auc.round(3), "LogReg AUC (clip 1)": q.classical_auc.round(3),
-                        "Diff": q.auc_diff.round(3), "Holm p (diff)": q.wilcoxon_p_holm.map(pfmt),
+                        "Diff": q.auc_diff.round(3), "NB-t Holm p (diff)": q.p_nb_t_holm.map(pfmt),
+                        "Wilcoxon Holm p (diff)": q.wilcoxon_p_holm.map(pfmt),
                         "VQC drop vs ∞": q.quantum_auc_drop.round(3), "LogReg drop vs ∞": q.classical_auc_drop.round(3),
-                        "Holm p (drop diff)": q.get("drop_diff_wilcoxon_p_holm", pd.Series(dtype=float)).map(pfmt)})
+                        "NB-t Holm p (drop diff)": q.get("drop_diff_p_nb_t_holm", pd.Series(dtype=float)).map(pfmt),
+                        "Wilcoxon Holm p (drop diff)": q.get("drop_diff_wilcoxon_p_holm", pd.Series(dtype=float)).map(pfmt)})
     # sensitivity: VQC (clip 1) vs LogReg clip 10, paired by fold
     main = pd.read_csv(exp3 / "fold_metrics.csv")
     sen = pd.read_csv(sens / "fold_metrics.csv")
     for f in (main, sen):
         f["eps"] = ["∞" if str(e) in ("inf", "nan") else f"{float(e):g}" for e in f.target_epsilon]
     rows = []
+    ratio = test_train_ratio(main)
     for e in order:
         a = main[(main.arm == "vqc_sub") & (main.eps == e)].set_index(["repeat", "fold"]).roc_auc.sort_index()
         b = sen[(sen.arm == "logreg_sub_clip10") & (sen.eps == e)].set_index(["repeat", "fold"]).roc_auc.sort_index()
         idx = a.index.intersection(b.index)
         rows.append({"ε": e, "VQC AUC": round(a[idx].mean(), 3), "LogReg clip 10 AUC": round(b[idx].mean(), 3),
-                     "Diff": round((a[idx] - b[idx]).mean(), 3), "Wilcoxon p": wilcoxon_p(a[idx].to_numpy(), b[idx].to_numpy())})
-    sensdf = pd.DataFrame(rows)
-    sensdf["Holm p"] = holm(sensdf["Wilcoxon p"].to_numpy())
-    sensdf["Wilcoxon p"] = sensdf["Wilcoxon p"].map(pfmt)
-    sensdf["Holm p"] = sensdf["Holm p"].map(pfmt)
+                     "Diff": round((a[idx] - b[idx]).mean(), 3),
+                     "p_nb_t": corrected_resampled_ttest(a[idx].to_numpy(), b[idx].to_numpy(), ratio)["p"],
+                     "wilcoxon_p": wilcoxon_p(a[idx].to_numpy(), b[idx].to_numpy())})
+    t = add_holm(pd.DataFrame(rows), None)
+    sensdf = t[["ε", "VQC AUC", "LogReg clip 10 AUC", "Diff"]].assign(**{
+        "NB-t Holm p (primary)": t.p_nb_t_holm.map(pfmt), "Significant": t.significant.map({True: "yes", False: "no"}),
+        "Wilcoxon Holm p (sensitivity)": t.wilcoxon_p_holm.map(pfmt)})
     return auc, deg, sensdf
 
 
@@ -199,7 +204,9 @@ def federated_table(exp4: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     tt = pd.DataFrame({"Arm": tests.arm.map(names), "Partition": tests.partition, "Clients": tests.n_clients,
                        "vs": tests.vs, "Federated AUC": tests.federated_auc.round(3),
                        "Reference AUC": tests.reference_auc.round(3), "Change": tests.auc_change.round(3),
-                       "Wilcoxon p": tests.wilcoxon_p.map(pfmt), "Holm p": tests.wilcoxon_p_holm.map(pfmt)})
+                       "NB-t Holm p (primary)": tests.p_nb_t_holm.map(pfmt),
+                       "Significant": tests.significant.map({True: "yes", False: "no"}),
+                       "Wilcoxon Holm p (sensitivity)": tests.wilcoxon_p_holm.map(pfmt)})
     return t, tt
 
 
@@ -242,7 +249,9 @@ def build(config_path: str) -> Path:
            "Protocol: repeated stratified CV on the dev rows; all preprocessing fitted inside each fold; "
            "hyperparameters, early stopping and the decision threshold chosen on an inner validation split of the "
            "fold's training rows, identically for every model. Headline metrics: balanced accuracy, recall, ROC-AUC. "
-           "Significance: paired two-sided Wilcoxon signed-rank over folds, Holm-adjusted within each family. "
+           "Significance: paired over folds; primary test = Nadeau–Bengio corrected resampled t (accounts for "
+           "overlapping CV training sets), Holm-adjusted within each family, significant when the adjusted p < 0.05; "
+           "the Wilcoxon signed-rank test, Holm-adjusted the same way, is reported as a sensitivity check. "
            "Privacy comes only from DP-SGD (Opacus) and federated aggregation; quantum circuits are a representation "
            "layer. RandomForest is excluded from all results on supervisor instruction.")
 
@@ -255,12 +264,11 @@ def build(config_path: str) -> Path:
     w.table(swing, "Encoding swing: best minus worst encoding (mean ROC-AUC)", "encoding_swing")
     shutil.copy(runs["exp1"] / "exp1_encoding_auc.png", out / "figures" / "encoding_comparison.png")
     w.text("![encoding comparison](figures/encoding_comparison.png)",
-           "Full pairwise tests: `" + str(runs["exp1"] / "summary.md") + "`. With 10 folds the smallest attainable "
-           "two-sided Wilcoxon p is 0.002, so differences cannot survive Holm over the whole 36-comparison table; "
-           "within-configuration Holm values are given there.")
+           "Full pairwise tests (primary corrected t and Wilcoxon sensitivity check, Holm over the whole table and "
+           "within each configuration): `" + str(runs["exp1"] / "summary.md") + "`.")
 
     w.text("## 3. Experiment 2 — quantum vs classical on identical rows and features (15 folds)")
-    w.table(comparison_table(runs["exp2"]), "Paired comparisons (Holm within metric)", "quantum_vs_classical")
+    w.table(comparison_table(runs["exp2"]), "Paired comparisons (Holm within metric; primary = corrected t)", "quantum_vs_classical")
     shutil.copy(runs["exp2"] / "exp2_roc.png", out / "figures" / "roc_curves.png")
     w.text("![ROC curves](figures/roc_curves.png)",
            "Mean ROC over the 15 outer folds. VQC and Hybrid validation scores were recovered by re-running those two "
@@ -280,7 +288,7 @@ def build(config_path: str) -> Path:
     w.text("## 5. Experiment 4 — federated learning + DP (ε = 4, 10 folds)",
            "![federated convergence](figures/federated_convergence.png)")
     w.table(fed, "Federated (FedAvg, 30 rounds, client-side DP-SGD) vs centralised", "federated")
-    w.table(fed_t, "Federated vs centralised, paired ROC-AUC (Holm within arm × reference)", "federated_tests")
+    w.table(fed_t, "Federated vs centralised, paired ROC-AUC (Holm within arm × reference; primary = corrected t)", "federated_tests")
 
     w.text("## 6. Computational cost")
     w.table(cost_table(runs["exp1"], runs["exp2"]),
@@ -327,14 +335,16 @@ def build(config_path: str) -> Path:
            "terrain for them by construction, which is the most likely explanation of the quantum results.",
            "- **Feature-reduction ceiling.** Qubit-sized inputs (4–8 features) cost ROC-AUC relative to all 95 features "
            "even for classical models; this is a cost of the quantum approach, separate from model quality.",
-           "- **Simulation, not hardware.** All circuits run on an exact CPU statevector simulator (no shot noise, "
-           "no hardware noise). The winning QSVM uses angle encoding, whose kernel is a product of cos² terms and is "
-           "classically computable.",
+           "- **Simulation, not hardware.** All results in this file use an exact CPU statevector simulator (no shot "
+           "noise, no hardware noise). Hardware noise was simulated separately with an assumed noise model "
+           "(Experiments 8 and 8b; see CONFORMANCE.md); no real hardware was used. The winning QSVM uses angle "
+           "encoding, whose kernel is a product of cos² terms and is classically computable.",
            "- **Small training subsample.** Quantum models train on 1,500 rows per fold (~150 positives; ~120 in "
            "inner-train, 30 in inner-val), so thresholds and model selection are noisy.",
            "- **DP scope.** ε covers the trained weights only; fixed hyperparameters and the decision threshold "
            "(chosen on inner-val rows) are not accounted. The DP comparison is sensitive to the clipping norm "
-           "(Table 7). QSVM is not gradient-trained and has no DP variant here. Secure aggregation is not implemented.",
+           "(Table 7). QSVM is not gradient-trained and has no DP variant here. Secure aggregation was built later "
+           "(Experiment 7b) and was not used in Experiments 3–4.",
            "- **ε does not cover preprocessing.** Imputation medians, scaling statistics and PCA components are fitted on "
            "the private training rows without DP, so the (ε, δ) guarantee applies to the training steps given that "
            "preprocessing, not to the whole pipeline end to end.",

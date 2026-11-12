@@ -12,7 +12,7 @@ from matplotlib.ticker import MaxNLocator  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-from src.m8_eval.stats import holm, wilcoxon_p  # noqa: E402
+from src.m8_eval.stats import add_holm, corrected_resampled_ttest, test_train_ratio, wilcoxon_p  # noqa: E402
 from src.m10_exp.common import report_header, stamp_synthetic  # noqa: E402
 
 HEAD = ["roc_auc", "balanced_accuracy", "recall"]
@@ -47,7 +47,7 @@ def _fmt(df: pd.DataFrame) -> str:
         for c in cols:
             v = r[c]
             if isinstance(v, (float, np.floating)):
-                cells.append("" if pd.isna(v) else (f"{v:.2g}" if "wilcoxon" in c else f"{v:.3f}"))
+                cells.append("" if pd.isna(v) else (f"{v:.2g}" if ("wilcoxon" in c or "p_nb_t" in c) else f"{v:.3f}"))
             else:
                 cells.append(str(v))
         lines.append("| " + " | ".join(cells) + " |")
@@ -123,6 +123,7 @@ def write_report(run_dir: Path, results: pd.DataFrame, history: pd.DataFrame, lo
     summary.to_csv(run_dir / "summary.csv", index=False)
 
     tests = []
+    ratio = test_train_ratio(results)
     for arm in exp["arms"]:
         for eps in sorted(set(results.target_epsilon)):
             central = ref[(ref.arm == arm) & (ref.target_epsilon == eps)].set_index(["repeat", "fold"]).roc_auc
@@ -139,10 +140,11 @@ def write_report(run_dir: Path, results: pd.DataFrame, history: pd.DataFrame, lo
                     tests.append({"arm": arm, "epsilon": eps, "partition": partition, "n_clients": n,
                                   "vs": ref_name, "federated_auc": fed[idx].mean(), "reference_auc": base[idx].mean(),
                                   "auc_change": (fed[idx] - base[idx]).mean(), "k": len(idx),
+                                  "p_nb_t": corrected_resampled_ttest(fed[idx].to_numpy(), base[idx].to_numpy(), ratio)["p"],
                                   "wilcoxon_p": wilcoxon_p(fed[idx].to_numpy(), base[idx].to_numpy())})
     tests = pd.DataFrame(tests)
     if len(tests):
-        tests["wilcoxon_p_holm"] = tests.groupby(["arm", "vs"])["wilcoxon_p"].transform(lambda p: holm(p.to_numpy()))
+        tests = add_holm(tests, ["arm", "vs"])
     tests.to_csv(run_dir / "tests_federated_vs_centralised.csv", index=False)
     convergence_plot(history, combined, config, run_dir / "federated_convergence.png", loader)
 
@@ -163,13 +165,15 @@ def write_report(run_dir: Path, results: pd.DataFrame, history: pd.DataFrame, lo
         f"{k} outer folds. FedAvg, {exp['rounds']} rounds × {exp['local_epochs']} local epoch; each client runs "
         "Opacus DP-SGD with its own RDP accountant (noise calibrated for all its local steps). Every record belongs "
         "to one client, so the record-level guarantee is the maximum client ε reported. Centralised rows are the "
-        "Experiment 3 runs on the same folds and arms. Secure aggregation is not implemented: the server sees "
-        "individual DP-noised updates. Threshold chosen on central inner-val rows, as in Experiment 3.", "",
+        "Experiment 3 runs on the same folds and arms. Secure aggregation was not used in this experiment (it was "
+        "built later; Experiment 7b), so here the server sees individual DP-noised updates. Threshold chosen on central inner-val rows, as in Experiment 3.", "",
         "Partitions: `iid` = stratified random clients; `by_state` = non-IID, whole U.S. states assigned to clients "
         "(\"schools\").", "",
         "![federated convergence](federated_convergence.png)", "",
         "## Utility (mean / std over folds)", "", _fmt(table), "",
-        "## Federated vs centralised (paired ROC-AUC, Wilcoxon, Holm within arm × reference)", "", _fmt(tests), "",
+        "## Federated vs centralised (paired ROC-AUC, Holm within arm × reference)", "",
+        "Primary: Nadeau–Bengio corrected resampled t (`p_nb_t`, Holm-adjusted `p_nb_t_holm`; `significant` = "
+        "p_nb_t_holm < 0.05). Sensitivity: Wilcoxon signed-rank, Holm-adjusted (`wilcoxon_p_holm`).", "", _fmt(tests), "",
         "## Communication cost (float64 weights, all clients every round, download + upload)", "", _fmt(comm), "",
         "## Client sizes and prevalence", "", _fmt(sizes), "",
     ]

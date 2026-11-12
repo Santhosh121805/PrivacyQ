@@ -35,7 +35,7 @@ from src.m1_data.nsch import three_class_labels
 from src.m2_preprocess.preprocessing import TabularPreprocessor
 from src.m5_models.multiclass import CLASS_NAMES, MULTICLASS_MODELS
 from src.m8_eval import multiclass_metrics
-from src.m8_eval.stats import corrected_resampled_ttest, holm, wilcoxon_p
+from src.m8_eval.stats import add_holm, corrected_resampled_ttest, wilcoxon_p
 from src.m10_exp.common import (
     cv_folds, environment_record, holdout_split, limit_worker_threads, load_config, load_dataset,
     make_run_dir, save_splits, write_json,
@@ -163,16 +163,20 @@ def write_report(run_dir: Path, results: pd.DataFrame, config: dict, population:
         for m in METRICS:
             x, z = q.loc[idx, m].to_numpy(), o.loc[idx, m].to_numpy()
             rows.append({"b": other, "metric": m, "diff": float((x - z).mean()), "wins": int((x > z).sum()),
-                         "k": len(idx), "p": wilcoxon_p(x, z), "p_nb": corrected_resampled_ttest(x, z, ratio)["p"]})
+                         "k": len(idx), "p_nb_t": corrected_resampled_ttest(x, z, ratio)["p"],
+                         "wilcoxon_p": wilcoxon_p(x, z)})
     if rows:
-        tests = pd.DataFrame(rows)
-        tests["p_holm"] = tests.groupby("metric")["p"].transform(lambda p: holm(p.to_numpy()))
+        tests = add_holm(pd.DataFrame(rows), ["metric"])
         tests.to_csv(run_dir / "paired_tests.csv", index=False)
-        lines += ["", f"Paired tests, {qn} vs classical on the identical subsample {qfs} folds (Wilcoxon signed-rank, "
-                  "Holm within metric; Nadeau–Bengio corrected t as a second view):", "",
-                  f"| {qn} vs | Metric | {qn} − other | {qn} wins | Wilcoxon p | Holm p | NB-t p |", "|---|---|---|---|---|---|---|"]
+        lines += ["", f"Paired tests, {qn} vs classical on the identical subsample {qfs} folds, Holm within metric. "
+                  "Primary: Nadeau–Bengio corrected resampled t (significant = Holm p < 0.05). Sensitivity check: "
+                  "Wilcoxon signed-rank, Holm-adjusted the same way.", "",
+                  f"| {qn} vs | Metric | {qn} − other | {qn} wins | NB-t p | NB-t Holm p (primary) | Significant | "
+                  "Wilcoxon p | Wilcoxon Holm p (sensitivity) |", "|---|---|---|---|---|---|---|---|---|"]
         for _, t in tests.iterrows():
-            lines.append(f"| {t.b} | {t.metric} | {t['diff']:+.3f} | {t.wins}/{t.k} | {t.p:.3g} | {t.p_holm:.3g} | {t.p_nb:.3g} |")
+            lines.append(f"| {t.b} | {t.metric} | {t['diff']:+.3f} | {t.wins}/{t.k} | {t.p_nb_t:.3g} | "
+                         f"{t.p_nb_t_holm:.3g} | {'yes' if t.significant else 'no'} | {t.wilcoxon_p:.3g} | "
+                         f"{t.wilcoxon_p_holm:.3g} |")
     (run_dir / "multiclass_report.md").write_text("\n".join(lines), encoding="utf-8")
     print("\n".join(lines))
 

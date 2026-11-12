@@ -12,7 +12,7 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 from sklearn.metrics import roc_curve  # noqa: E402
 
-from src.m8_eval.stats import corrected_resampled_ttest, holm, wilcoxon_p  # noqa: E402
+from src.m8_eval.stats import add_holm, corrected_resampled_ttest, wilcoxon_p  # noqa: E402
 from src.m10_exp.common import markdown_table, report_header, stamp_synthetic, summarise  # noqa: E402
 
 HEAD = ["balanced_accuracy", "recall", "roc_auc"]
@@ -54,8 +54,7 @@ def comparison_tables(results: pd.DataFrame, config: dict) -> tuple[pd.DataFrame
     for q, spec in quantum.items():
         ceil += compare(results, (q, "subsample", spec["feature_set"]), (ceiling, "full", "all95"), ratio)
     ceil = pd.DataFrame(ceil)
-    for df in (same, ceil):
-        df["wilcoxon_p_holm"] = df.groupby("metric")["wilcoxon_p"].transform(lambda p: holm(p.to_numpy()))
+    same, ceil = add_holm(same, ["metric"]), add_holm(ceil, ["metric"])
     return same, ceil, ceiling
 
 
@@ -139,16 +138,18 @@ def write_report(run_dir: Path, results: pd.DataFrame, loader, config: dict) -> 
         f"All arms are scored on the same outer folds ({int(results.n_val.iloc[0])} rows, "
         f"{results.n_val_pos.min()}–{results.n_val_pos.max()} positives).", "",
         "Every model uses the same tuning protocol (grid, early-stopping epoch and Youden threshold chosen on inner-val "
-        "only). Tests are paired over folds: two-sided Wilcoxon signed-rank (primary, Holm-adjusted within each "
-        "metric), Nadeau–Bengio corrected t as secondary. `quantum_wins` = folds where the quantum model scored higher.", "",
+        "only). Tests are paired over folds. Primary: Nadeau–Bengio corrected resampled t (`p_nb_t`), Holm-adjusted "
+        "within each metric (`p_nb_t_holm`; `significant` = p_nb_t_holm < 0.05). Sensitivity check: two-sided Wilcoxon "
+        "signed-rank, Holm-adjusted the same way (`wilcoxon_p_holm`). `quantum_wins` = folds where the quantum model "
+        "scored higher.", "",
         "## Utility (mean ± std over folds)", "",
         markdown_table(summary, KEYS, HEAD + ["pr_auc", "accuracy"]), "",
         "## Quantum vs classical on identical rows and features", "",
         _fmt(same, ["quantum", "classical", "metric", "quantum_mean", "classical_mean", "mean_diff",
-                    "ci95_low", "ci95_high", "quantum_wins", "wilcoxon_p", "wilcoxon_p_holm", "p_nb_t"]), "",
+                    "ci95_low", "ci95_high", "quantum_wins", "p_nb_t", "p_nb_t_holm", "significant", "wilcoxon_p", "wilcoxon_p_holm"]), "",
         f"## Quantum (1.5k rows, reduced features) vs the full-data classical ceiling ({ceiling}, all 95 features)", "",
         _fmt(ceil, ["quantum", "classical", "metric", "quantum_mean", "classical_mean", "mean_diff",
-                    "ci95_low", "ci95_high", "quantum_wins", "wilcoxon_p", "wilcoxon_p_holm", "p_nb_t"]), "",
+                    "ci95_low", "ci95_high", "quantum_wins", "p_nb_t", "p_nb_t_holm", "significant", "wilcoxon_p", "wilcoxon_p_holm"]), "",
         "## Cost (mean per fold)", "",
         _fmt(summary[KEYS + ["n_params_mean", "fit_seconds_mean", "tuning_seconds_mean"]],
              KEYS + ["n_params_mean", "fit_seconds_mean", "tuning_seconds_mean"]), "",

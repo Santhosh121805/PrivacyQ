@@ -124,7 +124,7 @@ def main() -> None:
     per_fold_alone = a4.groupby(["repeat", "fold"]).roc_auc.mean()
     fed_by_fold = fed.set_index(["repeat", "fold"]).roc_auc
     idx = per_fold_alone.index.intersection(fed_by_fold.index)
-    from src.m8_eval.stats import wilcoxon_p
+    from src.m8_eval.stats import corrected_resampled_ttest, test_train_ratio, wilcoxon_p
     replay_alone = a4[(a4["repeat"] == 0) & (a4["fold"] == 0)].sort_values("school")
     replay_alone_np = alone[(alone.epsilon == "inf") & (alone["repeat"] == 0) & (alone["fold"] == 0)].sort_values("school")
     summary = {
@@ -140,7 +140,9 @@ def main() -> None:
             "centralised_eps4_mean": float(central_dp.roc_auc.mean()),
             "federated_minus_alone_mean": float((fed_by_fold[idx] - per_fold_alone[idx]).mean()),
             "federated_beats_alone_folds": int((fed_by_fold[idx] > per_fold_alone[idx]).sum()), "k": int(len(idx)),
-            "wilcoxon_p": wilcoxon_p(fed_by_fold[idx].to_numpy(), per_fold_alone[idx].to_numpy()),
+            "p_nb_t": corrected_resampled_ttest(fed_by_fold[idx].to_numpy(), per_fold_alone[idx].to_numpy(),
+                                                test_train_ratio(fed))["p"],                  # primary
+            "wilcoxon_p": wilcoxon_p(fed_by_fold[idx].to_numpy(), per_fold_alone[idx].to_numpy()),  # sensitivity
         },
         "quantum_vs_classical": None,
         "holdout_size": int(len(holdout)),
@@ -149,7 +151,8 @@ def main() -> None:
     t4 = pd.read_csv(ROOT / final["runs"]["exp2"] / "tests_same_rows_features.csv")
     t = t4[(t4.metric == "roc_auc") & (t4.quantum == "qsvm/subsample/pca8") & (t4.classical == "logreg/subsample/pca8")].iloc[0]
     summary["quantum_vs_classical"] = {"quantum_auc": float(t.quantum_mean), "classical_auc": float(t.classical_mean),
-                                       "holm_p": float(t.wilcoxon_p_holm), "k": int(t.k)}
+                                       "holm_p": float(t.p_nb_t_holm), "wilcoxon_holm_p": float(t.wilcoxon_p_holm),
+                                       "k": int(t.k)}
     out = ROOT / "results" / "story"
     out.mkdir(parents=True, exist_ok=True)
     (out / "story.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -161,5 +164,35 @@ def main() -> None:
     print(f"done in {time.time() - t0:.0f} s")
 
 
+def stats_only() -> None:
+    """Recompute only the significance fields of results/story/story.json from saved results (no training):
+    primary = Nadeau-Bengio corrected t (Holm for the quantum-vs-classical family), Wilcoxon as sensitivity."""
+    import shutil
+
+    from src.m8_eval.stats import corrected_resampled_ttest, test_train_ratio, wilcoxon_p
+
+    final = load_config(ROOT / "configs/final_report.yaml")
+    path = ROOT / "results" / "story" / "story.json"
+    shutil.copy(path, path.with_name("story.superseded-sig-20261112.json"))
+    summary = json.loads(path.read_text(encoding="utf-8"))
+    fm = pd.read_csv(ROOT / final["runs"]["exp4"] / "fold_metrics.csv")
+    fed = fm[(fm.arm == "logreg_full") & (fm.n_clients == N_CLIENTS) & (fm.partition == PARTITION)]
+    alone = pd.read_csv(ROOT / "results" / "story_alone_runs.csv")
+    per_fold_alone = alone[alone.epsilon.astype(str).isin(["4", "4.0"])].groupby(["repeat", "fold"]).roc_auc.mean()
+    fed_by_fold = fed.set_index(["repeat", "fold"]).roc_auc
+    idx = per_fold_alone.index.intersection(fed_by_fold.index)
+    x, y = fed_by_fold[idx].to_numpy(), per_fold_alone[idx].to_numpy()
+    summary["ten_folds"]["p_nb_t"] = corrected_resampled_ttest(x, y, test_train_ratio(fed))["p"]
+    summary["ten_folds"]["wilcoxon_p"] = wilcoxon_p(x, y)
+    t4 = pd.read_csv(ROOT / final["runs"]["exp2"] / "tests_same_rows_features.csv")
+    t = t4[(t4.metric == "roc_auc") & (t4.quantum == "qsvm/subsample/pca8") & (t4.classical == "logreg/subsample/pca8")].iloc[0]
+    summary["quantum_vs_classical"].update({"holm_p": float(t.p_nb_t_holm), "wilcoxon_holm_p": float(t.wilcoxon_p_holm)})
+    path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    print(json.dumps({"ten_folds": summary["ten_folds"], "quantum_vs_classical": summary["quantum_vs_classical"]}, indent=2))
+
+
 if __name__ == "__main__":
+    if sys.argv[1:] == ["--stats-only"]:
+        stats_only()
+        raise SystemExit
     main()

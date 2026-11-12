@@ -141,7 +141,7 @@ def overview():
         "privacy_cost": base["holdout_auc"] - base["dp4_holdout_auc"],
         "dp4_holdout_auc": base["dp4_holdout_auc"],
         "qsvm_auc": float(t.quantum_mean), "logreg_matched_auc": float(t.classical_mean),
-        "qvc_holm_p": float(t.wilcoxon_p_holm), "qvc_folds": int(t.k),
+        "qvc_holm_p": float(t.p_nb_t_holm), "qvc_folds": int(t.k),  # Holm p of the primary test (Nadeau-Bengio corrected t)
         "tests": test_status,
         "curve": {"epsilons": pq.EPS_ORDER, "series": series, "folds": 10},
     }
