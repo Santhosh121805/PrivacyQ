@@ -110,7 +110,7 @@ privacy only.
 | Quantum neural network (hybrid QNN) | BUILT | `src/m5_models/quantum.py`, Exp 2 | Linear compression → quantum layer → linear head. |
 | Parameterised gates, entanglement layers | BUILT | `src/m5_models/quantum.py` | Rot gates plus CNOT entanglers. |
 | Simulator: PennyLane | BUILT | `requirements.txt`, all quantum code | `default.qubit`, exact statevector. |
-| Simulator: Qiskit | PHASE-2 | — | Scheduled: Priority 4, item 12. |
+| Simulator: Qiskit | BUILT (cross-check) | `src/m5_models/qiskit_vqc.py`, `results/qiskit_crosscheck/crosscheck.md` | Qiskit `Statevector` evaluates the trained VQC; identical to PennyLane on all 15 Exp 2 folds (see box 8). Training and the other models stay on PennyLane. |
 
 ## Box 7: Hybrid quantum-classical learning
 
