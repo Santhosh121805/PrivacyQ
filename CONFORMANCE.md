@@ -14,7 +14,7 @@ Status values:
 Paths are relative to the repository root. `results/` is git-ignored and produced by the commands in
 `README.md`; the run directories referenced are those listed in `configs/final_report.yaml`.
 
-_Last updated: 2026-11-12, after Priority 1 and Priority 2 items 1, 2, 4 and 5._
+_Last updated: 2026-11-12, after Priority 1 and Priority 2 items 1–5._
 
 ## Pipeline flow as built
 
@@ -99,7 +99,7 @@ privacy only.
 |---|---|---|---|
 | Amplitude encoding | BUILT | `src/m4_encoding/encodings.py`, `tests/test_phase2_quantum.py`, Exp 1 | |
 | Angle encoding | BUILT | same | Final QSVM uses it. |
-| Basis encoding | PHASE-2 | — | Scheduled: Priority 2, item 3. |
+| Basis encoding | BUILT | `src/m4_encoding/encodings.py` (`basis`), `tests/test_phase2_quantum.py::test_basis_encoding_prepares_the_computational_basis_state`, `results/exp1-nsch2024-encodings-with-basis-20261112/summary.md` | Each angle-scaled feature binarised at π/2, prepared as \|b⟩ with RX(π·b). Same 10 folds as Exp 1. Worst encoding in most settings: QSVM 0.658–0.779, VQC 0.517–0.723 (near chance with PCA). With basis included the encoding swing reaches 21–29 % (QSVM, PCA) and 43–57 % (VQC, PCA). |
 | Quantum feature maps (ZZ) | BUILT | same | Plus data re-uploading (not in the diagram). |
 
 ## Box 6: Quantum model (simulation)
@@ -214,3 +214,4 @@ privacy only.
 - 2026-11-12: Priority 2 item 2 — re-identification risk built and measured.
 - 2026-11-12: Priority 2 item 1 — membership inference test built and measured (Experiment 6).
 - 2026-11-12: Priority 2 items 4 and 5 — classical SVM baseline and COBYLA optimiser built and measured on the Exp 2 folds.
+- 2026-11-12: Priority 2 item 3 — basis encoding built and swept on the Exp 1 folds; merged encoding report written.
