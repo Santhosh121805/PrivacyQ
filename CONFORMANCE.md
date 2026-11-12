@@ -14,7 +14,7 @@ Status values:
 Paths are relative to the repository root. `results/` is git-ignored and produced by the commands in
 `README.md`; the run directories referenced are those listed in `configs/final_report.yaml`.
 
-_Last updated: 2026-11-12, after Priority 1 and Priority 2 (all six items)._
+_Last updated: 2026-11-12, after Priority 1, Priority 2 and Priority 3 item 7._
 
 ## Pipeline flow as built
 
@@ -129,7 +129,7 @@ privacy only.
 | PennyLane | BUILT | all quantum code | |
 | Qiskit | PHASE-2 | — | Scheduled: Priority 4, item 12. |
 | Cirq, TensorFlow Quantum | PHASE-2 | — | Redundant with PennyLane and Qiskit; would add no finding. |
-| Noise simulation (realistic hardware) | PHASE-2 | — | All results are exact statevector. Scheduled: Priority 3, item 7. |
+| Noise simulation (realistic hardware) | PARTIAL | `src/m5_models/noisy_kernel.py`, `tests/test_noisy_kernel.py` (4 tests, incl. exact match to the full multi-qubit `default.mixed` circuit), `configs/exp8_noise_nsch2024.yaml`, `results/exp8-nsch2024-hardware-noise-20261112-125925/noise_report.md` | Best configuration (QSVM, angle, 8 qubits, PCA-8) re-run on the 15 Exp 2 folds on `default.mixed` with T1/T2, depolarising gate error, readout error and finite shots: ROC-AUC 0.847 ideal → 0.847 (noise x1, exact) / 0.850 (x1, 4,096 shots) / 0.846 (x1, 1,024 shots) / 0.845 (x10, 4,096 shots); no difference significant after Holm. Noise model is assumed (representative published values), not a device calibration. **Not covered:** entangling circuits (ZZ, VQC, hybrid) and two-qubit gate errors — this circuit has none; no real hardware. |
 | Different numbers of qubits | BUILT | Exp 1 (4, 6, 8 qubits) | |
 | Multiple quantum circuit designs | BUILT | Exp 1, Exp 2 | 4 encodings × 3 models. |
 | Scalability experiments (number of clients) | BUILT | Exp 4 (3, 5, 10 clients) | |
@@ -216,3 +216,4 @@ privacy only.
 - 2026-11-12: Priority 2 items 4 and 5 — classical SVM baseline and COBYLA optimiser built and measured on the Exp 2 folds.
 - 2026-11-12: Priority 2 item 3 — basis encoding built and swept on the Exp 1 folds; merged encoding report written.
 - 2026-11-12: Priority 2 item 6 — measured payload, client time, server aggregation time and rounds to converge (Experiment 7).
+- 2026-11-12: Priority 3 item 7 — best configuration re-run under a simulated hardware noise model (Experiment 8).

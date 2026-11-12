@@ -1,0 +1,74 @@
+# Experiment 8: the best quantum configuration (QSVM, angle encoding, 8 qubits, PCA-8, 1,500-row subsample)
+# re-run on the identical Experiment 2 folds with a simulated hardware noise model (default.mixed).
+# Noise defaults (src/m5_models/noisy_kernel.py NoiseModel): T1 200 us, T2 150 us, SX 50 ns, SX error 3e-4,
+# readout P(1|0) 0.01, P(0|1) 0.02, two SX pulses per RY. Representative published values, not a device calibration.
+project:
+  name: exp8-nsch2024-hardware-noise
+  seed: 2026
+  output_dir: results
+  n_jobs: 6
+data:
+  loader: nsch
+  paths:
+  - data/raw/nsch_2024/nsch_2024e_topical.dta
+  target: depression_current
+  min_age: 12
+  max_age: 17
+split:
+  holdout_fraction: 0.2
+cv:
+  n_splits: 5
+  n_repeats: 3
+subsample:
+  n: 1500
+tuning:
+  inner_val_fraction: 0.2
+experiment:
+  regimes:
+  - subsample
+  feature_sets:
+    pca8:
+      method: pca
+      k: 8
+  classical_models: []
+  quantum:
+    qsvm:                      # ideal statevector, reproduces Experiment 2
+      feature_set: pca8
+      encoding: angle
+      n_qubits: 8
+      grid: {C: [0.1, 1.0, 10.0]}
+    qsvm_noise1_exact:         # noise x1, infinite shots
+      class: qsvm_noisy
+      feature_set: pca8
+      encoding: angle
+      n_qubits: 8
+      noise_scale: 1.0
+      shots: null
+      grid: {C: [0.1, 1.0, 10.0]}
+    qsvm_noise1_shots4096:
+      class: qsvm_noisy
+      feature_set: pca8
+      encoding: angle
+      n_qubits: 8
+      noise_scale: 1.0
+      shots: 4096
+      grid: {C: [0.1, 1.0, 10.0]}
+    qsvm_noise1_shots1024:
+      class: qsvm_noisy
+      feature_set: pca8
+      encoding: angle
+      n_qubits: 8
+      noise_scale: 1.0
+      shots: 1024
+      grid: {C: [0.1, 1.0, 10.0]}
+    qsvm_noise10_shots4096:    # ten times noisier device
+      class: qsvm_noisy
+      feature_set: pca8
+      encoding: angle
+      n_qubits: 8
+      noise_scale: 10.0
+      shots: 4096
+      grid: {C: [0.1, 1.0, 10.0]}
+base_params: {}
+grids: {}
+skip_report: true

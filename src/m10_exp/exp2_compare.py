@@ -33,6 +33,7 @@ from sklearn.preprocessing import StandardScaler
 from src.m2_preprocess.preprocessing import TabularPreprocessor
 from src.m3_features.features import FeatureTransformer
 from src.m5_models.classical import make_classical
+from src.m5_models.noisy_kernel import NoisyQuantumKernelSVC
 from src.m5_models.quantum import HybridQNNClassifier, QuantumKernelSVC, VQCClassifier
 from src.m8_eval.evaluation import binary_metrics
 from src.m10_exp.common import (
@@ -41,7 +42,8 @@ from src.m10_exp.common import (
 )
 from src.m10_exp.tuning import inner_split, scores_of, select_and_fit, stratified_subsample
 
-QUANTUM = {"qsvm": QuantumKernelSVC, "vqc": VQCClassifier, "vqc_cobyla": VQCClassifier, "hybrid": HybridQNNClassifier}
+QUANTUM = {"qsvm": QuantumKernelSVC, "vqc": VQCClassifier, "vqc_cobyla": VQCClassifier, "hybrid": HybridQNNClassifier,
+           "qsvm_noisy": NoisyQuantumKernelSVC}
 
 
 def feature_matrices(spec: dict, X_in, y_in, others, seed):
@@ -62,10 +64,10 @@ def run_task(task: dict) -> list[dict]:
     A, B, C = feature_matrices(task["feature_spec"], task["X_in"], task["y_in"], [task["X_iv"], task["X_ov"]], seed)
     rows = []
     for model_name in task["models"]:
-        if model_name in QUANTUM:
+        if model_name in task["quantum"]:
             q = task["quantum"][model_name]
-            cls = QUANTUM[model_name]
-            fixed = {k: v for k, v in q.items() if k not in ("feature_set", "grid")}
+            cls = QUANTUM[q.get("class", model_name)]   # "class" lets several arms share one model class
+            fixed = {k: v for k, v in q.items() if k not in ("feature_set", "grid", "class")}
 
             def factory(cls=cls, fixed=fixed, **p):
                 return cls(seed=seed, **fixed, **p)
