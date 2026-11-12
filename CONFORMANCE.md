@@ -14,7 +14,7 @@ Status values:
 Paths are relative to the repository root. `results/` is git-ignored and produced by the commands in
 `README.md`; the run directories referenced are those listed in `configs/final_report.yaml`.
 
-_Last updated: 2026-11-12, after Priority 1 and Priority 2 items 1–5._
+_Last updated: 2026-11-12, after Priority 1 and Priority 2 (all six items)._
 
 ## Pipeline flow as built
 
@@ -134,7 +134,7 @@ privacy only.
 | Multiple quantum circuit designs | BUILT | Exp 1, Exp 2 | 4 encodings × 3 models. |
 | Scalability experiments (number of clients) | BUILT | Exp 4 (3, 5, 10 clients) | |
 | Heterogeneous (non-IID) data | BUILT | `src/m6_federated/fedavg.py` (`group_partition`), Exp 4 | Clients split by U.S. state. |
-| Communication constraints | PARTIAL | Exp 4 `fold_metrics.csv` (`bytes_per_round`, `total_bytes`) | Bytes measured; no bandwidth constraint or latency. Scheduled: Priority 2, item 6. |
+| Communication constraints | PARTIAL | Exp 4 `fold_metrics.csv`; `results/exp7-nsch2024-federated-cost-20261112-123743/communication_cost.md` | Payload, per-round bytes and server time measured; no bandwidth limit imposed and no network latency (in-process simulation). |
 
 ## Box 9: Mental health analysis tasks
 
@@ -181,8 +181,8 @@ privacy only.
 |---|---|---|---|
 | Varying number of clients | BUILT | Exp 4 | |
 | Non-IID data distribution | BUILT | Exp 4 | |
-| Communication latency | PHASE-2 | — | Only bytes are recorded. Scheduled: Priority 2, item 6. |
-| Server aggregation load | PHASE-2 | — | Scheduled: Priority 2, item 6. |
+| Communication latency | PARTIAL | `src/m6_federated/fedavg.py`, `tests/test_phase5_federated.py::test_fedavg_records_measured_payload_and_timings`, `scripts/federated_cost_report.py`, `results/exp7-nsch2024-federated-cost-20261112-123743/communication_cost.md` | Measured: serialised update size (LogReg 2,136 B, VQC 1,812 B per update), bytes per round (10.9–42.7 kB), slowest-client time per round (0.05–0.42 s), rounds to converge (LogReg 2–11 median; VQC 24–29 of 30 — not converged). **Network transfer time is not measured**: training is in-process with no network, and bytes ÷ assumed bandwidth would be a simulation. |
+| Server aggregation load | BUILT | same | Wall-clock deserialise + weighted average per round: 1.1–3.1 ms (LogReg, 3–10 clients), 1.4–5.9 ms (VQC); grows roughly linearly with clients. 5 folds, by-state clients, ε = 4; re-run reproduced Exp 4 AUC exactly. |
 
 ## Box 14: Output and visualisation
 
@@ -215,3 +215,4 @@ privacy only.
 - 2026-11-12: Priority 2 item 1 — membership inference test built and measured (Experiment 6).
 - 2026-11-12: Priority 2 items 4 and 5 — classical SVM baseline and COBYLA optimiser built and measured on the Exp 2 folds.
 - 2026-11-12: Priority 2 item 3 — basis encoding built and swept on the Exp 1 folds; merged encoding report written.
+- 2026-11-12: Priority 2 item 6 — measured payload, client time, server aggregation time and rounds to converge (Experiment 7).
