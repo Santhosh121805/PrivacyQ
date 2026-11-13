@@ -10,3 +10,8 @@ data/*
 data/raw/
 data/processed/
 models/
+
+# Architecture demo: generated from results/ (manifest holds one raw hold-out row) — rebuild with scripts/build_demo_manifest.py
+demo/manifest.json
+demo/assets/
+demo/screenshots/

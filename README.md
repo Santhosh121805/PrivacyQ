@@ -49,6 +49,25 @@ The `resume:` blocks in the Exp 1/Exp 2 configs reuse rows from interrupted runs
 them to recompute everything from scratch. Update the run directories in
 `configs/exp4_nsch2024.yaml` (`reference_run`) and `configs/final_report.yaml` after re-running.
 
+### Architecture walkthrough demo (one section per box of `docs/architecture.jpg`)
+
+```sh
+python demo_app.py          # then open http://127.0.0.1:8002/  (offline; no external requests)
+```
+
+Needs `demo/manifest.json`, which is built once from `results/` and the cached models.
+The build fails loudly if any artifact is missing:
+
+```sh
+python scripts/build_feature_importance.py   # results/feature_importance/ (MI ranking)
+python scripts/build_screening_models.py     # models/screening_models.pkl (risk bands)
+python scripts/build_demo_manifest.py        # demo/manifest.json + demo/assets/
+```
+
+The only controls are Back/Next, the 15-box list, and one button that runs a live prediction on
+locked hold-out row 0 (de-identify → preprocess → 8 angles → 8-qubit statevector → QSVM and risk band).
+Section screenshots beside their diagram boxes are in `demo/screenshots/sections/`.
+
 ## What was found (plain English)
 
 All numbers are from `results/RESULTS.md` (real NSCH 2024 data, mean over folds).
