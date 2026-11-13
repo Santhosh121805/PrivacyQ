@@ -99,38 +99,130 @@
   </style>
 </head>
 <body>
-  <!-- Landing page (shown first; a door, not a dashboard) -->
+  <!-- Homepage (shown first). Numbers with an id are filled from /api/overview, which reads results/. -->
   <section data-view="home" hidden>
-   <div class="min-h-screen flex items-center justify-center px-6 py-[120px]">
-    <div class="w-full max-w-[720px] flex flex-col items-center text-center">
-      <svg class="hero-svg" width="280" height="180" viewBox="0 0 280 180" role="img"
-           aria-label="Three schools send model updates to a server, which aggregates them and sends an improved model back">
-        <g fill="none" stroke="#e4e4e7" stroke-width="1">
-          <line x1="50" y1="46" x2="140" y2="142"/><line x1="140" y1="34" x2="140" y2="142"/><line x1="230" y1="46" x2="140" y2="142"/>
-          <circle cx="50" cy="46" r="13"/><circle cx="140" cy="34" r="13"/><circle cx="230" cy="46" r="13"/>
-          <circle class="server" cx="140" cy="146" r="19"/>
-        </g>
-        <g fill="#4269d0">
-          <circle class="up" cx="50" cy="46" r="3" style="--dx: 90px; --dy: 100px"/>
-          <circle class="up" cx="140" cy="34" r="3" style="--dx: 0px; --dy: 112px"/>
-          <circle class="up" cx="230" cy="46" r="3" style="--dx: -90px; --dy: 100px"/>
-        </g>
-        <g fill="#6cc5b0">
-          <circle class="down" cx="140" cy="146" r="3" style="--dx: -90px; --dy: -100px"/>
-          <circle class="down" cx="140" cy="146" r="3" style="--dx: 0px; --dy: -112px"/>
-          <circle class="down" cx="140" cy="146" r="3" style="--dx: 90px; --dy: -100px"/>
-        </g>
-      </svg>
-      <h1 class="mt-12 text-[48px] leading-none font-semibold tracking-[-0.02em]">PrivacyQ</h1>
-      <p class="mt-4 text-[17px] text-muted">Training mental-health models across institutions, without the data ever leaving.</p>
-      <div class="mt-8 flex flex-wrap justify-center gap-2" id="home-pills">
-        <span class="pill num" id="home-records">NSCH 2024 · – records</span>
-        <span class="pill num" id="home-tests">– tests passing</span>
-        <span class="pill">Research use only</span>
+    <nav class="sticky top-0 z-30 h-14 px-6 bg-white border-b border-line">
+      <div class="h-full max-w-[1120px] mx-auto flex items-center justify-between">
+        <a href="#home" class="text-t15 font-semibold text-ink">PrivacyQ</a>
+        <div class="flex items-center gap-8 text-t14">
+          <a href="#overview" class="text-muted transition-colors hover:text-ink">Overview</a>
+          <a href="#configure" class="text-muted transition-colors hover:text-ink">Configure</a>
+          <a href="#inspect" class="text-muted transition-colors hover:text-ink">Inspect</a>
+          <a href="#evidence" class="text-muted transition-colors hover:text-ink">Evidence</a>
+        </div>
       </div>
-      <a href="#overview" class="mt-10 inline-flex items-center h-11 px-6 rounded-md bg-accent text-white text-t15 font-medium transition-colors hover:bg-[#3557b8]">Explore the system</a>
-    </div>
-   </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="min-h-[480px] px-6 pt-24 pb-24 flex justify-center">
+      <div class="w-full max-w-[720px] flex flex-col items-center text-center">
+        <svg class="hero-svg" width="280" height="180" viewBox="0 0 280 180" role="img"
+             aria-label="Three schools send model updates to a server, which aggregates them and sends an improved model back">
+          <g fill="none" stroke="#e4e4e7" stroke-width="1">
+            <line x1="50" y1="46" x2="140" y2="142"/><line x1="140" y1="34" x2="140" y2="142"/><line x1="230" y1="46" x2="140" y2="142"/>
+            <circle cx="50" cy="46" r="13"/><circle cx="140" cy="34" r="13"/><circle cx="230" cy="46" r="13"/>
+            <circle class="server" cx="140" cy="146" r="19"/>
+          </g>
+          <g fill="#4269d0">
+            <circle class="up" cx="50" cy="46" r="3" style="--dx: 90px; --dy: 100px"/>
+            <circle class="up" cx="140" cy="34" r="3" style="--dx: 0px; --dy: 112px"/>
+            <circle class="up" cx="230" cy="46" r="3" style="--dx: -90px; --dy: 100px"/>
+          </g>
+          <g fill="#6cc5b0">
+            <circle class="down" cx="140" cy="146" r="3" style="--dx: -90px; --dy: -100px"/>
+            <circle class="down" cx="140" cy="146" r="3" style="--dx: 0px; --dy: -112px"/>
+            <circle class="down" cx="140" cy="146" r="3" style="--dx: 90px; --dy: -100px"/>
+          </g>
+        </svg>
+        <h1 class="mt-10 text-[52px] leading-none font-semibold tracking-[-0.02em]">PrivacyQ</h1>
+        <p class="mt-5 text-[18px] text-muted">Training mental-health models across institutions, without the data ever leaving.</p>
+        <div class="mt-10 flex flex-wrap justify-center gap-3">
+          <a href="#overview" id="home-explore" class="inline-flex items-center h-11 px-6 rounded-md border border-accent bg-accent text-white text-t15 font-medium transition-colors hover:border-ink">Explore the system</a>
+          <a href="#evidence" id="home-results" class="inline-flex items-center h-11 px-6 rounded-md border border-line bg-white text-ink text-t15 font-medium transition-colors hover:border-ink">See the results</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- What it does -->
+    <section class="border-t border-line py-24 px-6">
+      <div class="max-w-[1120px] mx-auto min-h-[240px]">
+        <h2 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] mb-8">What it does</h2>
+        <div class="grid grid-cols-3 gap-6">
+          <div class="card p-8 transition-colors hover:border-muted">
+            <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="6" y="12" width="16" height="12" rx="2" fill="none" stroke="#4269d0" stroke-width="1.5"/><path d="M10 12V9a4 4 0 0 1 8 0v3" fill="none" stroke="#4269d0" stroke-width="1.5"/></svg>
+            <h3 class="mt-6 text-t20 font-semibold">Data stays put</h3>
+            <p class="mt-3 text-t15 text-muted leading-relaxed">Each school trains on its own records. Only model updates ever leave.</p>
+          </div>
+          <div class="card p-8 transition-colors hover:border-muted">
+            <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><path d="M4 22h20" stroke="#4269d0" stroke-width="1.5"/><path d="M6 22V14M12 22V9M18 22V12M24 22V6" stroke="#4269d0" stroke-width="1.5"/></svg>
+            <h3 class="mt-6 text-t20 font-semibold">Privacy you can measure</h3>
+            <p class="mt-3 text-t15 text-muted leading-relaxed">Formal differential privacy with a stated budget, not a promise.</p>
+          </div>
+          <div class="card p-8 transition-colors hover:border-muted">
+            <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="9" cy="14" r="6" fill="none" stroke="#6cc5b0" stroke-width="1.5"/><circle cx="19" cy="14" r="6" fill="none" stroke="#4269d0" stroke-width="1.5"/></svg>
+            <h3 class="mt-6 text-t20 font-semibold">An honest test of quantum</h3>
+            <p class="mt-3 text-t15 text-muted leading-relaxed">Quantum and classical models compared on identical data.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- What we found -->
+    <section class="bg-surface border-t border-line py-24 px-6">
+      <div class="max-w-[1120px] mx-auto min-h-[240px]">
+        <h2 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] mb-8">What we found</h2>
+        <div class="grid grid-cols-3 gap-6">
+          <div class="card p-8 transition-colors hover:border-muted">
+            <div class="text-t12 uppercase tracking-wide text-muted">Hold-out ROC-AUC</div>
+            <div class="num text-[40px] leading-tight tracking-tight mt-3" id="home-auc">–</div>
+            <p class="mt-3 text-t14 text-muted leading-relaxed">Best model, on records never used in training.</p>
+          </div>
+          <div class="card p-8 transition-colors hover:border-muted">
+            <div class="text-t12 uppercase tracking-wide text-muted">No detectable accuracy cost</div>
+            <div class="num text-[40px] leading-tight tracking-tight mt-3">ε = 4</div>
+            <p class="mt-3 text-t14 text-muted leading-relaxed">The privacy noise costs 0.016 AUC, which is not statistically significant.</p>
+          </div>
+          <div class="card p-8 transition-colors hover:border-muted">
+            <div class="text-t12 uppercase tracking-wide text-muted">Quantum vs classical</div>
+            <div class="num text-[40px] leading-tight tracking-tight mt-3 whitespace-nowrap" id="home-qvc">–</div>
+            <p class="mt-3 text-t14 text-muted leading-relaxed">A tie, at matched conditions.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="border-t border-line py-24 px-6">
+      <div class="max-w-[1120px] mx-auto min-h-[240px]">
+        <h2 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] mb-8">How it works</h2>
+        <div class="flex items-stretch">
+          <div class="flex-1 card p-6 transition-colors hover:border-muted"><div class="num text-t12 text-muted">01</div><div class="mt-3 text-t15 font-semibold">De-identify</div><p class="mt-2 text-t13 text-muted leading-relaxed">Identifiers removed before anything else.</p></div>
+          <div class="w-10 shrink-0 flex items-center justify-center" aria-hidden="true"><svg width="20" height="12" viewBox="0 0 20 12"><path d="M0 6h17M12 1l5 5-5 5" fill="none" stroke="#6b6f76" stroke-width="1.2"/></svg></div>
+          <div class="flex-1 card p-6 transition-colors hover:border-muted"><div class="num text-t12 text-muted">02</div><div class="mt-3 text-t15 font-semibold">Preprocess</div><p class="mt-2 text-t13 text-muted leading-relaxed">Imputation and scaling fitted on training rows only.</p></div>
+          <div class="w-10 shrink-0 flex items-center justify-center" aria-hidden="true"><svg width="20" height="12" viewBox="0 0 20 12"><path d="M0 6h17M12 1l5 5-5 5" fill="none" stroke="#6b6f76" stroke-width="1.2"/></svg></div>
+          <div class="flex-1 card p-6 transition-colors hover:border-muted"><div class="num text-t12 text-muted">03</div><div class="mt-3 text-t15 font-semibold">Encode to qubits</div><p class="mt-2 text-t13 text-muted leading-relaxed">4–8 features loaded into a quantum circuit.</p></div>
+          <div class="w-10 shrink-0 flex items-center justify-center" aria-hidden="true"><svg width="20" height="12" viewBox="0 0 20 12"><path d="M0 6h17M12 1l5 5-5 5" fill="none" stroke="#6b6f76" stroke-width="1.2"/></svg></div>
+          <div class="flex-1 card p-6 transition-colors hover:border-muted"><div class="num text-t12 text-muted">04</div><div class="mt-3 text-t15 font-semibold">Train privately</div><p class="mt-2 text-t13 text-muted leading-relaxed">DP-SGD at each site, combined by federated averaging.</p></div>
+          <div class="w-10 shrink-0 flex items-center justify-center" aria-hidden="true"><svg width="20" height="12" viewBox="0 0 20 12"><path d="M0 6h17M12 1l5 5-5 5" fill="none" stroke="#6b6f76" stroke-width="1.2"/></svg></div>
+          <div class="flex-1 card p-6 transition-colors hover:border-muted"><div class="num text-t12 text-muted">05</div><div class="mt-3 text-t15 font-semibold">Evaluate</div><p class="mt-2 text-t13 text-muted leading-relaxed">Cross-validation, then a hold-out scored once.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Built with -->
+    <section class="bg-surface border-t border-line py-24 px-6">
+      <div class="max-w-[1120px] mx-auto">
+        <h2 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] mb-8">Built with</h2>
+        <div class="flex flex-wrap items-center justify-between gap-6">
+          <p class="text-t15 text-muted">PennyLane · scikit-learn · XGBoost · Opacus · NSCH 2024</p>
+          <span class="pill num h-7 px-3" id="home-tests">– tests passing</span>
+        </div>
+      </div>
+    </section>
+
+    <footer class="border-t border-line px-6 py-10">
+      <div class="max-w-[1120px] mx-auto text-[13px] text-muted">Research configuration tool. Not for clinical or individual use. · REVA University, School of Computer Science and Engineering</div>
+    </footer>
   </section>
 
   <!-- Top bar: 56px -->
@@ -334,7 +426,7 @@
 
     </div></div>
   </main>
-  <script type="module" src="app.js?v=11"></script>
+  <script type="module" src="app.js?v=13"></script>
   <script src="federated.js?v=2"></script>
 </body>
 </html>

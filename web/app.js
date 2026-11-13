@@ -81,7 +81,8 @@ document.querySelectorAll(".navitem").forEach((a) => a.addEventListener("click",
 async function renderHome() {
   try {
     const o = await api("/api/overview");
-    $("home-records").textContent = `NSCH 2024 · ${Number(o.records).toLocaleString("en-US")} records`;
+    $("home-auc").textContent = f(o.holdout_auc, 3);
+    $("home-qvc").textContent = `${f(o.qsvm_auc, 3)}/${f(o.logreg_matched_auc, 3)}`;
     $("home-tests").textContent = o.tests ? `${o.tests.passed} tests passing` : "tests not recorded";
   } catch (e) { /* the pills keep their placeholders; the page still works */ }
 }
