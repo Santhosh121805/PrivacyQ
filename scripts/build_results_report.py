@@ -475,9 +475,33 @@ def build() -> Doc:
             [[r.encoding, int(r.n_qubits), int(r.depth), int(r.n_gates), int(r.n_cnot)]
              for _, r in fmap.sort_values(["encoding", "n_qubits"]).iterrows()], [rp],
             "rows circuit=feature_map; columns encoding, n_qubits, depth, n_gates, n_cnot")
-    d.table("Rotation angles for one real row", ["Qubit", "Angle"],
-            [[NM, "No file in results/ stores the encoded angles of an individual record."]], [rp], "status only")
+    svd = R / "state_visualisation"
+    svin, svc, bsum, svmd = (svd / f for f in ("state_vector_record_input.csv", "state_vector_record.csv", "bloch_summary.csv", "bloch_summary.md"))
+    for f in (svin, svc, bsum, svmd, svd / "state_vector_record.png", svd / "bloch_angle_vs_zz_bw.png"):
+        if not f.exists():
+            raise SystemExit(f"MISSING ARTIFACT: {rel(f)} — run scripts/state_visualisation.py")
+    inp = pd.read_csv(svin)
+    row0 = d.num(int(inp.dataset_row.iloc[0]), svin, "dataset_row of the visualised record")
+    d.table(f"Rotation angles for one real training record (dataset row {row0}; {inp.rows_from.iloc[0]}; never a hold-out row)",
+            ["Qubit", "Angle (rad)"], [[int(r.qubit), f"{r.angle_rad:.4f}"] for _, r in inp.iterrows()], [svin],
+            "columns qubit, angle_rad (PCA-8, angle-scaled; fitted on that fold's 1,200 inner-train rows)")
+    amp = pd.read_csv(svc, dtype={"basis_state": str})
+    top = pd.concat([amp[amp.encoding == e].nlargest(4, "probability") for e in ("angle", "zz")])
+    d.table("Statevector of the same record: four most probable basis states per encoding (full statevector in the file)",
+            ["Encoding", "Basis state", "Amplitude (real)", "Amplitude (imag)", "Probability"],
+            [[r.encoding, f"|{r.basis_state}⟩", f"{r.amplitude_real:+.4f}", f"{r.amplitude_imag:+.4f}", f"{r.probability:.4f}"]
+             for _, r in top.iterrows()], [svc], "the 4 rows with the largest probability per encoding; all 512 rows are in the file")
+    bs = pd.read_csv(bsum)
+    d.table("Bloch vectors of 1,200 real training records (Experiment 2 fold 1), per qubit", ["Encoding", "Qubit",
+            "Mean Bloch length", "Min Bloch length", "Class-mean distance"],
+            [[r.encoding, int(r.qubit), f3(r.mean_bloch_length), f3(r.min_bloch_length), f3(r.class_mean_distance)] for _, r in bs.iterrows()],
+            [bsum], "columns as headed",
+            note="Bloch length 1 = the qubit is unentangled; below 1 = entangled with the other qubits (bloch_summary.md).")
     d.lab("Figure")
+    d.figure(svd / "state_vector_record.png", f"Statevector of training record {row0}: the 16 most probable of 256 basis states "
+             "under angle encoding (hatched) and ZZ encoding (grey), 8 qubits.", [rel(svc)])
+    d.figure(svd / "bloch_angle_vs_zz_bw.png", "Single-qubit Bloch vectors of 1,200 real training records, qubits 1–4 of 8, angle "
+             "(top) and ZZ (bottom) encoding; dots = no current depression, crosses = current depression.", [rel(bsum)])
     for enc, path in fig_encodings():
         d.figure(path, f"{enc} encoding feature map, 4 qubits (structure only; no data values). Drawn from src/m4_encoding/encodings.py.",
                  ["src/m4_encoding/encodings.py (circuit structure; no numbers)"])
@@ -763,9 +787,9 @@ def build() -> Doc:
     d.blocks.append(("figindex",))
     d.table("Visualizations in the diagram that are not in this report", ["Diagram item", "Status"], [
         ["Feature and attention visualization: attention", f"{NA}: needs a transformer over text."],
-        ["Quantum state visualization (Bloch sphere, state vector)", "results/state_visualisation/bloch_angle_vs_zz.png exists but marks "
-         "its two classes by colour only, so it is not reproduced in this black-and-white report."]],
-        [R / "state_visualisation" / "bloch_angle_vs_zz.png"], "status of diagram items")
+        ["Quantum state visualization (Bloch sphere, state vector)", "shown in box 5 (statevector and Bloch-sphere figures), where the "
+         "encoding produces them; the colour version bloch_angle_vs_zz.png is replaced by the black-and-white bloch_angle_vs_zz_bw.png."]],
+        [R / "state_visualisation" / "bloch_angle_vs_zz_bw.png"], "status of diagram items")
     d.lab("Figure", "None (index only).")
 
     # ------------------------------------------------------------ Box 15
@@ -812,7 +836,7 @@ th { background: #e6e6e6; } tr { break-inside: avoid; }
 figure { margin: 2mm 0 4mm; break-inside: avoid; } figure img { max-width: 100%; max-height: 120mm; display: block; }
 figcaption { font-size: 9pt; margin-top: 1mm; }
 figure img.circ { max-height: 42mm; max-width: 100%; } td.nw { white-space: nowrap; }
-.appendix td { font-size: 8pt; } .appendix { break-before: page; }
+.appendix td { font-size: 8pt; overflow-wrap: anywhere; } .appendix { break-before: page; }
 """
 
 

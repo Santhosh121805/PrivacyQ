@@ -36,6 +36,18 @@ def bloch_vectors(encoding: str, n_qubits: int, X: np.ndarray, chunk: int = 256)
     return out
 
 
+def statevector(encoding: str, n_qubits: int, x: np.ndarray) -> np.ndarray:
+    """Exact encoded statevector of one record (2**n_qubits complex amplitudes), from ``default.qubit``."""
+    enc = make_encoding(encoding, n_qubits)
+
+    @qml.qnode(qml.device("default.qubit", wires=n_qubits))
+    def state(v):
+        enc.feature_map(v)
+        return qml.state()
+
+    return np.asarray(state(np.asarray(enc.prepare(np.atleast_2d(x)), dtype=float)[0]))
+
+
 def class_separation(vectors: np.ndarray, y: np.ndarray) -> np.ndarray:
     """Per qubit: distance between the two classes' mean Bloch vectors (0 = no separation, max 2)."""
     y = np.asarray(y)

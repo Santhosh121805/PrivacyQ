@@ -21,3 +21,13 @@ def test_class_separation_is_zero_for_identical_classes_and_two_for_opposite_pol
     v = np.zeros((4, 1, 3)); v[:2, 0, 2] = 1; v[2:, 0, 2] = -1
     assert np.allclose(class_separation(v, np.array([0, 0, 1, 1])), 2.0)
     assert np.allclose(class_separation(np.ones((4, 1, 3)), np.array([0, 0, 1, 1])), 0.0)
+
+
+def test_statevector_is_normalised_and_matches_angle_product_state():
+    from src.m8_eval.state_viz import statevector
+    x = np.array([0.3, 1.1, 2.0, 0.7])
+    psi = statevector("angle", 4, x)
+    assert psi.shape == (16,) and np.isclose(np.sum(np.abs(psi) ** 2), 1.0)
+    # angle encoding = RY(x_q) on each qubit: P(|0000>) = prod cos^2(x_q / 2)
+    assert np.isclose(np.abs(psi[0]) ** 2, np.prod(np.cos(x / 2) ** 2))
+    assert np.isclose(np.sum(np.abs(statevector("zz", 4, x)) ** 2), 1.0)
