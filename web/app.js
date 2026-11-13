@@ -44,11 +44,11 @@ function table(rows, headers, numericCols = []) {
 
 // ------------------------------------------------------------- state + routing
 const cfg = { model: "qsvm", encoding: "angle", features: 8, eps: "inf", sites: 1 };
-const PAGES = ["overview", "configure", "inspect", "evidence"];
+const PAGES = ["home", "overview", "configure", "inspect", "evidence"];
 const loaded = new Set();
 
 function readHash() {
-  const [page, query] = (location.hash.replace(/^#/, "") || "overview").split("?");
+  const [page, query] = (location.hash.replace(/^#/, "") || "home").split("?");
   const p = new URLSearchParams(query || "");
   if (p.get("model") in MODEL_NAMES) cfg.model = p.get("model");
   if (p.get("enc") in ENC_NAMES) cfg.encoding = p.get("enc");
@@ -61,6 +61,8 @@ function cfgQuery() { return `model=${cfg.model}&enc=${cfg.encoding}&f=${cfg.fea
 async function route() {
   const page = readHash();
   document.querySelectorAll("[data-view]").forEach((s) => { s.hidden = s.dataset.view !== page; });
+  document.body.classList.toggle("home", page === "home");
+  if (page === "home" && !loaded.has(page)) { loaded.add(page); renderHome(); }
   document.querySelectorAll(".navitem").forEach((a) => a.classList.toggle("active", a.dataset.page === page));
   window.scrollTo(0, 0);
   if (page === "overview" && !loaded.has(page)) { loaded.add(page); await renderOverview(); }
@@ -74,6 +76,15 @@ document.querySelectorAll(".navitem").forEach((a) => a.addEventListener("click",
   const page = a.dataset.page;
   location.hash = page === "configure" || page === "inspect" ? `${page}?${cfgQuery()}` : page;
 }));
+
+// ------------------------------------------------------------- Home (landing page)
+async function renderHome() {
+  try {
+    const o = await api("/api/overview");
+    $("home-records").textContent = `NSCH 2024 · ${Number(o.records).toLocaleString("en-US")} records`;
+    $("home-tests").textContent = o.tests ? `${o.tests.passed} tests passing` : "tests not recorded";
+  } catch (e) { /* the pills keep their placeholders; the page still works */ }
+}
 
 // ------------------------------------------------------------- Overview
 async function renderOverview() {

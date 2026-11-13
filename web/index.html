@@ -67,8 +67,72 @@
       .fade { @apply transition-opacity duration-150; }
     }
   </style>
+  <style>
+    /* Landing page: the app chrome is hidden while it is shown */
+    body.home > header, body.home > aside, body.home > main { display: none; }
+    /* Hero diagram: three schools send updates (blue) to the server, which aggregates, then sends the improved
+       model back (teal). One 4 s loop: 0–30 % up, 30–48 % aggregation, 50–80 % down, 80–100 % pause. */
+    .hero-svg .up, .hero-svg .down { opacity: 0; }
+    .hero-svg .up { animation: hero-up 4s infinite; }
+    .hero-svg .down { animation: hero-down 4s infinite; }
+    .hero-svg .server { animation: hero-server 4s infinite; }
+    @keyframes hero-up {
+      0% { opacity: 0; transform: translate(0, 0); animation-timing-function: ease-in-out; }
+      4% { opacity: 1; transform: translate(0, 0); animation-timing-function: ease-in-out; }
+      28% { opacity: 1; transform: translate(var(--dx), var(--dy)); }
+      31%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); }
+    }
+    @keyframes hero-server {
+      0%, 26% { stroke: #e4e4e7; }
+      33%, 44% { stroke: #4269d0; }
+      54%, 100% { stroke: #e4e4e7; }
+    }
+    @keyframes hero-down {
+      0%, 48% { opacity: 0; transform: translate(0, 0); }
+      52% { opacity: 1; transform: translate(0, 0); animation-timing-function: ease-in-out; }
+      78% { opacity: 1; transform: translate(var(--dx), var(--dy)); }
+      81%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-svg .up, .hero-svg .down, .hero-svg .server { animation: none; }
+    }
+  </style>
 </head>
 <body>
+  <!-- Landing page (shown first; a door, not a dashboard) -->
+  <section data-view="home" hidden>
+   <div class="min-h-screen flex items-center justify-center px-6 py-[120px]">
+    <div class="w-full max-w-[720px] flex flex-col items-center text-center">
+      <svg class="hero-svg" width="280" height="180" viewBox="0 0 280 180" role="img"
+           aria-label="Three schools send model updates to a server, which aggregates them and sends an improved model back">
+        <g fill="none" stroke="#e4e4e7" stroke-width="1">
+          <line x1="50" y1="46" x2="140" y2="142"/><line x1="140" y1="34" x2="140" y2="142"/><line x1="230" y1="46" x2="140" y2="142"/>
+          <circle cx="50" cy="46" r="13"/><circle cx="140" cy="34" r="13"/><circle cx="230" cy="46" r="13"/>
+          <circle class="server" cx="140" cy="146" r="19"/>
+        </g>
+        <g fill="#4269d0">
+          <circle class="up" cx="50" cy="46" r="3" style="--dx: 90px; --dy: 100px"/>
+          <circle class="up" cx="140" cy="34" r="3" style="--dx: 0px; --dy: 112px"/>
+          <circle class="up" cx="230" cy="46" r="3" style="--dx: -90px; --dy: 100px"/>
+        </g>
+        <g fill="#6cc5b0">
+          <circle class="down" cx="140" cy="146" r="3" style="--dx: -90px; --dy: -100px"/>
+          <circle class="down" cx="140" cy="146" r="3" style="--dx: 0px; --dy: -112px"/>
+          <circle class="down" cx="140" cy="146" r="3" style="--dx: 90px; --dy: -100px"/>
+        </g>
+      </svg>
+      <h1 class="mt-12 text-[48px] leading-none font-semibold tracking-[-0.02em]">PrivacyQ</h1>
+      <p class="mt-4 text-[17px] text-muted">Training mental-health models across institutions, without the data ever leaving.</p>
+      <div class="mt-8 flex flex-wrap justify-center gap-2" id="home-pills">
+        <span class="pill num" id="home-records">NSCH 2024 · – records</span>
+        <span class="pill num" id="home-tests">– tests passing</span>
+        <span class="pill">Research use only</span>
+      </div>
+      <a href="#overview" class="mt-10 inline-flex items-center h-11 px-6 rounded-md bg-accent text-white text-t15 font-medium transition-colors hover:bg-[#3557b8]">Explore the system</a>
+    </div>
+   </div>
+  </section>
+
   <!-- Top bar: 56px -->
   <header class="fixed top-0 inset-x-0 z-20 h-14 bg-white border-b border-line flex items-center justify-between px-6">
     <div class="flex items-baseline gap-3">
@@ -99,6 +163,52 @@
         <h1>Overview</h1>
         <p class="page-lede">What privacy, encoding and federation choices cost on adolescent survey data, as measured in this project's experiments.</p>
         <div id="ov-error" class="error mb-4" hidden></div>
+
+        <!-- How it works: replay of the recorded federated run (web/federated.js) -->
+        <div class="mb-12" id="fed">
+          <div class="flex items-end justify-between gap-6">
+            <div>
+              <h2>How it works</h2>
+              <p class="text-t14 text-muted mt-1">Three schools train one model together. Each trains on its own records; only model updates travel to the server.</p>
+            </div>
+            <button class="inline-flex items-center h-9 px-4 rounded-md bg-accent text-white text-t13 font-medium shrink-0 transition-colors hover:bg-[#3557b8] disabled:opacity-40" id="fed-start" disabled>Start federated training</button>
+          </div>
+          <div id="fed-error" class="error mt-4" hidden></div>
+          <div class="grid grid-cols-3 gap-4 mt-5" id="fed-schools"></div>
+          <div class="grid grid-cols-5 gap-4 mt-4">
+            <div class="col-span-3 flex flex-col gap-4">
+              <div class="card p-3"><svg id="fed-diagram" viewBox="0 0 560 300" class="w-full h-auto" role="img" aria-label="Three schools exchanging model updates with a server"></svg></div>
+              <div class="card py-4">
+                <div class="text-t13 font-medium mb-2">Training log</div>
+                <div id="fed-log" class="num text-[11px] leading-snug h-[124px] overflow-y-auto overflow-x-auto whitespace-nowrap space-y-1"></div>
+              </div>
+            </div>
+            <div class="col-span-2 flex flex-col gap-4">
+              <div class="card border-2 border-quantum text-center py-4">
+                <div class="text-t13 font-semibold uppercase tracking-wide text-ink">Student records sent</div>
+                <div class="num text-[64px] leading-none font-medium text-ink mt-2" id="fed-records">0</div>
+                <div class="text-t12 text-muted mt-2">in every round, from every school</div>
+              </div>
+              <div class="card py-4">
+                <div class="flex items-baseline justify-between">
+                  <span class="text-t13 font-medium">Privacy budget remaining</span>
+                  <span class="num text-t13" id="fed-eps-text">ε 4.0 of 4.0</span>
+                </div>
+                <div class="h-2.5 bg-surface border border-line rounded-full mt-3 overflow-hidden"><div id="fed-eps-bar" class="h-full bg-accent" style="width:100%"></div></div>
+                <div class="text-t12 text-muted mt-2" id="fed-eps-help">Each round spends part of the ε = 4 budget (Opacus RDP accountant, δ = 10⁻⁵).</div>
+              </div>
+              <div class="card py-4">
+                <div class="flex items-baseline justify-between">
+                  <span class="text-t13 font-medium">Shared model ROC-AUC by round</span>
+                  <span class="num text-t13" id="fed-auc">–</span>
+                </div>
+                <svg id="fed-chart" viewBox="0 0 360 150" class="w-full h-auto mt-2"></svg>
+              </div>
+            </div>
+          </div>
+          <p class="caption mt-3" id="fed-caption"></p>
+        </div>
+
         <div class="grid grid-cols-4 gap-4" id="ov-cards"></div>
         <div class="card mt-8">
           <h2>Privacy–utility curve</h2>
@@ -224,6 +334,7 @@
 
     </div></div>
   </main>
-  <script type="module" src="app.js?v=10"></script>
+  <script type="module" src="app.js?v=11"></script>
+  <script src="federated.js?v=2"></script>
 </body>
 </html>

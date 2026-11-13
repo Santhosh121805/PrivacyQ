@@ -327,6 +327,24 @@ def evidence():
             "figures": figs}
 
 
+# ------------------------------------------------------------------ federated demo (Overview "How it works")
+@app.get("/api/federated")
+def federated():
+    """Replay of the recorded Experiment 4 run (LogReg, 3 clients split by U.S. state, ε = 4, fold r0f0) from
+    results/story/story.json, plus the measured serialised update size for that same setup (Experiment 7)."""
+    story_file = RESULTS / "story" / "story.json"
+    if not story_file.exists():
+        raise ToolError("Replay data not found (results/story/story.json). Run `python scripts/build_story_data.py` once.")
+    story = json.loads(story_file.read_text(encoding="utf-8"))
+    cost_files = sorted(RESULTS.glob("exp7-nsch2024-federated-cost-*/communication_cost.csv"))
+    if not cost_files:
+        raise ToolError("Measured payload not found (results/exp7-*/communication_cost.csv).")
+    cost = _csv(cost_files[-1])
+    row = cost[(cost.arm == "logreg_full") & (cost.clients == 3) & (cost.partition == "by_state")].iloc[0]
+    return {"replay": story["replay"], "alone_auc_eps4": story["replay_alone_auc_eps4"],
+            "update_bytes": int(row.payload_bytes_per_update), "update_bytes_source": str(cost_files[-1].parent.name)}
+
+
 @app.get("/api/{rest:path}")
 def unknown(rest: str):
     return JSONResponse(status_code=404, content={"error": f"unknown endpoint /api/{rest}"})
