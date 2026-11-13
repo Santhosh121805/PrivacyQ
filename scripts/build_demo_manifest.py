@@ -542,10 +542,10 @@ def main() -> None:
             labels_n.append(f"{screen['risk']['n_inner_val']:,} inner-validation records (risk cut-points)")
         sec["full_heading"] = ("Full evaluation · " + " · ".join(labels_n)) if labels_n else f"From the dataset and results/ · {n_rows:,} records in the dataset"
     nd = f"{profile['n_dev']:,}"
-    for b, text in {1: f"Full dataset · {n_rows:,} records (no metrics on this screen)",
-                    2: f"Full dataset · {n_rows:,} records (no metrics on this screen)",
+    for b, text in {1: f"Full dataset · {n_rows:,} records",
+                    2: f"Full dataset · {n_rows:,} records",
                     3: f"Full evaluation · {nd} development records (feature ranking; cross-validated reduction comparison, Experiment 10)",
-                    5: "From results/ · circuit resources (no metrics on this screen)",
+                    5: "From results/ · circuit resources",
                     6: f"Full evaluation · {nd} development records (cross-validated; Qiskit re-scored 3 repeats = {3 * profile['n_dev']:,} scores)",
                     14: f"Full evaluation · {nd} development records (cross-validated; figures from Experiments 1, 2 and 4)"}.items():
         sections[b - 1]["full_heading"] = text

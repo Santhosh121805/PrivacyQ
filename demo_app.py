@@ -30,6 +30,8 @@ CONFIG = ROOT / "configs" / "holdout_final.yaml"
 app = FastAPI(title="Architecture walkthrough", docs_url=None, redoc_url=None)
 _STATE: dict = {}
 SHOW = ["sc_age_years", "sc_sex", "sc_racer", "sc_hispanic_r", "fpl_i1", "k2q01", "makefriend", "bullied_r"]
+HEAD = {"sc_age_years": "Age", "sc_sex": "Sex", "sc_racer": "Race", "sc_hispanic_r": "Hispanic", "fpl_i1": "Poverty ratio",
+        "k2q01": "General health", "makefriend": "Difficulty keeping friends", "bullied_r": "Bullied or excluded"}
 BANDS = {"sc_age_years": {1: "12–13", 2: "14–15", 3: "16–17"},
          "fpl_i1": {1: "≤ 99 %", 2: "100–199 %", 3: "200–399 %", 4: "400 % (top code)"}}
 
@@ -38,7 +40,8 @@ def required_files() -> list[Path]:
     import yaml
     cfg = yaml.safe_load(CONFIG.read_text(encoding="utf-8")) if CONFIG.exists() else {"data": {"paths": []}}
     return [CONFIG, MANIFEST, ROOT / "models/config_models.pkl", ROOT / "models/screening_models.pkl",
-            ROOT / "demo/assets/circuit_angle.svg", *[ROOT / p for p in cfg["data"]["paths"]]]
+            ROOT / "demo/assets/circuit_angle.svg", *[ROOT / p for p in cfg["data"]["paths"]],
+            *[(ROOT / p).with_name("nsch_2024_topical.do") for p in cfg["data"]["paths"]]]
 
 
 def preflight() -> None:
@@ -61,6 +64,9 @@ def _load() -> dict:
         _STATE["manifest"] = json.loads(MANIFEST.read_text(encoding="utf-8"))
         _STATE["cache"] = pickle.load(open(ROOT / "models/config_models.pkl", "rb"))
         _STATE["screen"] = pickle.load(open(ROOT / "models/screening_models.pkl", "rb"))
+        from src.m1_data.codebook import parse_codebook
+        do_file = [f for f in required_files() if f.suffix == ".do"][0]
+        _STATE["values"] = parse_codebook(do_file)[1]          # NSCH value labels: code -> meaning
     return _STATE
 
 
@@ -87,8 +93,16 @@ def run_trace():
     from src.m8_eval.screening import risk_band
     from src.m10_exp.common import holdout_split, load_config, load_dataset
 
+    from src.m1_data.codebook import display_value
+
     s = _load()
     man, cache, screen = s["manifest"], s["cache"], s["screen"]
+
+    def dv(col, v):
+        """Codebook meaning shown; the loaded value and NSCH code go to the tooltip."""
+        text, tip, _ = display_value(col, None if v is None or (isinstance(v, float) and np.isnan(v)) else v,
+                                     FEATURES[col][0], s["values"])
+        return {"v": text, "raw": tip}
     tr, labels = man["trace"], man["labels"]
     lab = lambda c: _short(labels.get(c, c))  # noqa: E731
     entry = cache["qsvm"][("angle", 8)]
@@ -111,10 +125,9 @@ def run_trace():
     yield {"box": 1, "ms": _ms(t0), "source": cfg["data"]["paths"][0],
            "detail": f"Read {len(frame):,} adolescents (12–17) from the NSCH 2024 file. Took hold-out indices {pos[0]} to {pos[-1]} "
                      f"in order. Each row has {len(FEATURES)} survey answers plus {len(loader.metadata_columns)} metadata columns; "
-                     f"{len(SHOW)} answers shown as read by src/m1_data/nsch.py (yes/no answers recoded to 1/0, "
-                     "categories written c1, c2, …; otherwise the file's values).",
-           "table": {"columns": ["Hold-out #", "Dataset row"] + [lab(c) for c in SHOW] + ["Missing answers"],
-                     "rows": [[p, i] + [_fmt(rows.iloc[j][c]) for c in SHOW] + [int(feats.iloc[j].isna().sum())]
+                     f"{len(SHOW)} answers shown, decoded with the NSCH 2024 codebook (hover a value for its raw code); — = missing.",
+           "table": {"columns": ["Hold-out #", "Dataset row"] + [HEAD[c] for c in SHOW] + ["Missing"],
+                     "rows": [[p, i] + [dv(c, rows.iloc[j][c]) for c in SHOW] + [int(feats.iloc[j].isna().sum())]
                               for j, (p, i) in enumerate(zip(pos, idx))]}}
 
     # ---- Box 2: drop identifiers, impute with training statistics, one-hot, standardise
@@ -137,7 +150,8 @@ def run_trace():
                   ["Scaling", f"each of the {X95.shape[1]} columns standardised, z = (x − mean) / SD, with training-row mean and SD; "
                               f"e.g. Age: mean {sc.mean_[a]:.2f}, SD {sc.scale_[a]:.2f}"]],
            "table": {"columns": ["Question with missing answers", "Missing in these 50", "Filled with (training median / mode)"],
-                     "rows": [[lab(c), int(n), _fmt(fill.get(c))] for c, n in miss.head(8).items()]}}
+                     "rows": [[lab(c), int(n), dv(c, fill.get(c) if isinstance(fill.get(c), str) else float(fill.get(c)))]
+                              for c, n in miss.head(8).items()]}}
 
     # ---- Box 3: the 8 model inputs = 8 PCA components; strongest questions in plain English
     t0 = time.perf_counter()
@@ -163,8 +177,8 @@ def run_trace():
     def gen(c, v):
         if v is None or (isinstance(v, float) and np.isnan(v)):
             return "suppressed"
-        return f"band {int(v)} ({BANDS[c][int(v)]})" if c in BANDS else _fmt(v)
-    before_after = [[lab(c), _fmt(rows.iloc[0][c]), gen(c, anon.iloc[0][c])] for c in NSCH_QUASI_IDENTIFIERS]
+        return f"band {int(v)} ({BANDS[c][int(v)]})" if c in BANDS else dv(c, v)
+    before_after = [[lab(c), dv(c, rows.iloc[0][c]), gen(c, anon.iloc[0][c])] for c in NSCH_QUASI_IDENTIFIERS]
     before_after += [[f"Angle, qubit {q}", f"{Z[0, q]:.3f}", f"{z_noisy[q]:.3f}"] for q in range(8)]
     yield {"box": 4, "ms": _ms(t0), "source": f"src/m7_privacy/input_privacy.py; safe groups fitted on {tr['kanon']['fit_rows']:,} training rows; "
                                               f"Experiment 5: {tr['ldp']['source']}",
