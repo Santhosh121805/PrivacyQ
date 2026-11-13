@@ -130,7 +130,8 @@ def fedavg_train(kind: str, model_params: dict, clients: list[tuple[np.ndarray, 
                  rounds: int, local_epochs: int, learning_rate: float, sample_rate: float,
                  epsilon: float | None, delta: float, max_grad_norm: float, seed: int,
                  prepare=lambda X: X, evaluate=None, secure_aggregation: bool = False,
-                 secagg_max_client_size: int | None = None, secagg_max_abs_weight: float = 1e3) -> dict:
+                 secagg_max_client_size: int | None = None, secagg_max_abs_weight: float = 1e3,
+                 on_round=None) -> dict:
     """Run FedAvg. Returns the final global module, per-round history and privacy summary."""
     torch.manual_seed(seed)
     prepared = [(np.asarray(prepare(X), dtype=float), np.asarray(y)) for X, y in clients]
@@ -204,6 +205,8 @@ def fedavg_train(kind: str, model_params: dict, clients: list[tuple[np.ndarray, 
         if evaluate is not None:
             entry.update(evaluate(global_module))
         history.append(entry)
+        if on_round is not None:                              # optional live reporting (scripts/federated_live.py)
+            on_round(entry, workers, sizes)
     eps = [w.epsilon(delta) for w in workers]
     return {
         "module": global_module,
