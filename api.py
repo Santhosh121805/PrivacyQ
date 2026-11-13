@@ -75,6 +75,40 @@ def models() -> dict:
     return _MODELS
 
 
+SCREENING = ROOT / "models" / "screening_models.pkl"
+_SCREENING = None
+
+
+def screening_models() -> dict | None:
+    """Box 9 models (three classes, graded risk), built by scripts/build_screening_models.py."""
+    global _SCREENING
+    if _SCREENING is None and SCREENING.exists():
+        with SCREENING.open("rb") as fh:
+            _SCREENING = pickle.load(fh)
+    return _SCREENING
+
+
+def _screening(record_id: int, X: np.ndarray) -> dict:
+    from src.m5_models.multiclass import CLASS_NAMES
+    from src.m8_eval.screening import risk_band
+
+    s = screening_models()
+    if s is None:
+        return {"error": "Screening models not built. Run `python scripts/build_screening_models.py` once (~20 s)."}
+    probs = s["three_class"]["model"].class_scores(X)[0]
+    p = float(s["risk"]["model"].predict_proba(X)[0, 1])
+    r = s["risk"]
+    return {"three_class": {"probabilities": {c: float(v) for c, v in zip(CLASS_NAMES, probs)},
+                            "predicted": CLASS_NAMES[int(np.argmax(probs))],
+                            "survey_answer": s["pool_three_class"].get(int(record_id)),
+                            "C": s["three_class"]["C"], "inner_val_macro_auc": s["three_class"]["inner_val_macro_auc"],
+                            "n_train": s["three_class"]["n_train"]},
+            "risk": {"probability": p, "band": risk_band(p, r["cuts"]), "cuts": r["cuts"],
+                     "inner_val_bands": r["inner_val_bands"], "inner_val_auc": r["inner_val_auc"],
+                     "n_inner_val": r["n_inner_val"], "n_inner_val_pos": r["n_inner_val_pos"],
+                     "rule_tried_first": r.get("rule_tried_first")}}
+
+
 @app.on_event("startup")
 def warm() -> None:
     """Load cached models in the background (torch/PennyLane imports dominate) so pages are served at once."""
@@ -311,7 +345,8 @@ def inspect(req: InspectRequest):
                     f"same encoding and {n} features on the same 1,200 rows.")
     return {"record_id": req.record_id, "survey_label": int(models()["pool"].loc[req.record_id, "label"]),
             "model": req.model, "encoding": req.encoding, "features": n, "note": note, "steps": steps,
-            "circuit_url": circuit_url, "latency_ms": 1000 * (time.perf_counter() - t0)}
+            "circuit_url": circuit_url, "screening": _screening(req.record_id, X),
+            "latency_ms": 1000 * (time.perf_counter() - t0)}
 
 
 # ------------------------------------------------------------------ evidence

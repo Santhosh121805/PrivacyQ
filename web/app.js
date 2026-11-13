@@ -87,6 +87,50 @@ async function renderHome() {
   } catch (e) { /* the pills keep their placeholders; the page still works */ }
 }
 
+// ------------------------------------------------------------- Inspect › screening indication (box 9)
+const CLASS_LABELS = { none: "None", anxiety_only: "Anxiety only", depression: "Depression (with or without anxiety)" };
+function renderScreening(s) {
+  const el = $("ins-screening");
+  el.hidden = false;
+  if (!s || s.error) { el.innerHTML = `<h2>Screening indication</h2><p class="error mt-3">${esc(s ? s.error : "not available")}</p>`; return; }
+  const t = s.three_class, r = s.risk, cuts = r.cuts, b = r.inner_val_bands;
+  const bar = (k) => `<div class="mt-3"><div class="flex justify-between text-t13"><span>${esc(CLASS_LABELS[k])}${k === t.predicted ? ' <span class="pill ml-1">highest</span>' : ""}</span>
+      <span class="num">${f(t.probabilities[k], 3)}</span></div>
+      <div class="h-2 bg-surface border border-line rounded-full mt-1 overflow-hidden"><div class="h-full ${k === "none" ? "bg-[#9498a0]" : "bg-accent"}" style="width:${(100 * t.probabilities[k]).toFixed(1)}%"></div></div></div>`;
+  const band = (name, lo, hi) => `<div class="flex-1 border rounded-md px-3 py-2 ${r.band === name ? "border-ink" : "border-line"}">
+      <div class="text-t13 ${r.band === name ? "font-semibold" : "text-muted"}">${name[0].toUpperCase() + name.slice(1)}${r.band === name ? " ← this record" : ""}</div>
+      <div class="num text-t12 text-muted mt-1">${lo} – ${hi}</div>
+      <div class="text-t12 text-muted mt-1">inner-val: ${b[name].rows} rows, ${b[name].positives} with depression</div></div>`;
+  el.innerHTML = `
+    <h2>Screening indication</h2>
+    <p class="help mt-2">Not a diagnosis. A research screening indication from logistic regression on all 95 columns, trained on the same
+      1,200 training rows as the models above (${t.n_train.toLocaleString("en-US")} for three classes: the rest have undetermined anxiety);
+      this record was not used to train either model.</p>
+    <div class="grid grid-cols-2 gap-8 mt-5">
+      <div>
+        <div class="label">Three classes</div>
+        <p class="help mt-1">Class-weighted model probabilities (not calibrated to how common each class is). Survey answer for this record:
+          <span class="text-ink">${esc(t.survey_answer ? CLASS_LABELS[t.survey_answer] : "undetermined")}</span>.</p>
+        ${["none", "anxiety_only", "depression"].map(bar).join("")}
+        <p class="help mt-3">Inner-validation macro one-vs-rest ROC-AUC <span class="num">${f(t.inner_val_macro_auc, 3)}</span>.
+          Cross-validated and hold-out results: RESULTS.md section 8.</p>
+      </div>
+      <div>
+        <div class="label">Risk level</div>
+        <p class="help mt-1">Depression probability <span class="num text-ink">${f(r.probability, 3)}</span> →
+          <span class="text-ink font-semibold">${esc(r.band)}</span></p>
+        <div class="flex gap-2 mt-3">${band("low", "0", f(cuts.low_moderate, 3))}${band("moderate", f(cuts.low_moderate, 3), f(cuts.moderate_high, 3))}${band("high", f(cuts.moderate_high, 3), "1")}</div>
+        <p class="help mt-3">Cut-points chosen on the ${r.n_inner_val} inner-validation rows (${r.n_inner_val_pos} with depression):
+          95 % sensitivity for the low/moderate cut (rule-out), 95 % specificity for the moderate/high cut (rule-in).
+          A 90 % / 90 % rule was tried first and left only ${r.rule_tried_first ? r.rule_tried_first.bands.moderate.rows : "–"} rows in the moderate band.
+          With so few validation positives the cut-points are approximate.</p>
+      </div>
+    </div>
+    <p class="text-t13 mt-6 pt-4 border-t border-line">Box 9 status: state classification (binary and three classes) and risk-level prediction are built.
+      Topic and trend analysis, emotion and sentiment analysis, and personalised insights are not, because they need text data the project
+      does not have. There is no stress class: NSCH 2024 records no stress variable.</p>`;
+}
+
 // ------------------------------------------------------------- Overview
 async function renderOverview() {
   showError("ov-error", null);
@@ -253,6 +297,7 @@ async function renderInspect() {
     return `<li class="card"><div class="flex items-baseline gap-3"><span class="num text-t12 text-muted">${String(i + 1).padStart(2, "0")}</span><span class="text-t15 font-semibold">${esc(s.title)}</span></div>
       <p class="help mt-2 mb-3">${esc(s.detail)}</p>${s.probabilities ? '<div class="state-chart mb-3"></div>' : ""}${tbl}</li>`;
   }).join("");
+  renderScreening(d.screening);
   const stateStep = d.steps.find((s) => s.probabilities);
   if (stateStep) {
     const Plot = await getPlot();
