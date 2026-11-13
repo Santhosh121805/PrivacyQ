@@ -99,8 +99,9 @@ class FeatureTransformer:
             raise ValueError("input feature count differs from fitted training data")
         standardized = self.scaler.transform(values)
         selected = self.selector.transform(standardized) if self.selector is not None else standardized
-        if self.reducer is not None:
-            reduced = self.reducer.transform(selected)
+        reducer = getattr(self, "reducer", None)   # objects pickled before UMAP/autoencoder support have no attribute
+        if reducer is not None:
+            reduced = reducer.transform(selected)
         else:
             reduced = self.pca.transform(selected) if self.pca is not None else selected
         if self.output == "standard":
