@@ -32,7 +32,26 @@ nav a.on { background: #fff; border-left-color: var(--box); font-weight: 600; }
 
 main { margin: var(--header-h) 0 0 var(--side-w); padding: 12px 20px 8px; }
 #error { border: 2px solid #b00020; color: #b00020; padding: 10px 14px; margin-bottom: 12px; }
-#content { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-items: start; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-items: start; }
+.panel { border: 2px solid var(--ink); padding: 0 12px 12px; margin-bottom: 14px; }
+.panel-h { font-size: 19px; font-weight: 600; margin: 0 -12px 10px; padding: 6px 12px; }
+.panel.live { border-color: #8a6d00; }
+.panel.live .panel-h { background: #fff4c2; color: #3d3000; border-bottom: 2px solid #8a6d00; }
+.panel.full .panel-h { background: #e8eaee; border-bottom: 2px solid var(--ink); }
+.panel.live .scroll { max-height: 300px; }
+.intro .statement { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+.run-row { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
+.err { color: #b00020; }
+.stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; align-items: start; }
+.stage.idle, .stage.waiting { border-top-color: #9aa0a8; }
+.stage h2 .tick { display: inline-block; width: 22px; color: #9aa0a8; }
+.stage.done h2 .tick { color: #1a7f37; font-weight: 700; }
+.scroll { max-height: 210px; overflow: auto; margin-top: 6px; border: 1px solid var(--line); }
+.scroll th { position: sticky; top: 0; background: #fff; }
+img.circuit-img { height: 300px; max-width: 100%; margin-top: 6px; }
+#diagram .done { position: absolute; border: 3px solid #1a7f37; background: rgba(26, 127, 55, 0.18); color: #1a7f37;
+  font-weight: 700; font-size: 16px; display: flex; align-items: flex-start; justify-content: flex-end; padding: 0 3px; }
+#diagram .done.latest { border-color: #e00000; color: #e00000; background: rgba(224, 0, 0, 0.12); }
 .card { border: 1px solid var(--line); border-top: 5px solid var(--box); background: #fff; padding: 8px 12px; }
 .card.span2 { grid-column: span 2; }
 .card.wide { grid-column: 1 / -1; }

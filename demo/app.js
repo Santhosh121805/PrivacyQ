@@ -1,5 +1,5 @@
 "use strict";
-// Architecture walkthrough. Reads only manifest.json and POST /api/live. No configuration controls.
+// Architecture walkthrough. Reads manifest.json and POST /api/trace (streamed). Only controls: Run, Back, Next, the box list.
 
 const BOXES = [
   // number, exact diagram title, subtitle, colour, position on the 1536 x 1024 diagram [x0, y0, x1, y1]
@@ -19,16 +19,21 @@ const BOXES = [
   [14, "Output & Visualization", "", "#00838f", [961, 762, 1243, 968]],
   [15, "Key Outcomes", "", "#4a3a9a", [1249, 762, 1533, 968]],
 ];
-const FLOW = "Flow: 1 → 2 → 3 → 4 → 5 → 6, then 7 → 8 → 9 → 10, then 11 · 12 · 13 · 14 · 15";
+const STAGES = [1, 2, 3, 4, 5, 6, 7, 8, 9];          // boxes the live trace passes through, in diagram order
+const PACE_MS = 350;                                   // display pacing between stage ticks; compute times shown are real
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 let manifest = null;
-let current = 1;
+let current = 0;
+let trace = {};
+let running = false;
+let traceError = null;
 
 const src = (s) => (s ? `<div class="source">Source: ${esc(s)}</div>` : "");
 const kv = (rows) => `<table class="kv">${rows.map((r) => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("")}</table>`;
 const tbl = (cols, rows) => `<table><thead><tr>${cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr></thead>
   <tbody>${rows.map((r) => `<tr>${r.map((v) => `<td class="${/^[-+–≥<]?[\d.]/.test(String(v)) ? "num" : ""}">${esc(v)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+const range = () => `indices ${manifest.trace.start} to ${manifest.trace.start + manifest.trace.count - 1}`;
 
 function render(it, wide) {
   const cls = `card${wide ? " wide" : ""}`;
@@ -81,65 +86,138 @@ function naCard(title, items, wide) {
     <table class="kv">${items.map((x) => `<tr><td>${esc(x.title)}</td><td>${esc(x.reason)}</td></tr>`).join("")}</table></section>`;
 }
 
-function liveCard() {
-  const l = manifest.live;
-  return `<section class="card wide" id="live"><h2>Live prediction on one real record</h2>
-    <div>Dataset row <span class="num">${l.row_index}</span> — ${esc(l.split)}. No model has ever seen this record.</div>
-    <div style="margin-top:8px"><button class="primary" id="run" type="button">Run live prediction</button></div>
-    <div id="live-out"></div><div class="source">Source: demo_app.py POST /api/live · models/config_models.pkl · models/screening_models.pkl</div></section>`;
+// ---------------------------------------------------------------- live trace
+function stageBody(st) {
+  return `${st.detail ? `<div>${esc(st.detail)}</div>` : ""}${st.kv ? kv(st.kv) : ""}
+    ${st.img ? `<img class="fig circuit-img" src="${esc(st.img)}" alt="circuit">` : ""}
+    ${st.table ? `<div class="scroll">${tbl(st.table.columns, st.table.rows)}</div>` : ""}
+    <div class="source">Computed live in ${st.ms} ms · ${esc(st.source)}</div>`;
 }
 
-async function runLive() {
-  const btn = $("run");
-  btn.disabled = true;
-  $("live-out").innerHTML = "<div class='note'>Running…</div>";
+function stageCard(b) {
+  const [, title, , colour] = BOXES[b - 1];
+  const st = trace[b];
+  const state = st ? "done" : running ? "waiting" : "idle";
+  const span = b === 1 ? " wide" : b === 9 ? " span2" : "";      // the two 50-row tables get room
+  return `<section class="card stage ${state}${span}" id="stage-${b}" style="--box:${colour}">
+    <h2><span class="tick">${st ? "✓" : "○"}</span> ${b}. ${esc(title)}</h2>
+    ${st ? stageBody(st) : `<div class="muted">${running ? "Waiting for this stage…" : "Not run yet."}</div>`}</section>`;
+}
+
+function overview() {
+  const t = manifest.trace;
+  return `<section class="card wide intro"><div class="statement">${t.count} real held-out records, ${range()}, never seen during training</div>
+      <div>Each architecture box lights up as its stage completes, in diagram order. Inference only: nothing is trained, and no metric is computed from these ${t.count} records.</div>
+      <div class="run-row"><button class="primary" id="run" type="button"${running ? " disabled" : ""}>Run</button>
+      <span id="run-status">${traceError ? `<b class="err">Failed: ${esc(traceError)}</b>` : trace[9] ? `All ${STAGES.length} stages completed in ${trace[9].total_ms} ms of compute (display paced at ${PACE_MS / 1000} s per stage).` : running ? "Running…" : ""}</span></div></section>
+    <div class="stages">${STAGES.map(stageCard).join("")}</div>`;
+}
+
+async function runTrace() {
+  if (running) return;
+  running = true; trace = {}; traceError = null;
+  show(0); markDone();
+  const queue = [];
+  let finished = false;
+  const reveal = (async () => {                                  // tick stages one by one, in order
+    while (!finished || queue.length) {
+      if (queue.length) {
+        const st = queue.shift();
+        if (st.error) { traceError = st.error; break; }
+        trace[st.box] = st;
+        markDone(st.box);
+        if (current === 0) { const el = $(`stage-${st.box}`); if (el) el.outerHTML = stageCard(st.box); }
+        await new Promise((r) => setTimeout(r, PACE_MS));
+      } else await new Promise((r) => setTimeout(r, 50));
+    }
+  })();
   try {
-    const res = await fetch("/api/live", { method: "POST" });
-    const d = await res.json();
-    if (!res.ok) throw new Error(d.error || `HTTP ${res.status}`);
-    $("live-out").innerHTML = `<div class="note">Dataset row <b class="num">${d.row_index}</b> · risk band <span class="band">${esc(d.band.toUpperCase())}</span>
-      · survey answer: ${esc(d.survey_label)} · computed in <span class="num">${d.ms}</span> ms</div>
-      <div class="live-steps">${d.steps.map((s) => `<div class="step"><h3>${esc(s.title)}</h3><div class="muted">${esc(s.detail)}</div><table class="kv stack">${s.rows.map((r) => `<tr><td>${esc(r[0])}</td><td class="num">${esc(r[1])}</td></tr>`).join("")}</table></div>`).join("")}</div>`;
-  } catch (e) {
-    $("live-out").innerHTML = `<div id="error">${esc(e.message)}</div>`;
-  }
-  btn.disabled = false;
+    const res = await fetch("/api/trace", { method: "POST" });
+    if (!res.ok) throw new Error((await res.json()).error || `HTTP ${res.status}`);
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    let buf = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf("\n")) >= 0) { const line = buf.slice(0, i); buf = buf.slice(i + 1); if (line.trim()) queue.push(JSON.parse(line)); }
+    }
+  } catch (e) { queue.push({ error: e.message }); }
+  finished = true;
+  await reveal;
+  if (!traceError && !trace[9]) traceError = "the stream ended before box 9";
+  running = false;
+  markDone();
+  if (current === 0) show(0);
 }
 
+function markDone(latest) {
+  document.querySelectorAll("#diagram .done").forEach((d) => d.remove());
+  const k = $("diagram-img").clientWidth / 1536;
+  for (const b of Object.keys(trace).map(Number)) {
+    const pos = BOXES[b - 1][4], d = document.createElement("div");
+    d.className = "done" + (b === latest ? " latest" : "");
+    Object.assign(d.style, { left: `${pos[0] * k}px`, top: `${pos[1] * k}px`, width: `${(pos[2] - pos[0]) * k}px`, height: `${(pos[3] - pos[1]) * k}px` });
+    d.textContent = "✓";
+    $("diagram").appendChild(d);
+  }
+}
+
+function livePanel(n) {
+  const head = `<h2 class="panel-h">Live run · ${manifest.trace.count} real held-out records (${range()})</h2>`;
+  let body;
+  if (STAGES.includes(n)) body = trace[n] ? stageBody(trace[n]) : `<div class="note">Not run yet. Press <b>Run</b> on the Overview screen (top of the box list).</div>`;
+  else if (n === 14) body = `<div class="note">No live stage in this box: the trace's outputs are shown in boxes 1–9. The figures below come from results/.</div>`;
+  else body = `<div class="note">No live stage in this box. The ${manifest.trace.count} live predictions (box 9) are mechanism only: only ${manifest.trace.n_positive} of the ${manifest.trace.count} have a current depression diagnosis, so no accuracy, precision, recall, F1 or AUC is computed from them. Every metric below is read from results/.</div>`;
+  return `<section class="panel live">${head}${body}</section>`;
+}
+
+// ---------------------------------------------------------------- navigation
 function show(n) {
-  current = Math.max(1, Math.min(15, n));
+  current = Math.max(0, Math.min(15, n));
+  $("back").disabled = current === 0;
+  $("next").disabled = current === 15;
+  document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", Number(a.dataset.n) === current));
+  const mark = $("diagram-mark");
+  if (current === 0) {
+    document.documentElement.style.setProperty("--box", "#111318");
+    $("box-count").textContent = "Overview";
+    $("box-title").textContent = "Live trace through the architecture";
+    $("box-subtitle").textContent = `${manifest.trace.count} real held-out records, ${range()}`;
+    mark.style.display = "none";
+    $("content").innerHTML = overview();
+    $("run").addEventListener("click", runTrace);
+    if (location.hash !== "#overview") history.replaceState(null, "", "#overview");
+    window.scrollTo(0, 0);
+    return;
+  }
   const [num, title, sub, colour, pos] = BOXES[current - 1];
   document.documentElement.style.setProperty("--box", colour);
   $("box-count").textContent = `Box ${num} of 15`;
   $("box-title").textContent = `${num}. ${title}`;
   $("box-subtitle").textContent = sub;
-  $("flow").textContent = FLOW;
-  const img = $("diagram-img"), k = img.clientWidth / 1536;
-  Object.assign($("diagram-mark").style, { left: `${pos[0] * k}px`, top: `${pos[1] * k}px`, width: `${(pos[2] - pos[0]) * k}px`, height: `${(pos[3] - pos[1]) * k}px` });
-  document.querySelectorAll("#nav a").forEach((a) => a.classList.toggle("on", Number(a.dataset.n) === current));
-  $("back").disabled = current === 1;
-  $("next").disabled = current === 15;
+  const k = $("diagram-img").clientWidth / 1536;
+  mark.style.display = "block";
+  Object.assign(mark.style, { left: `${pos[0] * k}px`, top: `${pos[1] * k}px`, width: `${(pos[2] - pos[0]) * k}px`, height: `${(pos[3] - pos[1]) * k}px` });
   const sec = manifest.sections.find((s) => s.box === current);
   let items = sec.items;
   const gi = items.findIndex((it, i) => it.kind === "group" && items[i + 1] && items[i + 1].kind === "figure");
-  if (current === 3 && gi >= 0 && items[gi + 1] && items[gi + 1].kind === "figure") {   // Dimensionality Reduction beside Structured Features
-    items = [...items.slice(0, gi), { ...items[gi], extra: items[gi + 1] }, ...items.slice(gi + 2)];
-  }
+  if (current === 3 && gi >= 0) items = [...items.slice(0, gi), { ...items[gi], extra: items[gi + 1] }, ...items.slice(gi + 2)];
   const wideKinds = new Set(["circuits", "loop", "twocol", "group"]);
   const nas = items.filter((it) => it.kind === "na");
   const collapse = current === 9 && nas.length >= 3;          // box 9: the three text-only tasks in one card
-  let html = items.filter((it) => !(collapse && it.kind === "na"))
-    .map((it) => render(it, wideKinds.has(it.kind) || (it.kind === "list" && it.entries.length > 12))).join("");
-  if (collapse) html += naCard("Topic and trend analysis · Emotion and sentiment analysis · Personalized insights (simulated)", nas, false);
-  if (current === 9) html += liveCard();
-  $("content").innerHTML = html;
-  if (current === 9) $("run").addEventListener("click", runLive);
+  let cards = items.filter((it) => !(collapse && it.kind === "na"))
+    .map((it) => render(it, wideKinds.has(it.kind) || (it.kind === "list" && it.entries.length > 12) || (it.kind === "table" && it.columns.length >= 7))).join("");
+  if (collapse) cards += naCard("Topic and trend analysis · Emotion and sentiment analysis · Personalized insights (simulated)", nas, false);
+  $("content").innerHTML = `${livePanel(current)}<section class="panel full"><h2 class="panel-h">${esc(sec.full_heading)}</h2><div class="grid">${cards}</div></section>`;
   if (location.hash !== `#box-${current}`) history.replaceState(null, "", `#box-${current}`);
   window.scrollTo(0, 0);
 }
 
 (async function init() {
-  $("nav").innerHTML = BOXES.map(([n, t]) => `<a href="#box-${n}" data-n="${n}"><b>${n}</b><span>${esc(t)}</span></a>`).join("");
+  $("nav").innerHTML = `<a href="#overview" data-n="0"><b>▶</b><span>Overview — live trace</span></a>`
+    + BOXES.map(([n, t]) => `<a href="#box-${n}" data-n="${n}"><b>${n}</b><span>${esc(t)}</span></a>`).join("");
   document.querySelectorAll("#nav a").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); show(Number(a.dataset.n)); }));
   $("back").addEventListener("click", () => show(current - 1));
   $("next").addEventListener("click", () => show(current + 1));
@@ -149,6 +227,6 @@ function show(n) {
     manifest = await res.json();
   } catch (e) { $("error").hidden = false; $("error").textContent = e.message; return; }
   const img = $("diagram-img");
-  const start = () => show(Number((location.hash.match(/box-(\d+)/) || [])[1]) || 1);
+  const start = () => show(Number((location.hash.match(/box-(\d+)/) || [])[1]) || 0);
   if (img.complete) start(); else img.addEventListener("load", start);
 })();

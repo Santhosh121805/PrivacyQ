@@ -64,9 +64,12 @@ python scripts/build_screening_models.py     # models/screening_models.pkl (risk
 python scripts/build_demo_manifest.py        # demo/manifest.json + demo/assets/
 ```
 
-The only controls are Back/Next, the 15-box list, and one button that runs a live prediction on
-locked hold-out row 0 (de-identify → preprocess → 8 angles → 8-qubit statevector → QSVM and risk band).
-Section screenshots beside their diagram boxes are in `demo/screenshots/sections/`.
+`demo_app.py` runs a pre-flight check at start-up and exits with the missing file's name if anything the
+trace needs is absent. The only controls are Run, Back, Next and the box list. **Overview → Run** streams
+50 consecutive locked hold-out records (hold-out indices 0–49, read from the NSCH file) through boxes 1–9
+in diagram order, inference only, with no metric computed from them. Every box screen separates "Live run · 50 real
+held-out records" from "Full evaluation · N records" (metrics read from `results/`, file named under each).
+Section screenshots beside their diagram boxes are in `demo/screenshots/sections/` (git-ignored).
 
 ## What was found (plain English)
 

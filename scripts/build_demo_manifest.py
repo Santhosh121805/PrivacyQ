@@ -498,9 +498,87 @@ def main() -> None:
         item("Research publication / project report", source="results/RESULTS.md · CONFORMANCE.md", rows=[
             ["Project report", "results/RESULTS.md and CONFORMANCE.md"], ["Publication", f"{NA}: not submitted"]])]})
 
+    # ------------------------------------------------------------ Box 11: locked hold-out metrics (read; never recomputed)
+    names = {"logreg_full_all95": "Logistic regression (all 95 columns, full training data)",
+             "qsvm_angle_pca8_1500rows": "QSVM (angle encoding, 8 qubits, 1.2k training rows)",
+             "dp_logreg_full_all95_eps4": "DP logistic regression, ε = 4 (all 95 columns)"}
+    sections[10]["items"].insert(0, item(
+        "Locked hold-out: accuracy, precision, recall and F1 together", kind="table", source=rel(RUNS["holdout"] / "holdout_metrics.csv"),
+        columns=["Model", "Accuracy", "Precision", "Recall", "F1", "ROC-AUC", "Positives / records"],
+        table=[[names.get(m, m), f"{r.accuracy:.3f}", f"{r.precision:.3f}", f"{r.recall:.3f}", f"{r.f1:.3f}", f"{r.roc_auc:.3f}",
+                f"{int(r.n_holdout_pos):,} / {int(r.n_holdout):,}"] for m, r in ho.iterrows()],
+        note="Scored once on the locked hold-out. Precision is low for every model at a 9.96 % positive rate."))
+
+    # ------------------------------------------------------------ "Full evaluation · N records" heading per section, from the artifacts' own row counts
+    def n_label(run_key: str):
+        d = RUNS[run_key]
+        if run_key.startswith("holdout"):
+            return f"{profile['n_holdout']:,} locked hold-out records"
+        fm_path = d / "fold_metrics.csv"
+        if fm_path.exists():
+            fmx = pd.read_csv(fm_path)
+            if {"n_val", "repeat", "fold"} <= set(fmx.columns):
+                first = fmx[fmx.repeat == fmx.repeat.min()].groupby("fold").n_val.first().sum()
+                return f"{int(first):,} development records (cross-validated)"
+        return None
+
+    def walk(items):
+        for it in items:
+            yield it
+            if it["kind"] == "group":
+                yield from walk(it["items"])
+    for sec in sections:
+        text = " ".join(str(it.get("source") or "") + " " + " ".join(str(f.get("source", "")) for f in it.get("figures", []))
+                        for it in walk(sec["items"]))
+        labels_n = []
+        for key, d in RUNS.items():
+            if rel(d) + "/" in text or rel(d) + " " in text:
+                lab_n = n_label(key)
+                if lab_n and lab_n not in labels_n:
+                    labels_n.append(lab_n)
+        if "feature_importance" in text and f"{profile['n_dev']:,} development records" not in " ".join(labels_n):
+            labels_n.append(f"{profile['n_dev']:,} development records (feature ranking)")
+        if "src/m8_eval/screening.py" in text:
+            labels_n.append(f"{screen['risk']['n_inner_val']:,} inner-validation records (risk cut-points)")
+        sec["full_heading"] = ("Full evaluation · " + " · ".join(labels_n)) if labels_n else f"From the dataset and results/ · {n_rows:,} records in the dataset"
+    nd = f"{profile['n_dev']:,}"
+    for b, text in {1: f"Full dataset · {n_rows:,} records (no metrics on this screen)",
+                    2: f"Full dataset · {n_rows:,} records (no metrics on this screen)",
+                    3: f"Full evaluation · {nd} development records (feature ranking; cross-validated reduction comparison, Experiment 10)",
+                    5: "From results/ · circuit resources (no metrics on this screen)",
+                    6: f"Full evaluation · {nd} development records (cross-validated; Qiskit re-scored 3 repeats = {3 * profile['n_dev']:,} scores)",
+                    14: f"Full evaluation · {nd} development records (cross-validated; figures from Experiments 1, 2 and 4)"}.items():
+        sections[b - 1]["full_heading"] = text
+
+    # ------------------------------------------------------------ live trace inputs: 50 consecutive hold-out rows, fixed start
+    from src.m7_privacy.input_privacy import KAnonymizer
+    from src.m10_exp.tuning import inner_split, stratified_subsample
+    sub = stratified_subsample(dev, y, 1500, seed)
+    tr_rows, _ = inner_split(sub, y, float(cfg["tuning"]["inner_val_fraction"]), seed)
+    if len(tr_rows) != cache["n_train"]:
+        raise SystemExit("training rows do not match models/config_models.pkl — rebuild the model cache")
+    kan = KAnonymizer(k=5).fit(frame.iloc[tr_rows])
+    e5 = csv(RUNS["exp5"] / "summary.csv")
+    q5 = e5[e5.arm == "qsvm"]
+    def e5_auc(k_lab, eps):
+        m = q5[(q5.k_anon.astype(str) == k_lab) & (q5.epsilon_input.astype(str).isin(eps))]
+        if len(m) != 1:
+            raise SystemExit(f"Experiment 5 summary has no unique qsvm row for k={k_lab}, eps={eps}")
+        return float(m.roc_auc_mean.iloc[0])
+    k_off = [v for v in q5.k_anon.astype(str).unique() if v != "k=5"][0]
+    start, count = 0, 50
+    trace = {"start": start, "count": count, "dataset_rows": [int(hold[i]) for i in range(start, start + count)],
+             "n_positive": int(y[hold[start:start + count]].sum()),        # label count only; no metric is computed from these rows
+             "kanon": {"k": 5, "safe_keys": sorted(kan.safe_keys_), "fit_rows": int(len(tr_rows)),
+                       "train_suppression_rate": kan.report_["suppression_rate"]},
+             "ldp": {"epsilon": 32.0, "seed": 0,
+                     "auc_k5_eps32": e5_auc("k=5", ["32", "32.0"]), "auc_none": e5_auc(k_off, ["inf", "nan", "None", ""]),
+                     "source": rel(RUNS["exp5"] / "summary.csv")},
+             "circuit": "assets/circuit_angle.svg"}
+
     manifest = {"dataset": {"rows": n_rows, "columns_one_hot": len(m95), "questions": profile["n_raw_features"],
                             "positive_rate": profile["n_positive"] / n_rows},
-                "architecture": "assets/architecture.jpg", "live": live, "sections": sections,
+                "architecture": "assets/architecture.jpg", "live": live, "trace": trace, "sections": sections,
                 "labels": {c: lab(c) for c in list(FEATURES) + m95},
                 "built_from": "scripts/build_demo_manifest.py"}
     shutil.copy(need(ROOT / "docs/architecture.jpg"), ASSETS / "architecture.jpg")
