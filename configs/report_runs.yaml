@@ -1,0 +1,40 @@
+# Short real runs whose terminal output is captured as report figures (scripts/report_runs.py).
+# Same file, hold-out split and folds as Experiments 1-4 (seed 2026). Training and scoring use cross-validation
+# fold r0f0 of the development rows; the locked hold-out is never scored. "handoff" reads one hold-out record
+# through the stored, already-trained transformer (inference only, no metric).
+project:
+  name: report-runs-nsch2024
+  seed: 2026
+
+data:
+  loader: nsch
+  paths: [data/raw/nsch_2024/nsch_2024e_topical.dta]
+  target: depression_current
+  min_age: 12
+  max_age: 17
+
+split:
+  holdout_fraction: 0.2
+
+cv:
+  n_splits: 5
+  n_repeats: 3
+
+tuning:
+  inner_val_fraction: 0.2
+
+# The four classical baselines of Experiment 2 (random forest was dropped on supervisor instruction; RBF-SVM added).
+# Grids and fixed settings copied from configs/exp2_nsch2024.yaml and configs/exp2_svm_nsch2024.yaml.
+classical:
+  logreg: {grid: {C: [0.01, 0.1, 1.0, 10.0]}}
+  xgboost: {base: {n_estimators: 300}, grid: {max_depth: [2, 4, 6], learning_rate: [0.03, 0.1]}}
+  mlp: {base: {epochs: 60, batch_size: 128}}
+  svm: {grid: {C: [0.1, 1.0, 10.0]}}
+
+core_model: logreg
+
+handoff:
+  models: models/config_models.pkl      # built by scripts/build_config_models.py (1,200 development rows)
+  holdout_index: 0                      # position in the locked hold-out (same record as the demo's first row)
+  encoding: angle
+  n_qubits: 8

@@ -38,8 +38,6 @@ td.num { text-align: right; }
 .na-list { border-top-color: #9aa0a8; background: var(--surface); }
 .na-list h2 { color: var(--muted); }
 .na-line { color: var(--muted); padding: 2px 0; }
-#ov-diagram { position: relative; }
-#ov-diagram img { width: 100%; display: block; border: 1px solid var(--line); }
 .intro .statement { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
 .run-row { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
 .err { color: #b00020; }
@@ -50,8 +48,6 @@ td.num { text-align: right; }
 .scroll { max-height: 210px; overflow: auto; margin-top: 6px; border: 1px solid var(--line); }
 .scroll th { position: sticky; top: 0; background: #fff; }
 img.circuit-img { height: 300px; max-width: 100%; margin-top: 6px; }
-#ov-diagram .done { position: absolute; border: 4px solid #111318; }
-#ov-diagram .done.latest { border: 5px solid #c00000; }
 .card { border: 1px solid var(--line); border-top: 5px solid var(--box); background: #fff; padding: 8px 12px; }
 .card.span2 { grid-column: span 2; }
 .card.wide { grid-column: 1 / -1; }
@@ -91,3 +87,4 @@ img.fig { max-width: 100%; max-height: 270px; display: block; border: 1px solid 
 .live-steps h3 { margin: 0 0 4px; font-size: 16px; }
 .band { font-size: 22px; font-weight: 600; }
 .stage:not(.wide):not(.span2) .scroll td { overflow-wrap: anywhere; }
+nav a.home-link { color: var(--muted); border-bottom: 1px solid var(--line); margin-bottom: 4px; }

@@ -2,7 +2,8 @@
 
 Start:  python demo_app.py        then open  http://127.0.0.1:8002/      (works offline)
 
-The page reads demo/manifest.json (built from real results by scripts/build_demo_manifest.py) and one live endpoint.
+/ is the PrivacyQ landing page (demo/index.html; its numbers come from GET /api/home, read from results/).
+/walkthrough.html is the architecture walkthrough. The walkthrough reads demo/manifest.json (built from real results by scripts/build_demo_manifest.py) and one live endpoint.
 POST /api/trace streams, stage by stage in diagram order, what the pipeline does to 50 consecutive rows of the locked
 hold-out (hold-out indices 0-49, read from the NSCH file now): read -> de-identify/impute/scale -> 8 PCA angles ->
 k-anonymity and local DP shown on one row -> 8-qubit statevectors -> QSVM kernel against the stored training states ->
@@ -27,6 +28,9 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 MANIFEST = ROOT / "demo" / "manifest.json"
 CONFIG = ROOT / "configs" / "holdout_final.yaml"
+HOLDOUT_METRICS = ROOT / "results/holdout-20261108-173801/holdout_metrics.csv"
+QVC_TESTS = ROOT / "results/exp2-nsch2024-quantum-vs-classical-20261108-165426/tests_same_rows_features.csv"
+TEST_STATUS = ROOT / "results/test_status.json"
 app = FastAPI(title="Architecture walkthrough", docs_url=None, redoc_url=None)
 _STATE: dict = {}
 SHOW = ["sc_age_years", "sc_sex", "sc_racer", "sc_hispanic_r", "fpl_i1", "k2q01", "makefriend", "bullied_r"]
@@ -39,7 +43,7 @@ BANDS = {"sc_age_years": {1: "12–13", 2: "14–15", 3: "16–17"},
 def required_files() -> list[Path]:
     import yaml
     cfg = yaml.safe_load(CONFIG.read_text(encoding="utf-8")) if CONFIG.exists() else {"data": {"paths": []}}
-    return [CONFIG, MANIFEST, ROOT / "models/config_models.pkl", ROOT / "models/screening_models.pkl",
+    return [CONFIG, MANIFEST, HOLDOUT_METRICS, QVC_TESTS, TEST_STATUS, ROOT / "models/config_models.pkl", ROOT / "models/screening_models.pkl",
             ROOT / "demo/assets/circuit_angle.svg", *[ROOT / p for p in cfg["data"]["paths"]],
             *[(ROOT / p).with_name("nsch_2024_topical.do") for p in cfg["data"]["paths"]]]
 
@@ -263,12 +267,29 @@ def trace():
     return StreamingResponse(stream(), media_type="application/x-ndjson")
 
 
+@app.get("/api/home")
+def home():
+    """Landing-page numbers, each read from a results file (no fallback values)."""
+    import pandas as pd
+
+    h = pd.read_csv(HOLDOUT_METRICS)
+    t = pd.read_csv(QVC_TESTS)
+    t = t[(t.metric == "roc_auc") & (t.quantum == "qsvm/subsample/pca8") & (t.classical == "logreg/subsample/pca8")].iloc[0]
+    tests = json.loads(TEST_STATUS.read_text(encoding="utf-8"))
+    return {"holdout_auc": float(h.roc_auc.max()), "holdout_model": str(h.loc[h.roc_auc.idxmax(), "model"]),
+            "qsvm_auc": float(t.quantum_mean), "logreg_matched_auc": float(t.classical_mean),
+            "qvc_holm_p": float(t.p_nb_t_holm), "tests_passed": int(tests["passed"]), "tests_failed": int(tests["failed"]),
+            "tests_recorded": tests["recorded"],
+            "sources": [str(p.relative_to(ROOT)).replace("\\", "/") for p in (HOLDOUT_METRICS, QVC_TESTS, TEST_STATUS)]}
+
+
 @app.get("/api/{rest:path}")
 def unknown(rest: str):
     return JSONResponse(status_code=404, content={"error": f"unknown endpoint /api/{rest}"})
 
 
 app.mount("/fonts", StaticFiles(directory=ROOT / "web" / "vendor" / "fonts"), name="fonts")
+app.mount("/vendor", StaticFiles(directory=ROOT / "web" / "vendor"), name="vendor")      # Tailwind (local copy) for /
 app.mount("/", StaticFiles(directory=ROOT / "demo", html=True), name="demo")
 
 if __name__ == "__main__":

@@ -55,6 +55,9 @@ them to recompute everything from scratch. Update the run directories in
 python demo_app.py          # then open http://127.0.0.1:8002/  (offline; no external requests)
 ```
 
+`/` is the PrivacyQ landing page (its three headline numbers come from `GET /api/home`, read from
+`results/`); "Explore the system" opens the walkthrough at `/walkthrough.html`.
+
 Needs `demo/manifest.json`, which is built once from `results/` and the cached models.
 The build fails loudly if any artifact is missing:
 
@@ -70,6 +73,20 @@ trace needs is absent. The only controls are Run, Back, Next and the box list. *
 in diagram order, inference only, with no metric computed from them. Every box screen separates "Live run · 50 real
 held-out records" from "Full evaluation · N records" (metrics read from `results/`, file named under each).
 Section screenshots beside their diagram boxes are in `demo/screenshots/sections/` (git-ignored).
+
+### Terminal runs and figures
+
+```sh
+python scripts/terminal_walkthrough.py --box 3            # one architecture box in the terminal (--all, --list)
+python scripts/full_pipeline_terminal.py --config configs/terminal_pipeline.yaml --pause   # all records, boxes 1-15
+python scripts/report_runs.py core      --config configs/report_runs.yaml   # load, clean, one model, score
+python scripts/report_runs.py baselines --config configs/report_runs.yaml   # four classical baselines
+python scripts/report_runs.py handoff   --config configs/report_runs.yaml   # PCA-8 -> rotation angles, one hold-out record
+python scripts/state_visualisation_all.py                 # Bloch spheres / statevectors of all 21,789 records
+```
+
+The terminal pipeline and report runs train on cross-validation fold r0f0 and never score the locked
+hold-out. `state_visualisation_all.py` is descriptive only and writes to `results/state_visualisation_all/`.
 
 ## What was found (plain English)
 

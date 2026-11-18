@@ -578,10 +578,9 @@ def main() -> None:
 
     manifest = {"dataset": {"rows": n_rows, "columns_one_hot": len(m95), "questions": profile["n_raw_features"],
                             "positive_rate": profile["n_positive"] / n_rows},
-                "architecture": "assets/architecture.jpg", "live": live, "trace": trace, "sections": sections,
+                "live": live, "trace": trace, "sections": sections,
                 "labels": {c: lab(c) for c in list(FEATURES) + m95},
                 "built_from": "scripts/build_demo_manifest.py"}
-    shutil.copy(need(ROOT / "docs/architecture.jpg"), ASSETS / "architecture.jpg")
     (DEMO / "manifest.json").write_text(json.dumps(manifest, indent=1, default=float), encoding="utf-8")
     print(f"wrote demo/manifest.json ({len(sections)} sections) and {len(list(ASSETS.iterdir()))} assets; live row = hold-out row {live_index}")
 

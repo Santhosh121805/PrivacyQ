@@ -1,0 +1,57 @@
+# Whole-dataset terminal run of the architecture (docs/architecture.jpg), boxes 1-15, printed step by step.
+# python scripts/full_pipeline_terminal.py --config configs/terminal_pipeline.yaml
+#
+# Same data, hold-out split, folds and quantum subsample as Experiments 1-4 (seed 2026). Every model is trained
+# on the training rows of cross-validation fold r0f0 and evaluated on that fold's validation rows. The locked
+# hold-out is never read for training or scoring. The numbers are computed fresh, from one fold, so they differ
+# slightly from results/ (which averages 15 folds). Nothing is written to disk.
+project:
+  name: terminal-pipeline-nsch2024
+  seed: 2026
+
+data:
+  loader: nsch
+  paths: [data/raw/nsch_2024/nsch_2024e_topical.dta]
+  target: depression_current
+  min_age: 12
+  max_age: 17
+
+split:
+  holdout_fraction: 0.2
+
+cv:                      # only fold r0f0 of the experiments' 5 x 3 repeated stratified folds is used
+  n_splits: 5
+  n_repeats: 3
+
+subsample:
+  n: 1500               # quantum regime: 1,200 inner-train / 300 inner-validation rows
+
+tuning:
+  inner_val_fraction: 0.2
+
+quantum:
+  qsvm: {feature_set: pca8, encoding: angle, n_qubits: 8, grid: {C: [0.1, 1.0, 10.0]}}
+  vqc: {feature_set: pca4, encoding: reupload, n_qubits: 4, n_layers: 2, epochs: 30, batch_size: 64,
+        init_scale: 0.1, learning_rate: 0.05}
+
+classical:
+  logreg: {grid: {C: [0.01, 0.1, 1.0, 10.0]}}
+  xgboost: {base: {n_estimators: 300}, grid: {max_depth: [2, 4, 6], learning_rate: [0.03, 0.1]}}
+  mlp: {base: {epochs: 60, batch_size: 128}}
+
+privacy:
+  k_anonymity: 5
+  ldp_epsilon: 32
+  dp_epsilons: [1, 4]         # plus the non-private reference (epsilon = infinity)
+  delta: 1.0e-5
+  dp_epochs: 30
+  dp_batch_size: 256
+  dp_learning_rate: 0.05
+
+federated:
+  clients: [3, 5, 10]
+  rounds: 10
+  local_epochs: 1
+  secure_aggregation_clients: 5
+
+risk_bands: {sensitivity: 0.90, specificity: 0.90}

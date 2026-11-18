@@ -129,18 +129,16 @@ function stageCard(b) {
 function overview() {
   const t = manifest.trace;
   return `<section class="card wide intro"><div class="statement">${t.count} real held-out records, ${range()}, never seen during training</div>
-      <div>Each architecture box lights up as its stage completes, in diagram order. Inference only: nothing is trained, and no metric is computed from these ${t.count} records.</div>
+      <div>Each box's card below fills in as its stage completes, in box order. Inference only: nothing is trained, and no metric is computed from these ${t.count} records.</div>
       <div class="run-row"><button class="primary" id="run" type="button"${running ? " disabled" : ""}>Run</button>
       <span id="run-status">${traceError ? `<b class="err">Failed: ${esc(traceError)}</b>` : trace[9] ? `All ${STAGES.length} stages completed in ${trace[9].total_ms} ms of compute (display paced at ${PACE_MS / 1000} s per stage).` : running ? "Running…" : ""}</span></div></section>
-    <section class="card wide"><h2>Architecture (docs/architecture.jpg) — boxes are outlined as their stage completes</h2>
-      <div id="ov-diagram"><img id="ov-img" src="${esc(manifest.architecture)}" alt="Architecture diagram"></div></section>
     <div class="stages">${STAGES.map(stageCard).join("")}</div>`;
 }
 
 async function runTrace() {
   if (running) return;
   running = true; trace = {}; traceError = null;
-  show(0); markDone();
+  show(0);
   const queue = [];
   let finished = false;
   const reveal = (async () => {                                  // tick stages one by one, in order
@@ -149,7 +147,6 @@ async function runTrace() {
         const st = queue.shift();
         if (st.error) { traceError = st.error; break; }
         trace[st.box] = st;
-        markDone(st.box);
         if (current === 0) { const el = $(`stage-${st.box}`); if (el) el.outerHTML = stageCard(st.box); }
         await new Promise((r) => setTimeout(r, PACE_MS));
       } else await new Promise((r) => setTimeout(r, 50));
@@ -172,22 +169,7 @@ async function runTrace() {
   await reveal;
   if (!traceError && !trace[9]) traceError = "the stream ended before box 9";
   running = false;
-  markDone();
   if (current === 0) show(0);
-}
-
-function markDone(latest) {
-  const host = $("ov-diagram"), img = $("ov-img");
-  if (!host || !img) return;                                  // the diagram is shown on the Overview only
-  if (!img.complete) { img.addEventListener("load", () => markDone(latest), { once: true }); return; }
-  host.querySelectorAll(".done").forEach((d) => d.remove());
-  const k = img.clientWidth / 1536;
-  for (const b of Object.keys(trace).map(Number)) {
-    const pos = BOXES[b - 1][4], d = document.createElement("div");
-    d.className = "done" + (b === latest ? " latest" : "");
-    Object.assign(d.style, { left: `${pos[0] * k}px`, top: `${pos[1] * k}px`, width: `${(pos[2] - pos[0]) * k}px`, height: `${(pos[3] - pos[1]) * k}px` });
-    host.appendChild(d);
-  }
 }
 
 function livePanel(n) {
@@ -212,7 +194,6 @@ function show(n) {
     $("box-subtitle").textContent = `${manifest.trace.count} real held-out records, ${range()}`;
     $("content").innerHTML = overview();
     $("run").addEventListener("click", runTrace);
-    markDone();
     if (location.hash !== "#overview") history.replaceState(null, "", "#overview");
     window.scrollTo(0, 0);
     return;
@@ -237,9 +218,10 @@ function show(n) {
 }
 
 (async function init() {
-  $("nav").innerHTML = `<a href="#overview" data-n="0"><b>▶</b><span>Overview — live trace</span></a>`
+  $("nav").innerHTML = `<a href="/" class="home-link"><b>←</b><span>PrivacyQ home</span></a>`
+    + `<a href="#overview" data-n="0"><b>▶</b><span>Overview — live trace</span></a>`
     + BOXES.map(([n, t]) => `<a href="#box-${n}" data-n="${n}"><b>${n}</b><span>${esc(t)}</span></a>`).join("");
-  document.querySelectorAll("#nav a").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); show(Number(a.dataset.n)); }));
+  document.querySelectorAll("#nav a[data-n]").forEach((a) => a.addEventListener("click", (e) => { e.preventDefault(); show(Number(a.dataset.n)); }));
   $("back").addEventListener("click", () => show(current - 1));
   $("next").addEventListener("click", () => show(current + 1));
   try {
@@ -247,5 +229,7 @@ function show(n) {
     if (!res.ok) throw new Error(`manifest.json not found (HTTP ${res.status}) — run: python scripts/build_demo_manifest.py`);
     manifest = await res.json();
   } catch (e) { $("error").hidden = false; $("error").textContent = e.message; return; }
-  show(Number((location.hash.match(/box-(\d+)/) || [])[1]) || 0);
+  const fromHash = () => show(Number((location.hash.match(/box-(\d+)/) || [])[1]) || 0);
+  window.addEventListener("hashchange", fromHash);         // links such as walkthrough.html#box-11
+  fromHash();
 })();

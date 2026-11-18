@@ -3,24 +3,239 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Quantum AI for Mental Health — architecture walkthrough</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 fill=%22%23111318%22/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css">
+  <title>PrivacyQ</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect x=%223%22 y=%223%22 width=%2210%22 height=%2210%22 rx=%222%22 fill=%22%234269d0%22/%3E%3C/svg%3E">
+  <style>
+    @font-face { font-family: "Inter"; font-weight: 400; font-display: swap; src: url("/vendor/fonts/inter-latin-400.woff2") format("woff2"); }
+    @font-face { font-family: "Inter"; font-weight: 500; font-display: swap; src: url("/vendor/fonts/inter-latin-500.woff2") format("woff2"); }
+    @font-face { font-family: "Inter"; font-weight: 600; font-display: swap; src: url("/vendor/fonts/inter-latin-600.woff2") format("woff2"); }
+    @font-face { font-family: "JetBrains Mono"; font-weight: 400; font-display: swap; src: url("/vendor/fonts/jetbrains-mono-latin-400.woff2") format("woff2"); }
+    @font-face { font-family: "JetBrains Mono"; font-weight: 500; font-display: swap; src: url("/vendor/fonts/jetbrains-mono-latin-500.woff2") format("woff2"); }
+  </style>
+  <!-- Tailwind Play 3.4.16, local copy (works offline) -->
+  <script src="/vendor/tailwind-play-3.4.16.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { ink: "#1b1e23", muted: "#6b6f76", line: "#e4e4e7", surface: "#f9f9f9", accent: "#4269d0", quantum: "#6cc5b0" },
+          fontFamily: { sans: ["Inter", "system-ui", "sans-serif"], mono: ["JetBrains Mono", "Consolas", "monospace"] },
+          fontSize: {
+            "t28": ["28px", { lineHeight: "1.2", letterSpacing: "-0.02em" }],
+            "t20": ["20px", { lineHeight: "1.3", letterSpacing: "-0.02em" }],
+            "t15": ["15px", { lineHeight: "1.5" }],
+            "t14": ["14px", { lineHeight: "1.5" }],
+            "t13": ["13px", { lineHeight: "1.5" }],
+            "t12": ["12px", { lineHeight: "1.4" }],
+          },
+          transitionDuration: { DEFAULT: "150ms" },
+        },
+      },
+    };
+  </script>
+  <style type="text/tailwindcss">
+    @layer base {
+      body { @apply bg-white text-ink font-sans text-t14 antialiased; }
+      h1 { @apply text-t28 font-semibold; }
+      h2 { @apply text-t20 font-semibold; }
+      .num { font-family: "JetBrains Mono", monospace; font-variant-numeric: tabular-nums; }
+      table { @apply w-full border-collapse text-t13; }
+      th { @apply text-left font-medium text-muted py-2 pr-4 border-b border-line; }
+      td { @apply py-2 pr-4 border-b border-line align-top; }
+      td.n, th.n { @apply text-right num; }
+      tr:last-child td { @apply border-b-0; }
+      summary { @apply cursor-pointer text-t13 text-accent mt-2; }
+      input[type=range] { accent-color: #4269d0; }
+    }
+    @layer components {
+      .card { @apply border border-[#e4e4e7] rounded-lg bg-white p-5; }
+      .page-lede { @apply text-t14 text-muted mt-2 mb-8; }
+      .label { @apply text-t13 font-medium text-ink; }
+      .help { @apply text-t12 text-muted; }
+      .caption { @apply text-t13 text-muted; }
+      .navitem { @apply block text-t14 py-[10px] pl-6 pr-4 border-l-2 border-transparent text-muted transition-colors hover:text-ink; }
+      .navitem.active { @apply text-ink border-accent; }
+      .pill { @apply inline-flex items-center h-6 px-2.5 rounded-full border border-line text-t12 text-muted bg-white; }
+      .seg { @apply inline-flex w-full border border-line rounded-md overflow-hidden; }
+      .seg button { @apply flex-auto px-2 py-1.5 text-t13 whitespace-nowrap text-muted bg-white border-r border-line transition-colors hover:text-ink; }
+      .seg button:last-child { @apply border-r-0; }
+      .seg button.on { @apply bg-ink text-white hover:text-white; }
+      .seg.disabled { @apply opacity-40 pointer-events-none; }
+      .btn { @apply inline-flex items-center h-8 px-3 rounded-md border border-line bg-white text-t13 text-ink transition-colors hover:border-ink disabled:opacity-50; }
+      .error { @apply text-t13 text-[#b4462f] border border-[#f1c9bf] rounded-lg px-4 py-3 bg-white; }
+      .fade { @apply transition-opacity duration-150; }
+    }
+  </style>
+  <style>
+    /* Hero diagram: three schools send updates (blue) to the server, which aggregates, then sends the improved
+       model back (teal). One 4 s loop: 0–30 % up, 30–48 % aggregation, 50–80 % down, 80–100 % pause. */
+    .hero-svg .up, .hero-svg .down { opacity: 0; }
+    .hero-svg .up { animation: hero-up 4s infinite; }
+    .hero-svg .down { animation: hero-down 4s infinite; }
+    .hero-svg .server { animation: hero-server 4s infinite; }
+    @keyframes hero-up {
+      0% { opacity: 0; transform: translate(0, 0); animation-timing-function: ease-in-out; }
+      4% { opacity: 1; transform: translate(0, 0); animation-timing-function: ease-in-out; }
+      28% { opacity: 1; transform: translate(var(--dx), var(--dy)); }
+      31%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); }
+    }
+    @keyframes hero-server {
+      0%, 26% { stroke: #e4e4e7; }
+      33%, 44% { stroke: #4269d0; }
+      54%, 100% { stroke: #e4e4e7; }
+    }
+    @keyframes hero-down {
+      0%, 48% { opacity: 0; transform: translate(0, 0); }
+      52% { opacity: 1; transform: translate(0, 0); animation-timing-function: ease-in-out; }
+      78% { opacity: 1; transform: translate(var(--dx), var(--dy)); }
+      81%, 100% { opacity: 0; transform: translate(var(--dx), var(--dy)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-svg .up, .hero-svg .down, .hero-svg .server { animation: none; }
+    }
+  </style>
 </head>
 <body>
-  <header id="top">
-    <div id="heading">
-      <div id="box-count" class="muted"></div>
-      <h1 id="box-title"></h1>
-      <div id="box-subtitle"></div>
-      <div id="flow" class="muted"></div>
-    </div>
-    <div id="pager"><button id="back" type="button">Back</button><button id="next" type="button">Next</button></div>
-  </header>
-  <aside id="side">
-    <nav id="nav"></nav>
-  </aside>
-  <main id="main"><div id="error" hidden></div><div id="content"></div></main>
-  <script src="app.js"></script>
+  <!-- PrivacyQ landing page (restored from commit 6695d16); the walkthrough is at walkthrough.html -->
+  <section data-view="home">
+    <nav class="sticky top-0 z-30 h-14 px-6 bg-white border-b border-line">
+      <div class="h-full max-w-[1120px] mx-auto flex items-center justify-between">
+        <a href="/" class="text-t15 font-semibold text-ink">PrivacyQ</a>
+        <div class="flex items-center gap-8 text-t14">
+          <a href="walkthrough.html#overview" class="text-muted transition-colors hover:text-ink">Live trace</a>
+          <a href="walkthrough.html#box-1" class="text-muted transition-colors hover:text-ink">Architecture boxes</a>
+          <a href="walkthrough.html#box-11" class="text-muted transition-colors hover:text-ink">Results</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="min-h-[480px] px-6 pt-24 pb-24 flex justify-center">
+      <div class="w-full max-w-[720px] flex flex-col items-center text-center">
+        <svg class="hero-svg" width="280" height="180" viewBox="0 0 280 180" role="img"
+             aria-label="Three schools send model updates to a server, which aggregates them and sends an improved model back">
+          <g fill="none" stroke="#e4e4e7" stroke-width="1">
+            <line x1="50" y1="46" x2="140" y2="142"/><line x1="140" y1="34" x2="140" y2="142"/><line x1="230" y1="46" x2="140" y2="142"/>
+            <circle cx="50" cy="46" r="13"/><circle cx="140" cy="34" r="13"/><circle cx="230" cy="46" r="13"/>
+            <circle class="server" cx="140" cy="146" r="19"/>
+          </g>
+          <g fill="#4269d0">
+            <circle class="up" cx="50" cy="46" r="3" style="--dx: 90px; --dy: 100px"/>
+            <circle class="up" cx="140" cy="34" r="3" style="--dx: 0px; --dy: 112px"/>
+            <circle class="up" cx="230" cy="46" r="3" style="--dx: -90px; --dy: 100px"/>
+          </g>
+          <g fill="#6cc5b0">
+            <circle class="down" cx="140" cy="146" r="3" style="--dx: -90px; --dy: -100px"/>
+            <circle class="down" cx="140" cy="146" r="3" style="--dx: 0px; --dy: -112px"/>
+            <circle class="down" cx="140" cy="146" r="3" style="--dx: 90px; --dy: -100px"/>
+          </g>
+        </svg>
+        <h1 class="mt-10 text-[52px] leading-none font-semibold tracking-[-0.02em]">PrivacyQ</h1>
+        <p class="mt-5 text-[18px] text-muted">Training mental-health models across institutions, without the data ever leaving.</p>
+        <div class="mt-10 flex flex-wrap justify-center gap-3">
+          <a href="walkthrough.html#overview" id="home-explore" class="inline-flex items-center h-11 px-6 rounded-md border border-accent bg-accent text-white text-t15 font-medium transition-colors hover:border-ink">Explore the system</a>
+          <a href="walkthrough.html#box-11" id="home-results" class="inline-flex items-center h-11 px-6 rounded-md border border-line bg-white text-ink text-t15 font-medium transition-colors hover:border-ink">See the results</a>
+        </div>
+      </div>
+    </header>
+
+    <!-- What it does -->
+    <section class="border-t border-line py-24 px-6">
+      <div class="max-w-[1120px] mx-auto min-h-[240px]">
+        <h2 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] mb-8">What it does</h2>
+        <div class="grid grid-cols-3 gap-6">
+          <div class="card p-8 transition-colors hover:border-muted">
+            <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="6" y="12" width="16" height="12" rx="2" fill="none" stroke="#4269d0" stroke-width="1.5"/><path d="M10 12V9a4 4 0 0 1 8 0v3" fill="none" stroke="#4269d0" stroke-width="1.5"/></svg>
+            <h3 class="mt-6 text-t20 font-semibold">Data stays put</h3>
+            <p class="mt-3 text-t15 text-muted leading-relaxed">Each school trains on its own records. Only model updates ever leave.</p>
+          </div>
+          <div class="card p-8 transition-colors hover:border-muted">
+            <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><path d="M4 22h20" stroke="#4269d0" stroke-width="1.5"/><path d="M6 22V14M12 22V9M18 22V12M24 22V6" stroke="#4269d0" stroke-width="1.5"/></svg>
+            <h3 class="mt-6 text-t20 font-semibold">Privacy you can measure</h3>
+            <p class="mt-3 text-t15 text-muted leading-relaxed">Formal differential privacy with a stated budget, not a promise.</p>
+          </div>
+          <div class="card p-8 transition-colors hover:border-muted">
+            <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><circle cx="9" cy="14" r="6" fill="none" stroke="#6cc5b0" stroke-width="1.5"/><circle cx="19" cy="14" r="6" fill="none" stroke="#4269d0" stroke-width="1.5"/></svg>
+            <h3 class="mt-6 text-t20 font-semibold">An honest test of quantum</h3>
+            <p class="mt-3 text-t15 text-muted leading-relaxed">Quantum and classical models compared on identical data.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- What we found -->
+    <section class="bg-surface border-t border-line py-24 px-6">
+      <div class="max-w-[1120px] mx-auto min-h-[240px]">
+        <h2 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] mb-8">What we found</h2>
+        <div class="grid grid-cols-3 gap-6">
+          <div class="card p-8 transition-colors hover:border-muted">
+            <div class="text-t12 uppercase tracking-wide text-muted">Hold-out ROC-AUC</div>
+            <div class="num text-[40px] leading-tight tracking-tight mt-3" id="home-auc">–</div>
+            <p class="mt-3 text-t14 text-muted leading-relaxed">Best model, on records never used in training.</p>
+          </div>
+          <div class="card p-8 transition-colors hover:border-muted">
+            <div class="text-t12 uppercase tracking-wide text-muted">No detectable accuracy cost</div>
+            <div class="num text-[40px] leading-tight tracking-tight mt-3">ε = 4</div>
+            <p class="mt-3 text-t14 text-muted leading-relaxed">The privacy noise costs 0.016 AUC, which is not statistically significant.</p>
+          </div>
+          <div class="card p-8 transition-colors hover:border-muted">
+            <div class="text-t12 uppercase tracking-wide text-muted">Quantum vs classical</div>
+            <div class="num text-[40px] leading-tight tracking-tight mt-3 whitespace-nowrap" id="home-qvc">–</div>
+            <p class="mt-3 text-t14 text-muted leading-relaxed">A tie, at matched conditions.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="border-t border-line py-24 px-6">
+      <div class="max-w-[1120px] mx-auto min-h-[240px]">
+        <h2 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] mb-8">How it works</h2>
+        <div class="flex items-stretch">
+          <div class="flex-1 card p-6 transition-colors hover:border-muted"><div class="num text-t12 text-muted">01</div><div class="mt-3 text-t15 font-semibold">De-identify</div><p class="mt-2 text-t13 text-muted leading-relaxed">Identifiers removed before anything else.</p></div>
+          <div class="w-10 shrink-0 flex items-center justify-center" aria-hidden="true"><svg width="20" height="12" viewBox="0 0 20 12"><path d="M0 6h17M12 1l5 5-5 5" fill="none" stroke="#6b6f76" stroke-width="1.2"/></svg></div>
+          <div class="flex-1 card p-6 transition-colors hover:border-muted"><div class="num text-t12 text-muted">02</div><div class="mt-3 text-t15 font-semibold">Preprocess</div><p class="mt-2 text-t13 text-muted leading-relaxed">Imputation and scaling fitted on training rows only.</p></div>
+          <div class="w-10 shrink-0 flex items-center justify-center" aria-hidden="true"><svg width="20" height="12" viewBox="0 0 20 12"><path d="M0 6h17M12 1l5 5-5 5" fill="none" stroke="#6b6f76" stroke-width="1.2"/></svg></div>
+          <div class="flex-1 card p-6 transition-colors hover:border-muted"><div class="num text-t12 text-muted">03</div><div class="mt-3 text-t15 font-semibold">Encode to qubits</div><p class="mt-2 text-t13 text-muted leading-relaxed">4–8 features loaded into a quantum circuit.</p></div>
+          <div class="w-10 shrink-0 flex items-center justify-center" aria-hidden="true"><svg width="20" height="12" viewBox="0 0 20 12"><path d="M0 6h17M12 1l5 5-5 5" fill="none" stroke="#6b6f76" stroke-width="1.2"/></svg></div>
+          <div class="flex-1 card p-6 transition-colors hover:border-muted"><div class="num text-t12 text-muted">04</div><div class="mt-3 text-t15 font-semibold">Train privately</div><p class="mt-2 text-t13 text-muted leading-relaxed">DP-SGD at each site, combined by federated averaging.</p></div>
+          <div class="w-10 shrink-0 flex items-center justify-center" aria-hidden="true"><svg width="20" height="12" viewBox="0 0 20 12"><path d="M0 6h17M12 1l5 5-5 5" fill="none" stroke="#6b6f76" stroke-width="1.2"/></svg></div>
+          <div class="flex-1 card p-6 transition-colors hover:border-muted"><div class="num text-t12 text-muted">05</div><div class="mt-3 text-t15 font-semibold">Evaluate</div><p class="mt-2 text-t13 text-muted leading-relaxed">Cross-validation, then a hold-out scored once.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Built with -->
+    <section class="bg-surface border-t border-line py-24 px-6">
+      <div class="max-w-[1120px] mx-auto">
+        <h2 class="text-[28px] leading-tight font-semibold tracking-[-0.02em] mb-8">Built with</h2>
+        <div class="flex flex-wrap items-center justify-between gap-6">
+          <p class="text-t15 text-muted">PennyLane · scikit-learn · XGBoost · Opacus · NSCH 2024</p>
+          <span class="pill num h-7 px-3" id="home-tests">– tests passing</span>
+        </div>
+      </div>
+    </section>
+
+    <footer class="border-t border-line px-6 py-10">
+      <div class="max-w-[1120px] mx-auto text-[13px] text-muted">Research demonstration. Not for clinical or individual use. · REVA University, School of Computer Science and Engineering</div>
+    </footer>
+  </section>
+
+  <!-- Numbers from GET /api/home, read from results/. On failure they stay "–" and the error is shown. -->
+  <script>
+    (async () => {
+      const $ = (id) => document.getElementById(id);
+      try {
+        const r = await fetch("/api/home");
+        const o = await r.json();
+        if (!r.ok) throw new Error(o.error || `HTTP ${r.status}`);
+        $("home-auc").textContent = o.holdout_auc.toFixed(3);
+        $("home-qvc").textContent = `${o.qsvm_auc.toFixed(3)}/${o.logreg_matched_auc.toFixed(3)}`;
+        $("home-tests").textContent = `${o.tests_passed} tests passing`;
+      } catch (e) {
+        $("home-tests").textContent = `numbers unavailable: ${e.message}`;
+      }
+    })();
+  </script>
 </body>
 </html>
