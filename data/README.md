@@ -45,6 +45,29 @@ NSCH 2023 is downloadable with the same variables but is deliberately not pooled
 the quantum models are subsample-limited, so extra rows buy nothing and would add
 a survey-year effect.
 
+## Second dataset: Mental Health Text Classification (4-class, public)
+
+- **What:** Mukherjee, P. (2025). *Mental Health Text Classification Dataset (4-Class)*, Hugging Face Hub,
+  `ourafla/Mental-Health_Text-Classification_Dataset`. English social-media posts and short statements labelled
+  Suicidal / Depression / Anxiety / Normal. Derived from three public corpora (Komati, *Suicide and Depression
+  Detection*, Kaggle; Sarkar, *Sentiment Analysis for Mental Health*, Kaggle; Murarka et al. 2021, *Reddit Mental
+  Health Classification*, GitHub). Cite all four.
+- **Licence:** CC BY 4.0 — `license: cc-by-4.0` in the dataset card metadata and the Hub tag `license:cc-by-4.0`
+  (checked 2026-11-18). The card limits use to research and education: "not a clinical tool and must not be used
+  for real-world diagnosis, triage, or crisis intervention."
+- **Version used:** Hub commit `e47ef4f68a0d28d9f174cb8af2323400b14f1a73` (last modified 2025-12-18), files fetched
+  from `https://huggingface.co/datasets/ourafla/Mental-Health_Text-Classification_Dataset/resolve/<commit>/<file>`
+  into `data/raw/mhtext/` (git-ignored). SHA-256:
+  - `mental_heath_unbanlanced.csv` `d41cdc3ec3b8dde8f5553accaccd1a01a59c1440d83d7af6856fab77605c9471`
+  - `mental_health_combined_test.csv` `2806f9518b92915b11ea35b16955ac3826fb5d981fc5f9152ee2282f7cffa418`
+  - `mental_health_feature_engineered.csv` `122f1e702d2971d4c80c90fb3329dfa1485b56e1ccd0f4c5266604299858887e`
+- **Files are CSV, not parquet.** The card describes two columns and 48,945 rows for the main file; the file holds
+  three columns (`Unique_ID`, `text`, `status`) and 49,612 rows. No source-corpus column exists.
+- **Known problems found on inspection (2026-11-18):** 496 of the 992 rows of the shipped "balanced test" file
+  also occur in the main file (after lower-casing and whitespace normalisation), so that file is not used as a
+  held-out set. The main file has 684 exact duplicates (normalised) and further near-duplicates; see the Phase 0
+  report. Free text written by real people is more identifying than survey codes.
+
 ## Synthetic data
 
 `SyntheticAdolescentLoader` generates survey-shaped data for tests and smoke runs.

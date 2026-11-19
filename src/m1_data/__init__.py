@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from src.m1_data.adodas import AdoDASLoader
 from src.m1_data.loader import CSVDatasetLoader, DatasetLoader
+from src.m1_data.mhtext import MHTextLoader
 from src.m1_data.nsch import NSCHLoader
 from src.m1_data.synthetic import SyntheticAdolescentLoader, SyntheticDatasetLoader
 
@@ -13,6 +15,10 @@ def make_loader(data_cfg: dict, seed: int = 0) -> DatasetLoader:
     kind = cfg.pop("loader")
     if kind == "nsch":
         return NSCHLoader(**cfg)
+    if kind == "adodas":
+        return AdoDASLoader(**cfg)
+    if kind == "mhtext":
+        return MHTextLoader(**cfg)
     if kind == "csv":
         return CSVDatasetLoader(**cfg)
     if kind == "synthetic_adolescent":
@@ -23,8 +29,10 @@ def make_loader(data_cfg: dict, seed: int = 0) -> DatasetLoader:
 
 
 __all__ = [
+    "AdoDASLoader",
     "CSVDatasetLoader",
     "DatasetLoader",
+    "MHTextLoader",
     "NSCHLoader",
     "SyntheticAdolescentLoader",
     "SyntheticDatasetLoader",

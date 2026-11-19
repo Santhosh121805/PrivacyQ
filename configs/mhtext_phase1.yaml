@@ -1,0 +1,19 @@
+# Phase 1: Mental Health Text Classification — dedup, quarantine, subsample, locked hold-out.
+# python scripts/build_mhtext_splits.py --config configs/mhtext_phase1.yaml
+project:
+  name: mhtext-phase1
+  seed: 2026
+  output_dir: results/mhtext/phase1        # counts and checks only (no text)
+
+data:
+  raw_root: data/raw/mhtext                  # Hub commit e47ef4f (see data/README.md)
+  processed: data/processed/mhtext/mhtext_phase1.csv   # git-ignored; holds text
+
+dedup:
+  threshold: 0.90                            # TF-IDF cosine; conflicting-label groups dropped entirely
+
+subsample:
+  n: 15000                                   # stratified by 4-class label, from the deduplicated ID-bearing rows
+
+split:
+  holdout_fraction: 0.2                      # stratified; opened once, never used for fitting or selection

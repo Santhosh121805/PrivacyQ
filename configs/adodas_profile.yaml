@@ -1,0 +1,15 @@
+# Phase 1: AdoDAS loader check and real class balance. Data under data/raw/adodas/ (git-ignored).
+project:
+  name: adodas-profile
+  seed: 2026
+  output_dir: results/adodas/profile
+
+data:
+  loader: adodas
+  root: data/raw/adodas          # train.csv, val.csv, and <split>/<school>/<class>/<pid>/ feature folders
+  target: depression
+  splits: [train, val, test]     # test rows carry no labels (withheld by the organisers)
+
+cv:                              # subject-grouped folds inside the official 4,200-participant train split
+  n_splits: 5
+  n_repeats: 3
