@@ -1,0 +1,18 @@
+# Phase 6 (box 13): SIMULATED federated learning, Mental Health Text binary Depression vs Suicidal view.
+# python -m src.m10_exp.mhtext_federated --config configs/mhtext_phase6.yaml
+# Method (arms, rounds, local epochs, epsilon, delta, clients) read from the NSCH exp4 config; nothing NSCH is run.
+project:
+  name: mhtext-phase6-federated
+  seed: 2026
+  output_dir: results/mhtext/phase6
+  n_jobs: 6
+
+nsch_method_config: configs/exp4_nsch2024.yaml
+phase4_config: configs/mhtext_phase4.yaml
+view: binary
+partitions: [iid, by_length]          # by_length replaces NSCH's by_state (posts carry no site or state)
+centralised_reference: results/mhtext/phase5/dp/fold_metrics.csv
+
+nsch_results:                         # read only
+  summary: results/exp4-nsch2024-federated-dp-20261108-170320/summary.csv
+  fold_metrics: results/exp4-nsch2024-federated-dp-20261108-170320/fold_metrics.csv
