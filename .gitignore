@@ -22,6 +22,12 @@ results/mhtext/**
 !results/mhtext/phase5/reid/fragment_risk.csv
 !results/mhtext/phase5/reid/linkage.csv
 !results/mhtext/phase5/reid/self_disclosures.csv
+# report figures and the committed inputs they are drawn from
+!results/mhtext/report_figures/*.png
+!results/mhtext/report_figures/figures.json
+!results/mhtext/phase2/mi_scores_4class.csv
+!results/mhtext/phase7/pattern_checks/replication_summary.csv
+!results/mhtext/phase7/nsch_reference/nsch_*.csv
 results/mhtext/**/tasks/
 data/*
 !data/README.md

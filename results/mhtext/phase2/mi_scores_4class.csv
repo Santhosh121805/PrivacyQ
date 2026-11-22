@@ -1,0 +1,1175 @@
+column,label,mutual_information,selected_top8,rank
+type_token_ratio,"type_token_ratio (shipped with the dataset, not computed here)",0.30317333223234044,True,1
+text_length,"text_length (shipped with the dataset, not computed here)",0.30027710064988966,True,2
+word_count,"word_count (shipped with the dataset, not computed here)",0.29551537566545205,True,3
+emb_sent_max_081,"Per-sentence embedding dim 81, max over sentences",0.25014982541622555,True,4
+emb_sent_max_065,"Per-sentence embedding dim 65, max over sentences",0.2366355910843263,True,5
+emb_pooled_319,"Pooled embedding dim 319 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.23257796412093246,True,6
+verb_ratio,"verb_ratio (shipped with the dataset, not computed here)",0.22604216338647776,True,7
+adj_ratio,"adj_ratio (shipped with the dataset, not computed here)",0.22167467009378727,True,8
+stopword_ratio,"stopword_ratio (shipped with the dataset, not computed here)",0.21945754171905274,False,9
+avg_word_length,"avg_word_length (shipped with the dataset, not computed here)",0.2156129069865127,False,10
+emb_sent_max_370,"Per-sentence embedding dim 370, max over sentences",0.20343750709702135,False,11
+emb_sent_max_019,"Per-sentence embedding dim 19, max over sentences",0.2000636723864624,False,12
+emb_sent_max_165,"Per-sentence embedding dim 165, max over sentences",0.19803534437625459,False,13
+polarity,"polarity (shipped with the dataset, not computed here)",0.19371973899321726,False,14
+emb_pooled_081,"Pooled embedding dim 81 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.19031495252986463,False,15
+emb_sent_max_041,"Per-sentence embedding dim 41, max over sentences",0.1901379575186093,False,16
+subjectivity,"subjectivity (shipped with the dataset, not computed here)",0.18882288416248905,False,17
+emb_sent_max_237,"Per-sentence embedding dim 237, max over sentences",0.18691531740653966,False,18
+emb_sent_max_172,"Per-sentence embedding dim 172, max over sentences",0.18102335403817382,False,19
+emb_sent_mean_081,"Per-sentence embedding dim 81, mean over sentences",0.18085613111366805,False,20
+emb_sent_max_377,"Per-sentence embedding dim 377, max over sentences",0.17658450091655276,False,21
+emb_sent_max_030,"Per-sentence embedding dim 30, max over sentences",0.17332191379525197,False,22
+emb_sent_max_079,"Per-sentence embedding dim 79, max over sentences",0.1670410122898418,False,23
+emb_sent_max_119,"Per-sentence embedding dim 119, max over sentences",0.16336918848420812,False,24
+adv_ratio,"adv_ratio (shipped with the dataset, not computed here)",0.16263613609485672,False,25
+emb_sent_max_270,"Per-sentence embedding dim 270, max over sentences",0.16169171747164102,False,26
+emb_sent_max_025,"Per-sentence embedding dim 25, max over sentences",0.1599926137056924,False,27
+emb_sent_max_088,"Per-sentence embedding dim 88, max over sentences",0.15871382336269413,False,28
+emb_sent_max_252,"Per-sentence embedding dim 252, max over sentences",0.1562473110470255,False,29
+emb_sent_max_004,"Per-sentence embedding dim 4, max over sentences",0.155688356236225,False,30
+emb_pooled_125,"Pooled embedding dim 125 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.15431787013339582,False,31
+emb_sent_max_306,"Per-sentence embedding dim 306, max over sentences",0.15318747380017905,False,32
+emb_sent_max_128,"Per-sentence embedding dim 128, max over sentences",0.15142016639789135,False,33
+emb_sent_max_125,"Per-sentence embedding dim 125, max over sentences",0.1513208931333656,False,34
+emb_pooled_065,"Pooled embedding dim 65 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.1513113686762977,False,35
+emb_sent_mean_065,"Per-sentence embedding dim 65, mean over sentences",0.1502618612211366,False,36
+emb_pooled_030,"Pooled embedding dim 30 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.14822406042676306,False,37
+emb_sent_max_003,"Per-sentence embedding dim 3, max over sentences",0.14790467413267505,False,38
+emb_sent_max_236,"Per-sentence embedding dim 236, max over sentences",0.14709999343066738,False,39
+emb_sent_max_212,"Per-sentence embedding dim 212, max over sentences",0.14584835226543547,False,40
+emb_sent_max_255,"Per-sentence embedding dim 255, max over sentences",0.14483653771464633,False,41
+emb_sent_max_062,"Per-sentence embedding dim 62, max over sentences",0.14445152877052259,False,42
+emb_pooled_370,"Pooled embedding dim 370 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.14435287808238906,False,43
+emb_sent_max_361,"Per-sentence embedding dim 361, max over sentences",0.14339948966856486,False,44
+emb_sent_max_356,"Per-sentence embedding dim 356, max over sentences",0.14302525576217517,False,45
+emb_pooled_263,"Pooled embedding dim 263 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.14301851422221823,False,46
+emb_pooled_165,"Pooled embedding dim 165 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.14086686808886473,False,47
+emb_pooled_019,"Pooled embedding dim 19 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.1397611008595221,False,48
+emb_sent_max_118,"Per-sentence embedding dim 118, max over sentences",0.13829363292465713,False,49
+emb_sent_max_311,"Per-sentence embedding dim 311, max over sentences",0.1377592878150713,False,50
+emb_sent_max_136,"Per-sentence embedding dim 136, max over sentences",0.1366405577550629,False,51
+emb_sent_max_338,"Per-sentence embedding dim 338, max over sentences",0.13649054806347083,False,52
+emb_sent_max_226,"Per-sentence embedding dim 226, max over sentences",0.13572631625746068,False,53
+emb_sent_mean_370,"Per-sentence embedding dim 370, mean over sentences",0.1353593444662482,False,54
+emb_sent_max_066,"Per-sentence embedding dim 66, max over sentences",0.13468609797403452,False,55
+emb_sent_max_278,"Per-sentence embedding dim 278, max over sentences",0.1346404652161044,False,56
+emb_pooled_101,"Pooled embedding dim 101 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.13454444019972822,False,57
+emb_sent_max_245,"Per-sentence embedding dim 245, max over sentences",0.13438414727302916,False,58
+emb_sent_max_123,"Per-sentence embedding dim 123, max over sentences",0.13348630904693026,False,59
+emb_sent_max_000,"Per-sentence embedding dim 0, max over sentences",0.13342088614019776,False,60
+emb_sent_max_218,"Per-sentence embedding dim 218, max over sentences",0.13210856649497504,False,61
+emb_sent_max_353,"Per-sentence embedding dim 353, max over sentences",0.13044256329354464,False,62
+emb_pooled_041,"Pooled embedding dim 41 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.12930093007144094,False,63
+emb_sent_mean_176,"Per-sentence embedding dim 176, mean over sentences",0.12909746382569853,False,64
+emotion_neutral,Emotion probability: neutral (emotion-english-distilroberta-base),0.128743646668259,False,65
+emb_sent_max_352,"Per-sentence embedding dim 352, max over sentences",0.12847890930493433,False,66
+emb_sent_max_008,"Per-sentence embedding dim 8, max over sentences",0.12717956984760326,False,67
+emb_pooled_267,"Pooled embedding dim 267 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.1260404641828341,False,68
+emb_sent_max_169,"Per-sentence embedding dim 169, max over sentences",0.12576100689125225,False,69
+emb_sent_max_130,"Per-sentence embedding dim 130, max over sentences",0.12526800423158768,False,70
+emb_sent_max_375,"Per-sentence embedding dim 375, max over sentences",0.12431093001096638,False,71
+emb_sent_max_057,"Per-sentence embedding dim 57, max over sentences",0.12420263184272118,False,72
+emb_sent_max_336,"Per-sentence embedding dim 336, max over sentences",0.1235237924275614,False,73
+emb_pooled_176,"Pooled embedding dim 176 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.12284736388774231,False,74
+emb_pooled_321,"Pooled embedding dim 321 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.12253810282167255,False,75
+emb_sent_max_288,"Per-sentence embedding dim 288, max over sentences",0.12168846070281836,False,76
+emb_sent_max_346,"Per-sentence embedding dim 346, max over sentences",0.12022014173794071,False,77
+emb_pooled_347,"Pooled embedding dim 347 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.11920959851907309,False,78
+emb_sent_max_089,"Per-sentence embedding dim 89, max over sentences",0.11894525156229951,False,79
+emb_pooled_184,"Pooled embedding dim 184 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.11782132603827344,False,80
+emb_sent_max_327,"Per-sentence embedding dim 327, max over sentences",0.11765034853075784,False,81
+emb_pooled_175,"Pooled embedding dim 175 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.11727147891432432,False,82
+emb_pooled_049,"Pooled embedding dim 49 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.11654730159817328,False,83
+emb_sent_max_105,"Per-sentence embedding dim 105, max over sentences",0.11600875063871152,False,84
+emb_sent_max_366,"Per-sentence embedding dim 366, max over sentences",0.11590756719144668,False,85
+emb_sent_mean_308,"Per-sentence embedding dim 308, mean over sentences",0.115869945479393,False,86
+emb_sent_max_094,"Per-sentence embedding dim 94, max over sentences",0.11580510781741316,False,87
+emb_pooled_256,"Pooled embedding dim 256 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.11502729223749464,False,88
+emb_sent_mean_165,"Per-sentence embedding dim 165, mean over sentences",0.11489176765034426,False,89
+emb_sent_mean_041,"Per-sentence embedding dim 41, mean over sentences",0.11456390182872678,False,90
+emotion_fear,Emotion probability: fear (emotion-english-distilroberta-base),0.11437036276972101,False,91
+emb_sent_max_248,"Per-sentence embedding dim 248, max over sentences",0.11383449658726486,False,92
+emb_sent_max_086,"Per-sentence embedding dim 86, max over sentences",0.11275424897494535,False,93
+emb_pooled_238,"Pooled embedding dim 238 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.11234661663548451,False,94
+emb_sent_mean_172,"Per-sentence embedding dim 172, mean over sentences",0.11200731813894826,False,95
+emb_sent_max_007,"Per-sentence embedding dim 7, max over sentences",0.11158302366558992,False,96
+emb_sent_max_256,"Per-sentence embedding dim 256, max over sentences",0.11078741713196383,False,97
+emb_sent_max_273,"Per-sentence embedding dim 273, max over sentences",0.10931872766104433,False,98
+emb_pooled_071,"Pooled embedding dim 71 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.10880771938647094,False,99
+emb_sent_max_164,"Per-sentence embedding dim 164, max over sentences",0.10868395544464526,False,100
+emb_sent_mean_263,"Per-sentence embedding dim 263, mean over sentences",0.10838806996481765,False,101
+emb_sent_max_147,"Per-sentence embedding dim 147, max over sentences",0.10836723799105341,False,102
+emb_sent_mean_119,"Per-sentence embedding dim 119, mean over sentences",0.1080154570580989,False,103
+emb_sent_max_059,"Per-sentence embedding dim 59, max over sentences",0.10757851268018692,False,104
+emb_sent_max_275,"Per-sentence embedding dim 275, max over sentences",0.10690327619938467,False,105
+emb_pooled_062,"Pooled embedding dim 62 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.10637118438892212,False,106
+emb_sent_max_276,"Per-sentence embedding dim 276, max over sentences",0.10620600495889176,False,107
+emotion_surprise,Emotion probability: surprise (emotion-english-distilroberta-base),0.10569940445587012,False,108
+emb_sent_max_075,"Per-sentence embedding dim 75, max over sentences",0.10529423624617573,False,109
+emb_pooled_230,"Pooled embedding dim 230 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.10523799851350368,False,110
+emb_sent_max_192,"Per-sentence embedding dim 192, max over sentences",0.10505857546822517,False,111
+emb_sent_max_233,"Per-sentence embedding dim 233, max over sentences",0.10483664359999434,False,112
+emb_sent_mean_319,"Per-sentence embedding dim 319, mean over sentences",0.10458744841493584,False,113
+emb_pooled_088,"Pooled embedding dim 88 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.10457863044784999,False,114
+emb_sent_mean_237,"Per-sentence embedding dim 237, mean over sentences",0.10439037716493438,False,115
+emb_pooled_205,"Pooled embedding dim 205 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.10391991390762056,False,116
+emb_pooled_210,"Pooled embedding dim 210 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.10318897344816058,False,117
+emb_sent_max_138,"Per-sentence embedding dim 138, max over sentences",0.10250833456582686,False,118
+emb_sent_mean_321,"Per-sentence embedding dim 321, mean over sentences",0.10239431954301548,False,119
+emb_sent_mean_101,"Per-sentence embedding dim 101, mean over sentences",0.10225580544295543,False,120
+emb_pooled_306,"Pooled embedding dim 306 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.10167614583706808,False,121
+emb_pooled_066,"Pooled embedding dim 66 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.1005199605535525,False,122
+emb_sent_max_064,"Per-sentence embedding dim 64, max over sentences",0.10023541620316267,False,123
+emb_pooled_341,"Pooled embedding dim 341 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.10005169289078397,False,124
+emb_sent_mean_175,"Per-sentence embedding dim 175, mean over sentences",0.09996006556899495,False,125
+emb_pooled_377,"Pooled embedding dim 377 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0997777793987158,False,126
+emb_sent_mean_026,"Per-sentence embedding dim 26, mean over sentences",0.09972436398371087,False,127
+emb_sent_max_202,"Per-sentence embedding dim 202, max over sentences",0.09972367210952582,False,128
+emb_pooled_172,"Pooled embedding dim 172 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.09965126316804662,False,129
+emb_pooled_119,"Pooled embedding dim 119 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.09875844821912727,False,130
+emb_sent_max_048,"Per-sentence embedding dim 48, max over sentences",0.09844010373389311,False,131
+emb_sent_max_028,"Per-sentence embedding dim 28, max over sentences",0.09813263028663766,False,132
+emb_pooled_118,"Pooled embedding dim 118 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.09784402475315712,False,133
+emb_sent_max_180,"Per-sentence embedding dim 180, max over sentences",0.09770095628054198,False,134
+emb_pooled_243,"Pooled embedding dim 243 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.09745024747638542,False,135
+emb_sent_max_029,"Per-sentence embedding dim 29, max over sentences",0.09721316218908527,False,136
+emb_sent_max_304,"Per-sentence embedding dim 304, max over sentences",0.096916162921858,False,137
+emb_sent_mean_306,"Per-sentence embedding dim 306, mean over sentences",0.0967192137042101,False,138
+emb_pooled_094,"Pooled embedding dim 94 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.09665521929116494,False,139
+emb_sent_mean_361,"Per-sentence embedding dim 361, mean over sentences",0.0964128305925458,False,140
+emb_sent_max_068,"Per-sentence embedding dim 68, max over sentences",0.09619210308731185,False,141
+emb_sent_mean_079,"Per-sentence embedding dim 79, mean over sentences",0.09590578100882974,False,142
+emb_sent_mean_270,"Per-sentence embedding dim 270, mean over sentences",0.09568035044714218,False,143
+emb_sent_mean_003,"Per-sentence embedding dim 3, mean over sentences",0.09536321864099051,False,144
+emb_sent_max_371,"Per-sentence embedding dim 371, max over sentences",0.09483145812999316,False,145
+emb_sent_max_044,"Per-sentence embedding dim 44, max over sentences",0.0946926915798092,False,146
+emb_sent_max_325,"Per-sentence embedding dim 325, max over sentences",0.09378179665903241,False,147
+emb_sent_max_056,"Per-sentence embedding dim 56, max over sentences",0.09351117628397398,False,148
+emb_pooled_255,"Pooled embedding dim 255 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.09342201131589789,False,149
+emb_sent_max_372,"Per-sentence embedding dim 372, max over sentences",0.09315774316763958,False,150
+emb_sent_mean_123,"Per-sentence embedding dim 123, mean over sentences",0.09307185142151075,False,151
+emb_pooled_231,"Pooled embedding dim 231 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.09306852201211813,False,152
+emb_pooled_025,"Pooled embedding dim 25 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0918400285643366,False,153
+emb_pooled_279,"Pooled embedding dim 279 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.09183717559255866,False,154
+emb_pooled_206,"Pooled embedding dim 206 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.09170094209859414,False,155
+emb_sent_mean_377,"Per-sentence embedding dim 377, mean over sentences",0.09162824076938803,False,156
+emb_sent_max_268,"Per-sentence embedding dim 268, max over sentences",0.09162105714601765,False,157
+emb_sent_max_160,"Per-sentence embedding dim 160, max over sentences",0.09131082729862872,False,158
+emb_pooled_226,"Pooled embedding dim 226 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.09126611449375632,False,159
+emb_sent_max_038,"Per-sentence embedding dim 38, max over sentences",0.09120666161211277,False,160
+emb_sent_max_234,"Per-sentence embedding dim 234, max over sentences",0.09083077703988351,False,161
+emb_sent_mean_019,"Per-sentence embedding dim 19, mean over sentences",0.09074225379787304,False,162
+emb_pooled_026,"Pooled embedding dim 26 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.09067087833078391,False,163
+emb_sent_mean_243,"Per-sentence embedding dim 243, mean over sentences",0.09060378609985786,False,164
+emb_sent_mean_088,"Per-sentence embedding dim 88, mean over sentences",0.09055922356420609,False,165
+emb_sent_mean_030,"Per-sentence embedding dim 30, mean over sentences",0.09042799271265123,False,166
+emb_sent_max_021,"Per-sentence embedding dim 21, max over sentences",0.09003186691274712,False,167
+emb_sent_max_254,"Per-sentence embedding dim 254, max over sentences",0.08980148506391838,False,168
+emb_sent_max_159,"Per-sentence embedding dim 159, max over sentences",0.08979038942166628,False,169
+emb_pooled_004,"Pooled embedding dim 4 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.089604570672293,False,170
+emb_sent_max_368,"Per-sentence embedding dim 368, max over sentences",0.08933660227128914,False,171
+noun_ratio,"noun_ratio (shipped with the dataset, not computed here)",0.08926966150886173,False,172
+emb_sent_mean_205,"Per-sentence embedding dim 205, mean over sentences",0.08925070821084047,False,173
+emb_pooled_237,"Pooled embedding dim 237 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.08918769848506569,False,174
+emb_sent_mean_255,"Per-sentence embedding dim 255, mean over sentences",0.08915883605608421,False,175
+emb_sent_max_074,"Per-sentence embedding dim 74, max over sentences",0.0887876291614429,False,176
+emb_sent_mean_184,"Per-sentence embedding dim 184, mean over sentences",0.08854489453576964,False,177
+emb_pooled_236,"Pooled embedding dim 236 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.08848135467104923,False,178
+emb_pooled_167,"Pooled embedding dim 167 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.08841686942338489,False,179
+emb_sent_max_215,"Per-sentence embedding dim 215, max over sentences",0.08748645981602898,False,180
+emb_sent_max_211,"Per-sentence embedding dim 211, max over sentences",0.08725852579730686,False,181
+emb_pooled_252,"Pooled embedding dim 252 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.08719311404432784,False,182
+emb_sent_max_080,"Per-sentence embedding dim 80, max over sentences",0.08668500088326159,False,183
+emb_sent_max_301,"Per-sentence embedding dim 301, max over sentences",0.08657743247954741,False,184
+emb_sent_max_359,"Per-sentence embedding dim 359, max over sentences",0.08648971514107329,False,185
+emb_pooled_099,"Pooled embedding dim 99 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.08646400328054149,False,186
+emb_sent_max_287,"Per-sentence embedding dim 287, max over sentences",0.08602625182889634,False,187
+emb_sent_mean_212,"Per-sentence embedding dim 212, mean over sentences",0.0854007663085583,False,188
+emb_sent_max_115,"Per-sentence embedding dim 115, max over sentences",0.08504399933279583,False,189
+emb_sent_max_380,"Per-sentence embedding dim 380, max over sentences",0.08425820209215029,False,190
+emb_sent_max_042,"Per-sentence embedding dim 42, max over sentences",0.08417445002294555,False,191
+emb_sent_max_078,"Per-sentence embedding dim 78, max over sentences",0.08409766587212442,False,192
+emb_sent_mean_245,"Per-sentence embedding dim 245, mean over sentences",0.08407507609734166,False,193
+emb_sent_max_199,"Per-sentence embedding dim 199, max over sentences",0.08400111430707291,False,194
+emb_sent_max_337,"Per-sentence embedding dim 337, max over sentences",0.08362211266881214,False,195
+emb_pooled_308,"Pooled embedding dim 308 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.08351185375886816,False,196
+emb_sent_max_363,"Per-sentence embedding dim 363, max over sentences",0.08344848345587064,False,197
+emb_sent_mean_267,"Per-sentence embedding dim 267, mean over sentences",0.08339293599564712,False,198
+emb_sent_max_209,"Per-sentence embedding dim 209, max over sentences",0.08308833799239768,False,199
+emb_sent_max_146,"Per-sentence embedding dim 146, max over sentences",0.08308017238029297,False,200
+emb_sent_max_319,"Per-sentence embedding dim 319, max over sentences",0.08301424496250753,False,201
+emb_pooled_145,"Pooled embedding dim 145 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.08300630439920909,False,202
+emotion_sadness,Emotion probability: sadness (emotion-english-distilroberta-base),0.08297446566769162,False,203
+emb_sent_max_323,"Per-sentence embedding dim 323, max over sentences",0.08251431756426708,False,204
+emb_sent_max_051,"Per-sentence embedding dim 51, max over sentences",0.08239577034311596,False,205
+emb_sent_max_224,"Per-sentence embedding dim 224, max over sentences",0.08217960132081092,False,206
+emb_sent_mean_157,"Per-sentence embedding dim 157, mean over sentences",0.08193207388293144,False,207
+emb_pooled_242,"Pooled embedding dim 242 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.08115796120617258,False,208
+emb_sent_max_012,"Per-sentence embedding dim 12, max over sentences",0.08101680750072582,False,209
+emb_sent_max_087,"Per-sentence embedding dim 87, max over sentences",0.08088472485047093,False,210
+emb_sent_max_137,"Per-sentence embedding dim 137, max over sentences",0.08023407613626654,False,211
+emb_sent_mean_136,"Per-sentence embedding dim 136, mean over sentences",0.0802102485803724,False,212
+emb_pooled_348,"Pooled embedding dim 348 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07980568722151471,False,213
+emb_sent_mean_000,"Per-sentence embedding dim 0, mean over sentences",0.07977431104046495,False,214
+emb_sent_max_163,"Per-sentence embedding dim 163, max over sentences",0.07965718357496954,False,215
+emb_pooled_036,"Pooled embedding dim 36 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0791508035177495,False,216
+emb_sent_mean_004,"Per-sentence embedding dim 4, mean over sentences",0.0791218530134774,False,217
+emb_sent_max_069,"Per-sentence embedding dim 69, max over sentences",0.07888240970030713,False,218
+emb_sent_mean_356,"Per-sentence embedding dim 356, mean over sentences",0.07865483304653065,False,219
+emb_sent_max_191,"Per-sentence embedding dim 191, max over sentences",0.07863850674330264,False,220
+emb_sent_mean_240,"Per-sentence embedding dim 240, mean over sentences",0.07860966798619584,False,221
+emb_sent_max_122,"Per-sentence embedding dim 122, max over sentences",0.07858420584431913,False,222
+emb_sent_max_050,"Per-sentence embedding dim 50, max over sentences",0.07848350949610694,False,223
+emb_pooled_169,"Pooled embedding dim 169 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07822369581325983,False,224
+emb_sent_mean_049,"Per-sentence embedding dim 49, mean over sentences",0.07807712677281975,False,225
+emb_sent_max_298,"Per-sentence embedding dim 298, max over sentences",0.07805251670668101,False,226
+emb_sent_mean_347,"Per-sentence embedding dim 347, mean over sentences",0.0776491302058826,False,227
+emb_sent_max_037,"Per-sentence embedding dim 37, max over sentences",0.07758734336659856,False,228
+emotion_joy,Emotion probability: joy (emotion-english-distilroberta-base),0.07743563657706565,False,229
+emb_sent_max_171,"Per-sentence embedding dim 171, max over sentences",0.07733968758203513,False,230
+emb_sent_max_259,"Per-sentence embedding dim 259, max over sentences",0.07729410615737065,False,231
+emb_pooled_003,"Pooled embedding dim 3 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07728980065154323,False,232
+emb_sent_mean_236,"Per-sentence embedding dim 236, mean over sentences",0.0769087120666816,False,233
+emb_pooled_278,"Pooled embedding dim 278 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07670366655771543,False,234
+emb_sent_max_040,"Per-sentence embedding dim 40, max over sentences",0.07658101454803035,False,235
+emb_pooled_123,"Pooled embedding dim 123 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07651084523410168,False,236
+emb_sent_max_332,"Per-sentence embedding dim 332, max over sentences",0.07629665218088455,False,237
+emb_sent_mean_273,"Per-sentence embedding dim 273, mean over sentences",0.07625878464841973,False,238
+emb_sent_max_174,"Per-sentence embedding dim 174, max over sentences",0.07591255715903378,False,239
+emb_sent_mean_057,"Per-sentence embedding dim 57, mean over sentences",0.07571968997243816,False,240
+emb_pooled_022,"Pooled embedding dim 22 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07562151000175721,False,241
+emb_sent_max_282,"Per-sentence embedding dim 282, max over sentences",0.07561615024394364,False,242
+emb_sent_mean_264,"Per-sentence embedding dim 264, mean over sentences",0.07557527714070256,False,243
+emb_sent_max_095,"Per-sentence embedding dim 95, max over sentences",0.07556868836027908,False,244
+emb_sent_mean_025,"Per-sentence embedding dim 25, mean over sentences",0.07529140930678047,False,245
+emb_sent_max_326,"Per-sentence embedding dim 326, max over sentences",0.07526173632215993,False,246
+emb_sent_max_246,"Per-sentence embedding dim 246, max over sentences",0.07509876058645171,False,247
+emb_sent_mean_351,"Per-sentence embedding dim 351, mean over sentences",0.07499186381688805,False,248
+emb_sent_mean_252,"Per-sentence embedding dim 252, mean over sentences",0.0749847067051097,False,249
+emb_sent_max_124,"Per-sentence embedding dim 124, max over sentences",0.07493101676186598,False,250
+emb_pooled_195,"Pooled embedding dim 195 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07471888593215859,False,251
+emb_sent_max_265,"Per-sentence embedding dim 265, max over sentences",0.07449685624997571,False,252
+emb_sent_max_017,"Per-sentence embedding dim 17, max over sentences",0.07432918592331283,False,253
+emb_sent_max_104,"Per-sentence embedding dim 104, max over sentences",0.07428109065977306,False,254
+emb_pooled_157,"Pooled embedding dim 157 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07420843410808997,False,255
+emb_pooled_227,"Pooled embedding dim 227 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07420377574906878,False,256
+emb_sent_mean_162,"Per-sentence embedding dim 162, mean over sentences",0.07402281477921058,False,257
+emb_pooled_311,"Pooled embedding dim 311 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07394489859371367,False,258
+emb_sent_max_220,"Per-sentence embedding dim 220, max over sentences",0.07393327720187282,False,259
+emb_pooled_007,"Pooled embedding dim 7 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07382439559772802,False,260
+emb_sent_mean_206,"Per-sentence embedding dim 206, mean over sentences",0.07375918151620287,False,261
+emb_sent_mean_027,"Per-sentence embedding dim 27, mean over sentences",0.07359540492709726,False,262
+emb_sent_max_054,"Per-sentence embedding dim 54, max over sentences",0.07355107019433182,False,263
+emb_sent_max_357,"Per-sentence embedding dim 357, max over sentences",0.0734689606842478,False,264
+emb_sent_max_362,"Per-sentence embedding dim 362, max over sentences",0.07341806297516218,False,265
+emb_sent_mean_311,"Per-sentence embedding dim 311, mean over sentences",0.07325798124787175,False,266
+emb_sent_mean_231,"Per-sentence embedding dim 231, mean over sentences",0.07303114064831862,False,267
+emb_sent_mean_066,"Per-sentence embedding dim 66, mean over sentences",0.07296952205978213,False,268
+emb_sent_mean_071,"Per-sentence embedding dim 71, mean over sentences",0.07288043430388358,False,269
+emb_sent_max_005,"Per-sentence embedding dim 5, max over sentences",0.07255724055979673,False,270
+emb_sent_max_208,"Per-sentence embedding dim 208, max over sentences",0.07255318066116256,False,271
+emb_sent_max_034,"Per-sentence embedding dim 34, max over sentences",0.07231903442601162,False,272
+emb_pooled_084,"Pooled embedding dim 84 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07230689445493388,False,273
+emb_sent_max_350,"Per-sentence embedding dim 350, max over sentences",0.0719424370487145,False,274
+emb_pooled_289,"Pooled embedding dim 289 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07189175468686271,False,275
+emb_sent_max_266,"Per-sentence embedding dim 266, max over sentences",0.0717691019851241,False,276
+emb_pooled_356,"Pooled embedding dim 356 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07166516135716039,False,277
+emb_sent_mean_278,"Per-sentence embedding dim 278, mean over sentences",0.07162142371160751,False,278
+emb_sent_max_285,"Per-sentence embedding dim 285, max over sentences",0.07152574497746977,False,279
+emb_sent_mean_336,"Per-sentence embedding dim 336, mean over sentences",0.07111224340047384,False,280
+emb_sent_max_277,"Per-sentence embedding dim 277, max over sentences",0.07108334776419722,False,281
+emb_sent_max_015,"Per-sentence embedding dim 15, max over sentences",0.07105879983484353,False,282
+emb_pooled_063,"Pooled embedding dim 63 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07083193702301349,False,283
+emb_sent_max_292,"Per-sentence embedding dim 292, max over sentences",0.07081369122410575,False,284
+emb_sent_max_186,"Per-sentence embedding dim 186, max over sentences",0.07069568141298888,False,285
+emb_pooled_079,"Pooled embedding dim 79 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.07044525313018157,False,286
+emb_pooled_264,"Pooled embedding dim 264 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0701844248302761,False,287
+emb_sent_mean_226,"Per-sentence embedding dim 226, mean over sentences",0.07014929437635109,False,288
+emb_sent_max_369,"Per-sentence embedding dim 369, max over sentences",0.06998219557823004,False,289
+emb_pooled_351,"Pooled embedding dim 351 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06997731519549788,False,290
+emb_sent_mean_279,"Per-sentence embedding dim 279, mean over sentences",0.06991048641256636,False,291
+emb_sent_mean_242,"Per-sentence embedding dim 242, mean over sentences",0.06984644793448824,False,292
+emb_sent_max_053,"Per-sentence embedding dim 53, max over sentences",0.06960227779552097,False,293
+emb_sent_mean_346,"Per-sentence embedding dim 346, mean over sentences",0.06959777856888927,False,294
+emb_sent_max_201,"Per-sentence embedding dim 201, max over sentences",0.06933587859735058,False,295
+emb_pooled_202,"Pooled embedding dim 202 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06929973394639877,False,296
+emb_sent_max_305,"Per-sentence embedding dim 305, max over sentences",0.06915574260032198,False,297
+emb_sent_max_151,"Per-sentence embedding dim 151, max over sentences",0.06908284833297396,False,298
+emb_pooled_247,"Pooled embedding dim 247 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06904109570165495,False,299
+emb_pooled_143,"Pooled embedding dim 143 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06899193054491182,False,300
+emb_sent_mean_368,"Per-sentence embedding dim 368, mean over sentences",0.06888050079419106,False,301
+emb_sent_max_296,"Per-sentence embedding dim 296, max over sentences",0.06887175711484339,False,302
+emb_sent_mean_214,"Per-sentence embedding dim 214, mean over sentences",0.0688437427400932,False,303
+emb_sent_mean_107,"Per-sentence embedding dim 107, mean over sentences",0.06883235992288617,False,304
+emb_sent_max_225,"Per-sentence embedding dim 225, max over sentences",0.06861731418174832,False,305
+emb_sent_max_295,"Per-sentence embedding dim 295, max over sentences",0.06859371315351215,False,306
+emb_sent_max_023,"Per-sentence embedding dim 23, max over sentences",0.06856671879613918,False,307
+emb_sent_max_092,"Per-sentence embedding dim 92, max over sentences",0.06852832458151115,False,308
+emb_sent_max_091,"Per-sentence embedding dim 91, max over sentences",0.06837241886049039,False,309
+emb_sent_max_131,"Per-sentence embedding dim 131, max over sentences",0.06833726979746313,False,310
+emb_sent_mean_189,"Per-sentence embedding dim 189, mean over sentences",0.06819347581867463,False,311
+emb_sent_max_250,"Per-sentence embedding dim 250, max over sentences",0.068017904533753,False,312
+emb_pooled_156,"Pooled embedding dim 156 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06784835445898763,False,313
+emb_sent_mean_118,"Per-sentence embedding dim 118, mean over sentences",0.06783654351606305,False,314
+emb_pooled_244,"Pooled embedding dim 244 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06770472054110854,False,315
+emb_sent_mean_289,"Per-sentence embedding dim 289, mean over sentences",0.06757990218090537,False,316
+emb_sent_mean_210,"Per-sentence embedding dim 210, mean over sentences",0.06755574928484442,False,317
+emb_pooled_218,"Pooled embedding dim 218 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06754534347323515,False,318
+emb_sent_mean_287,"Per-sentence embedding dim 287, mean over sentences",0.06748220534075022,False,319
+emb_sent_max_200,"Per-sentence embedding dim 200, max over sentences",0.06728646959672568,False,320
+emb_sent_max_335,"Per-sentence embedding dim 335, max over sentences",0.06661203579421171,False,321
+emb_sent_mean_167,"Per-sentence embedding dim 167, mean over sentences",0.06651855841279586,False,322
+emb_sent_max_339,"Per-sentence embedding dim 339, max over sentences",0.0661924312642137,False,323
+emb_sent_max_097,"Per-sentence embedding dim 97, max over sentences",0.06610862882684199,False,324
+emb_pooled_192,"Pooled embedding dim 192 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06587415022806287,False,325
+emb_sent_max_177,"Per-sentence embedding dim 177, max over sentences",0.06574709936582845,False,326
+emb_sent_mean_353,"Per-sentence embedding dim 353, mean over sentences",0.06542326798446041,False,327
+emb_sent_max_241,"Per-sentence embedding dim 241, max over sentences",0.06541318496441395,False,328
+emb_pooled_183,"Pooled embedding dim 183 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06528459482402038,False,329
+emb_pooled_240,"Pooled embedding dim 240 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06511042155776536,False,330
+emb_sent_mean_286,"Per-sentence embedding dim 286, mean over sentences",0.06476855558759897,False,331
+emb_pooled_162,"Pooled embedding dim 162 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06475867296225202,False,332
+emb_sent_max_381,"Per-sentence embedding dim 381, max over sentences",0.06450945531774721,False,333
+emb_sent_max_150,"Per-sentence embedding dim 150, max over sentences",0.06419525943667503,False,334
+emb_sent_mean_190,"Per-sentence embedding dim 190, mean over sentences",0.06412388073161202,False,335
+emb_sent_mean_156,"Per-sentence embedding dim 156, mean over sentences",0.0640977833724059,False,336
+emb_pooled_212,"Pooled embedding dim 212 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06404823374132063,False,337
+emb_sent_max_145,"Per-sentence embedding dim 145, max over sentences",0.0640045254413053,False,338
+emb_sent_max_103,"Per-sentence embedding dim 103, max over sentences",0.06394065870568744,False,339
+emb_pooled_352,"Pooled embedding dim 352 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06374082810628323,False,340
+emb_sent_mean_341,"Per-sentence embedding dim 341, mean over sentences",0.06361874318038341,False,341
+emb_sent_max_155,"Per-sentence embedding dim 155, max over sentences",0.06357178758196547,False,342
+emb_sent_mean_352,"Per-sentence embedding dim 352, mean over sentences",0.06347214654598288,False,343
+emb_sent_max_135,"Per-sentence embedding dim 135, max over sentences",0.06335322173858193,False,344
+emb_sent_mean_154,"Per-sentence embedding dim 154, mean over sentences",0.06335014724194199,False,345
+emb_sent_mean_230,"Per-sentence embedding dim 230, mean over sentences",0.06321490491831261,False,346
+emb_sent_mean_084,"Per-sentence embedding dim 84, mean over sentences",0.06319231306449069,False,347
+emb_sent_max_235,"Per-sentence embedding dim 235, max over sentences",0.06318704227463767,False,348
+emb_sent_mean_310,"Per-sentence embedding dim 310, mean over sentences",0.0631096671959015,False,349
+emb_sent_max_367,"Per-sentence embedding dim 367, max over sentences",0.06307648675320987,False,350
+emb_sent_max_317,"Per-sentence embedding dim 317, max over sentences",0.06304550461640535,False,351
+emb_sent_max_247,"Per-sentence embedding dim 247, max over sentences",0.06304473304287184,False,352
+emb_sent_max_261,"Per-sentence embedding dim 261, max over sentences",0.063043073286972,False,353
+emb_pooled_209,"Pooled embedding dim 209 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06282829680073876,False,354
+emb_sent_mean_218,"Per-sentence embedding dim 218, mean over sentences",0.06261141449531094,False,355
+emb_pooled_375,"Pooled embedding dim 375 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0624458983232814,False,356
+emb_sent_mean_009,"Per-sentence embedding dim 9, mean over sentences",0.06234982357500529,False,357
+emb_sent_max_193,"Per-sentence embedding dim 193, max over sentences",0.062164035231057735,False,358
+emb_sent_mean_314,"Per-sentence embedding dim 314, mean over sentences",0.061945232752638635,False,359
+emb_sent_max_014,"Per-sentence embedding dim 14, max over sentences",0.061943426078191255,False,360
+emb_pooled_214,"Pooled embedding dim 214 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06192927651547864,False,361
+emb_sent_mean_086,"Per-sentence embedding dim 86, mean over sentences",0.061707461241207184,False,362
+emb_sent_mean_325,"Per-sentence embedding dim 325, mean over sentences",0.061643781921564056,False,363
+emb_sent_max_334,"Per-sentence embedding dim 334, max over sentences",0.061335659809925946,False,364
+emb_sent_mean_138,"Per-sentence embedding dim 138, mean over sentences",0.06128535411300717,False,365
+emb_pooled_353,"Pooled embedding dim 353 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06109955804997513,False,366
+emb_pooled_368,"Pooled embedding dim 368 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06106179631450104,False,367
+emb_pooled_031,"Pooled embedding dim 31 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06101397894288185,False,368
+emb_sent_mean_143,"Per-sentence embedding dim 143, mean over sentences",0.06072785518498636,False,369
+emb_sent_mean_233,"Per-sentence embedding dim 233, mean over sentences",0.06062117315876492,False,370
+emb_sent_max_322,"Per-sentence embedding dim 322, max over sentences",0.060459341840807035,False,371
+emb_sent_max_258,"Per-sentence embedding dim 258, max over sentences",0.06028316337736683,False,372
+emb_pooled_142,"Pooled embedding dim 142 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.06023913693929028,False,373
+emb_pooled_027,"Pooled embedding dim 27 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.060175408109488515,False,374
+emb_sent_max_093,"Per-sentence embedding dim 93, max over sentences",0.060170450811417364,False,375
+emb_sent_max_344,"Per-sentence embedding dim 344, max over sentences",0.05998060982919462,False,376
+emb_pooled_270,"Pooled embedding dim 270 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.05971030323949522,False,377
+emb_sent_max_133,"Per-sentence embedding dim 133, max over sentences",0.059701094314778214,False,378
+emb_sent_mean_300,"Per-sentence embedding dim 300, mean over sentences",0.05966487292362821,False,379
+emb_sent_mean_007,"Per-sentence embedding dim 7, mean over sentences",0.059497564158364824,False,380
+emb_sent_mean_366,"Per-sentence embedding dim 366, mean over sentences",0.059446944049045936,False,381
+emb_sent_mean_186,"Per-sentence embedding dim 186, mean over sentences",0.0593553838953822,False,382
+emb_sent_mean_036,"Per-sentence embedding dim 36, mean over sentences",0.05916851426319347,False,383
+emb_sent_max_210,"Per-sentence embedding dim 210, max over sentences",0.05913578129033015,False,384
+emb_sent_mean_158,"Per-sentence embedding dim 158, mean over sentences",0.058994882647810165,False,385
+emb_sent_mean_161,"Per-sentence embedding dim 161, mean over sentences",0.0589244563874578,False,386
+emb_sent_mean_090,"Per-sentence embedding dim 90, mean over sentences",0.05881876735550895,False,387
+emb_sent_mean_302,"Per-sentence embedding dim 302, mean over sentences",0.05879837141713473,False,388
+emb_sent_mean_094,"Per-sentence embedding dim 94, mean over sentences",0.05828568611457463,False,389
+emb_sent_mean_339,"Per-sentence embedding dim 339, mean over sentences",0.05818252574568916,False,390
+emb_sent_max_166,"Per-sentence embedding dim 166, max over sentences",0.058150953432052344,False,391
+emb_sent_max_365,"Per-sentence embedding dim 365, max over sentences",0.05809574751049684,False,392
+emb_pooled_000,"Pooled embedding dim 0 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.05802848610477396,False,393
+emb_sent_mean_048,"Per-sentence embedding dim 48, mean over sentences",0.05789740081724082,False,394
+emb_sent_mean_062,"Per-sentence embedding dim 62, mean over sentences",0.05784772639500613,False,395
+emb_pooled_018,"Pooled embedding dim 18 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.057843445461934095,False,396
+emb_sent_max_260,"Per-sentence embedding dim 260, max over sentences",0.05782260711939902,False,397
+emb_sent_mean_292,"Per-sentence embedding dim 292, mean over sentences",0.05781598026315393,False,398
+emb_sent_mean_142,"Per-sentence embedding dim 142, mean over sentences",0.05778806371886436,False,399
+emb_sent_mean_337,"Per-sentence embedding dim 337, mean over sentences",0.0577685547816742,False,400
+emb_sent_mean_348,"Per-sentence embedding dim 348, mean over sentences",0.05775430760446598,False,401
+emb_sent_mean_191,"Per-sentence embedding dim 191, mean over sentences",0.0577421318168021,False,402
+emb_sent_max_197,"Per-sentence embedding dim 197, max over sentences",0.05773879745022015,False,403
+emb_sent_mean_010,"Per-sentence embedding dim 10, mean over sentences",0.05754308693182075,False,404
+emb_pooled_070,"Pooled embedding dim 70 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.05753459600663868,False,405
+emb_pooled_340,"Pooled embedding dim 340 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.057445502457516895,False,406
+emb_sent_max_035,"Per-sentence embedding dim 35, max over sentences",0.057350231475942426,False,407
+emb_sent_mean_340,"Per-sentence embedding dim 340, mean over sentences",0.05734410837583459,False,408
+emb_sent_mean_238,"Per-sentence embedding dim 238, mean over sentences",0.05734408484982545,False,409
+emb_sent_max_187,"Per-sentence embedding dim 187, max over sentences",0.057177665108410825,False,410
+emb_sent_mean_089,"Per-sentence embedding dim 89, mean over sentences",0.05710284692649514,False,411
+emb_sent_max_043,"Per-sentence embedding dim 43, max over sentences",0.05710054604585757,False,412
+emb_sent_mean_248,"Per-sentence embedding dim 248, mean over sentences",0.05704788776901326,False,413
+emb_sent_mean_283,"Per-sentence embedding dim 283, mean over sentences",0.057020802792258074,False,414
+emb_sent_mean_129,"Per-sentence embedding dim 129, mean over sentences",0.05701794688522499,False,415
+emb_sent_max_221,"Per-sentence embedding dim 221, max over sentences",0.056721424113049146,False,416
+emb_sent_mean_327,"Per-sentence embedding dim 327, mean over sentences",0.05665855999053937,False,417
+emb_sent_mean_132,"Per-sentence embedding dim 132, mean over sentences",0.056638253709403674,False,418
+emb_sent_mean_183,"Per-sentence embedding dim 183, mean over sentences",0.05652790066701119,False,419
+emb_sent_mean_031,"Per-sentence embedding dim 31, mean over sentences",0.05645574931021713,False,420
+emb_sent_mean_149,"Per-sentence embedding dim 149, mean over sentences",0.05638466602020209,False,421
+emb_sent_mean_111,"Per-sentence embedding dim 111, mean over sentences",0.056205307659605186,False,422
+emb_sent_mean_096,"Per-sentence embedding dim 96, mean over sentences",0.0559038171441979,False,423
+emb_pooled_045,"Pooled embedding dim 45 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.05565449792481747,False,424
+emb_sent_max_011,"Per-sentence embedding dim 11, max over sentences",0.055587012541666425,False,425
+emb_sent_mean_045,"Per-sentence embedding dim 45, mean over sentences",0.05556483005371504,False,426
+emb_sent_mean_375,"Per-sentence embedding dim 375, mean over sentences",0.05555673834003416,False,427
+emb_sent_max_379,"Per-sentence embedding dim 379, max over sentences",0.055544267783565804,False,428
+emb_pooled_009,"Pooled embedding dim 9 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.05553167989156149,False,429
+emb_sent_mean_093,"Per-sentence embedding dim 93, mean over sentences",0.05550203511061991,False,430
+emb_sent_mean_077,"Per-sentence embedding dim 77, mean over sentences",0.05545195229651112,False,431
+emb_sent_mean_222,"Per-sentence embedding dim 222, mean over sentences",0.0554365028528947,False,432
+emb_sent_mean_128,"Per-sentence embedding dim 128, mean over sentences",0.05540260193487301,False,433
+emb_sent_max_373,"Per-sentence embedding dim 373, max over sentences",0.055218508268793265,False,434
+emb_sent_max_312,"Per-sentence embedding dim 312, max over sentences",0.055215752215624025,False,435
+emb_sent_mean_130,"Per-sentence embedding dim 130, mean over sentences",0.0551895260572155,False,436
+emb_sent_mean_244,"Per-sentence embedding dim 244, mean over sentences",0.05512393495848622,False,437
+emb_sent_mean_070,"Per-sentence embedding dim 70, mean over sentences",0.055101997622784005,False,438
+emb_sent_max_013,"Per-sentence embedding dim 13, max over sentences",0.05503632180443008,False,439
+emb_sent_max_112,"Per-sentence embedding dim 112, max over sentences",0.05501980012373986,False,440
+emb_sent_max_061,"Per-sentence embedding dim 61, max over sentences",0.054995899912309465,False,441
+emb_sent_max_313,"Per-sentence embedding dim 313, max over sentences",0.05493003051320633,False,442
+emb_sent_mean_224,"Per-sentence embedding dim 224, mean over sentences",0.05467931912225055,False,443
+emb_sent_mean_265,"Per-sentence embedding dim 265, mean over sentences",0.05460532214533398,False,444
+emb_sent_max_345,"Per-sentence embedding dim 345, max over sentences",0.05458772980298621,False,445
+emb_sent_max_140,"Per-sentence embedding dim 140, max over sentences",0.054528464324958836,False,446
+emb_sent_mean_180,"Per-sentence embedding dim 180, mean over sentences",0.05411750652283365,False,447
+emb_sent_mean_338,"Per-sentence embedding dim 338, mean over sentences",0.05395516828882707,False,448
+emb_sent_mean_114,"Per-sentence embedding dim 114, mean over sentences",0.05392075303994259,False,449
+emb_sent_max_033,"Per-sentence embedding dim 33, max over sentences",0.053781230696039906,False,450
+emb_sent_mean_359,"Per-sentence embedding dim 359, mean over sentences",0.053640605502941696,False,451
+emb_pooled_224,"Pooled embedding dim 224 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.05358502188349723,False,452
+emb_sent_max_316,"Per-sentence embedding dim 316, max over sentences",0.05348360878271974,False,453
+emb_sent_mean_125,"Per-sentence embedding dim 125, mean over sentences",0.05342633965181731,False,454
+emb_sent_mean_169,"Per-sentence embedding dim 169, mean over sentences",0.05331504666371556,False,455
+emb_sent_mean_365,"Per-sentence embedding dim 365, mean over sentences",0.053273219752839385,False,456
+emb_pooled_128,"Pooled embedding dim 128 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0532042105809154,False,457
+emb_sent_mean_266,"Per-sentence embedding dim 266, mean over sentences",0.05318252684358926,False,458
+emb_sent_mean_254,"Per-sentence embedding dim 254, mean over sentences",0.0531017136204146,False,459
+emb_pooled_057,"Pooled embedding dim 57 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.05292215529425448,False,460
+emb_sent_max_083,"Per-sentence embedding dim 83, max over sentences",0.05284268574508877,False,461
+emb_sent_mean_247,"Per-sentence embedding dim 247, mean over sentences",0.05251741784331854,False,462
+emb_pooled_008,"Pooled embedding dim 8 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0525115961344369,False,463
+emb_sent_max_251,"Per-sentence embedding dim 251, max over sentences",0.052381518522148784,False,464
+emb_sent_mean_281,"Per-sentence embedding dim 281, mean over sentences",0.05215489447403021,False,465
+emb_pooled_325,"Pooled embedding dim 325 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.05211421903544977,False,466
+emb_sent_mean_099,"Per-sentence embedding dim 99, mean over sentences",0.0520458277846223,False,467
+emb_sent_mean_207,"Per-sentence embedding dim 207, mean over sentences",0.05202757301261762,False,468
+emb_pooled_336,"Pooled embedding dim 336 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.05200203150471383,False,469
+emb_sent_mean_178,"Per-sentence embedding dim 178, mean over sentences",0.051963763834396826,False,470
+emb_sent_mean_108,"Per-sentence embedding dim 108, mean over sentences",0.051891889743594266,False,471
+emb_sent_mean_063,"Per-sentence embedding dim 63, mean over sentences",0.05171124457198362,False,472
+emb_sent_mean_262,"Per-sentence embedding dim 262, mean over sentences",0.0516134192954798,False,473
+emb_sent_max_272,"Per-sentence embedding dim 272, max over sentences",0.05161196821383118,False,474
+emb_sent_mean_051,"Per-sentence embedding dim 51, mean over sentences",0.051608997643560084,False,475
+emb_sent_mean_261,"Per-sentence embedding dim 261, mean over sentences",0.051594900421592094,False,476
+emb_pooled_010,"Pooled embedding dim 10 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.05153030693285787,False,477
+emb_sent_max_148,"Per-sentence embedding dim 148, max over sentences",0.05151118109550179,False,478
+emb_sent_max_116,"Per-sentence embedding dim 116, max over sentences",0.051478040195985564,False,479
+emb_pooled_338,"Pooled embedding dim 338 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.05138530837145927,False,480
+emb_sent_max_196,"Per-sentence embedding dim 196, max over sentences",0.05123443307105191,False,481
+emb_sent_mean_160,"Per-sentence embedding dim 160, mean over sentences",0.051215481049755596,False,482
+emb_sent_max_194,"Per-sentence embedding dim 194, max over sentences",0.05115021512265061,False,483
+emb_sent_max_020,"Per-sentence embedding dim 20, max over sentences",0.051015093499237274,False,484
+emb_sent_max_290,"Per-sentence embedding dim 290, max over sentences",0.05101364997753288,False,485
+emb_sent_mean_008,"Per-sentence embedding dim 8, mean over sentences",0.050874325979051616,False,486
+emb_sent_mean_109,"Per-sentence embedding dim 109, mean over sentences",0.05086191969292031,False,487
+emb_sent_mean_124,"Per-sentence embedding dim 124, mean over sentences",0.05084660068406066,False,488
+emb_sent_mean_042,"Per-sentence embedding dim 42, mean over sentences",0.050786564190570704,False,489
+emb_sent_mean_043,"Per-sentence embedding dim 43, mean over sentences",0.05072662829521013,False,490
+emb_sent_mean_288,"Per-sentence embedding dim 288, mean over sentences",0.050587065928111574,False,491
+emb_sent_max_204,"Per-sentence embedding dim 204, max over sentences",0.05056100802254937,False,492
+emb_sent_mean_208,"Per-sentence embedding dim 208, mean over sentences",0.05033998739369894,False,493
+emb_pooled_262,"Pooled embedding dim 262 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.05032450902078356,False,494
+emb_sent_mean_276,"Per-sentence embedding dim 276, mean over sentences",0.05032279311877508,False,495
+emb_sent_mean_195,"Per-sentence embedding dim 195, mean over sentences",0.05031669837069064,False,496
+emb_pooled_136,"Pooled embedding dim 136 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.05031384195426414,False,497
+emb_sent_mean_115,"Per-sentence embedding dim 115, mean over sentences",0.05027621807694338,False,498
+emb_sent_mean_168,"Per-sentence embedding dim 168, mean over sentences",0.05027450132398226,False,499
+emb_sent_mean_147,"Per-sentence embedding dim 147, mean over sentences",0.05023321395036895,False,500
+emb_sent_max_321,"Per-sentence embedding dim 321, max over sentences",0.05020483688710797,False,501
+emb_pooled_105,"Pooled embedding dim 105 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.050189197946573394,False,502
+emb_sent_mean_076,"Per-sentence embedding dim 76, mean over sentences",0.050010083946064654,False,503
+emb_sent_mean_171,"Per-sentence embedding dim 171, mean over sentences",0.049956587889037785,False,504
+emb_sent_mean_011,"Per-sentence embedding dim 11, mean over sentences",0.049950345140636454,False,505
+emb_pooled_276,"Pooled embedding dim 276 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04987092686354577,False,506
+emb_sent_max_333,"Per-sentence embedding dim 333, max over sentences",0.04984803830068607,False,507
+emb_sent_max_309,"Per-sentence embedding dim 309, max over sentences",0.049827525724277955,False,508
+emb_sent_mean_290,"Per-sentence embedding dim 290, mean over sentences",0.04976130108268917,False,509
+emb_sent_mean_001,"Per-sentence embedding dim 1, mean over sentences",0.04949906805216697,False,510
+emb_sent_mean_272,"Per-sentence embedding dim 272, mean over sentences",0.04941960496855691,False,511
+emb_sent_max_349,"Per-sentence embedding dim 349, max over sentences",0.04940568759602826,False,512
+emb_pooled_282,"Pooled embedding dim 282 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04938576068229983,False,513
+emb_sent_max_082,"Per-sentence embedding dim 82, max over sentences",0.049169498073982965,False,514
+emb_sent_max_320,"Per-sentence embedding dim 320, max over sentences",0.04912607273165781,False,515
+emb_sent_max_328,"Per-sentence embedding dim 328, max over sentences",0.04910893758173973,False,516
+emb_sent_mean_069,"Per-sentence embedding dim 69, mean over sentences",0.04909176981305308,False,517
+emb_sent_mean_120,"Per-sentence embedding dim 120, mean over sentences",0.04901498055471576,False,518
+emb_sent_max_354,"Per-sentence embedding dim 354, max over sentences",0.04898586957668449,False,519
+emb_sent_mean_164,"Per-sentence embedding dim 164, mean over sentences",0.04895210115843529,False,520
+emb_sent_max_300,"Per-sentence embedding dim 300, max over sentences",0.048848034354368686,False,521
+emb_pooled_075,"Pooled embedding dim 75 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04884703668399659,False,522
+emb_sent_mean_110,"Per-sentence embedding dim 110, mean over sentences",0.048781352469010386,False,523
+emb_sent_mean_383,"Per-sentence embedding dim 383, mean over sentences",0.04875324566711825,False,524
+emb_sent_max_269,"Per-sentence embedding dim 269, max over sentences",0.04868279797318653,False,525
+emb_sent_max_294,"Per-sentence embedding dim 294, max over sentences",0.04863387819645837,False,526
+emb_sent_mean_023,"Per-sentence embedding dim 23, mean over sentences",0.04861834923922048,False,527
+emb_sent_mean_029,"Per-sentence embedding dim 29, mean over sentences",0.04860241554640288,False,528
+emb_sent_max_217,"Per-sentence embedding dim 217, max over sentences",0.04838531666642698,False,529
+emb_sent_mean_374,"Per-sentence embedding dim 374, mean over sentences",0.04836221718857203,False,530
+emb_sent_mean_113,"Per-sentence embedding dim 113, mean over sentences",0.04831646829542535,False,531
+emb_sent_mean_005,"Per-sentence embedding dim 5, mean over sentences",0.048284659580671185,False,532
+emb_sent_mean_105,"Per-sentence embedding dim 105, mean over sentences",0.04820187383104413,False,533
+emb_sent_mean_259,"Per-sentence embedding dim 259, mean over sentences",0.04818877942541322,False,534
+emb_sent_mean_170,"Per-sentence embedding dim 170, mean over sentences",0.04812888833125584,False,535
+emb_sent_mean_166,"Per-sentence embedding dim 166, mean over sentences",0.048115590763739835,False,536
+emb_sent_mean_056,"Per-sentence embedding dim 56, mean over sentences",0.04807621481233504,False,537
+emb_sent_mean_329,"Per-sentence embedding dim 329, mean over sentences",0.048047674426841436,False,538
+emb_sent_max_099,"Per-sentence embedding dim 99, max over sentences",0.04796772886792677,False,539
+emb_sent_max_188,"Per-sentence embedding dim 188, max over sentences",0.04794118831815952,False,540
+emb_sent_max_016,"Per-sentence embedding dim 16, max over sentences",0.04793480997760513,False,541
+emb_sent_max_084,"Per-sentence embedding dim 84, max over sentences",0.04792254111729033,False,542
+emb_pooled_076,"Pooled embedding dim 76 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04787560458860396,False,543
+emb_sent_mean_044,"Per-sentence embedding dim 44, mean over sentences",0.047873289568048705,False,544
+emb_sent_max_291,"Per-sentence embedding dim 291, max over sentences",0.04784913099877164,False,545
+emb_sent_mean_251,"Per-sentence embedding dim 251, mean over sentences",0.04782365415790757,False,546
+emb_sent_mean_153,"Per-sentence embedding dim 153, mean over sentences",0.04772884760019158,False,547
+emb_sent_max_032,"Per-sentence embedding dim 32, max over sentences",0.04765907742532871,False,548
+emb_pooled_093,"Pooled embedding dim 93 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0476330868034025,False,549
+emb_sent_mean_315,"Per-sentence embedding dim 315, mean over sentences",0.04756556116982935,False,550
+emb_sent_mean_018,"Per-sentence embedding dim 18, mean over sentences",0.04752673189367851,False,551
+emb_sent_max_230,"Per-sentence embedding dim 230, max over sentences",0.047520699392485266,False,552
+emb_sent_max_358,"Per-sentence embedding dim 358, max over sentences",0.04748994420227248,False,553
+emb_sent_max_331,"Per-sentence embedding dim 331, max over sentences",0.04745782116008801,False,554
+emb_pooled_056,"Pooled embedding dim 56 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04741523621818944,False,555
+emb_sent_mean_227,"Per-sentence embedding dim 227, mean over sentences",0.04740743800492275,False,556
+emb_sent_max_073,"Per-sentence embedding dim 73, max over sentences",0.047394726210028715,False,557
+emb_sent_max_280,"Per-sentence embedding dim 280, max over sentences",0.047387647330844995,False,558
+emb_sent_mean_343,"Per-sentence embedding dim 343, mean over sentences",0.047365131617671974,False,559
+emb_sent_mean_060,"Per-sentence embedding dim 60, mean over sentences",0.04731765757121664,False,560
+emb_sent_max_318,"Per-sentence embedding dim 318, max over sentences",0.04722666635766748,False,561
+emb_sent_max_343,"Per-sentence embedding dim 343, max over sentences",0.04720328804676166,False,562
+emb_sent_mean_358,"Per-sentence embedding dim 358, mean over sentences",0.0471950322698822,False,563
+emb_sent_mean_052,"Per-sentence embedding dim 52, mean over sentences",0.047123877407297066,False,564
+emb_sent_max_207,"Per-sentence embedding dim 207, max over sentences",0.04712067809226106,False,565
+emb_sent_max_219,"Per-sentence embedding dim 219, max over sentences",0.04706958450533172,False,566
+emb_sent_mean_234,"Per-sentence embedding dim 234, mean over sentences",0.04703308650207738,False,567
+emb_sent_max_002,"Per-sentence embedding dim 2, max over sentences",0.046992440704788585,False,568
+emb_sent_mean_362,"Per-sentence embedding dim 362, mean over sentences",0.04696608699349358,False,569
+emb_sent_mean_192,"Per-sentence embedding dim 192, mean over sentences",0.046750892298558444,False,570
+emb_sent_mean_064,"Per-sentence embedding dim 64, mean over sentences",0.04668456499681861,False,571
+emb_sent_mean_297,"Per-sentence embedding dim 297, mean over sentences",0.04665683340807547,False,572
+emb_pooled_233,"Pooled embedding dim 233 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.046641396905132915,False,573
+emb_pooled_132,"Pooled embedding dim 132 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04661293847309489,False,574
+emb_sent_mean_357,"Per-sentence embedding dim 357, mean over sentences",0.04660977213618356,False,575
+emb_pooled_186,"Pooled embedding dim 186 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04659373886876761,False,576
+emb_sent_mean_275,"Per-sentence embedding dim 275, mean over sentences",0.046432761842660764,False,577
+emb_pooled_113,"Pooled embedding dim 113 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.046418521068760654,False,578
+emb_sent_max_055,"Per-sentence embedding dim 55, max over sentences",0.04634342951706705,False,579
+emb_sent_mean_106,"Per-sentence embedding dim 106, mean over sentences",0.04633764973013399,False,580
+emb_sent_mean_304,"Per-sentence embedding dim 304, mean over sentences",0.046329251375948566,False,581
+emb_sent_max_232,"Per-sentence embedding dim 232, max over sentences",0.04622197623997648,False,582
+emb_pooled_189,"Pooled embedding dim 189 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04621978540479299,False,583
+emb_pooled_357,"Pooled embedding dim 357 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04620676086055786,False,584
+emb_sent_mean_330,"Per-sentence embedding dim 330, mean over sentences",0.04616064562477984,False,585
+emb_sent_mean_159,"Per-sentence embedding dim 159, mean over sentences",0.046077599561219706,False,586
+emb_sent_mean_022,"Per-sentence embedding dim 22, mean over sentences",0.04604973173009519,False,587
+emb_sent_mean_121,"Per-sentence embedding dim 121, mean over sentences",0.04600638624653808,False,588
+emb_sent_mean_006,"Per-sentence embedding dim 6, mean over sentences",0.04596280146428322,False,589
+emb_sent_mean_098,"Per-sentence embedding dim 98, mean over sentences",0.045956671924861414,False,590
+emb_sent_mean_307,"Per-sentence embedding dim 307, mean over sentences",0.045950636303612846,False,591
+emb_pooled_358,"Pooled embedding dim 358 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04590062683381646,False,592
+emb_sent_mean_371,"Per-sentence embedding dim 371, mean over sentences",0.04588633299939415,False,593
+emb_sent_mean_182,"Per-sentence embedding dim 182, mean over sentences",0.04586371024848468,False,594
+emb_sent_mean_372,"Per-sentence embedding dim 372, mean over sentences",0.04584275713825159,False,595
+emb_sent_mean_268,"Per-sentence embedding dim 268, mean over sentences",0.045821090127395436,False,596
+emb_sent_max_134,"Per-sentence embedding dim 134, max over sentences",0.04578986001524088,False,597
+emb_sent_mean_317,"Per-sentence embedding dim 317, mean over sentences",0.04567736869865202,False,598
+emb_sent_mean_087,"Per-sentence embedding dim 87, mean over sentences",0.045575379805661065,False,599
+emb_sent_mean_080,"Per-sentence embedding dim 80, mean over sentences",0.045567699811042583,False,600
+emb_pooled_292,"Pooled embedding dim 292 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.045556921242857484,False,601
+emb_sent_mean_075,"Per-sentence embedding dim 75, mean over sentences",0.04553442836077659,False,602
+emb_sent_max_114,"Per-sentence embedding dim 114, max over sentences",0.04527430296491053,False,603
+emb_sent_mean_196,"Per-sentence embedding dim 196, mean over sentences",0.04525133231874312,False,604
+emb_pooled_051,"Pooled embedding dim 51 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.045249050520717926,False,605
+emb_sent_max_168,"Per-sentence embedding dim 168, max over sentences",0.04518579324877159,False,606
+emb_sent_max_293,"Per-sentence embedding dim 293, max over sentences",0.04511104155657586,False,607
+emb_sent_mean_021,"Per-sentence embedding dim 21, mean over sentences",0.0449638639371277,False,608
+emb_sent_mean_028,"Per-sentence embedding dim 28, mean over sentences",0.04495374501717686,False,609
+emb_pooled_361,"Pooled embedding dim 361 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04492186303230872,False,610
+emb_sent_mean_324,"Per-sentence embedding dim 324, mean over sentences",0.04474853926628697,False,611
+emb_sent_max_286,"Per-sentence embedding dim 286, max over sentences",0.044719811726499525,False,612
+emb_pooled_168,"Pooled embedding dim 168 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04470351761660796,False,613
+emb_sent_max_329,"Per-sentence embedding dim 329, max over sentences",0.044643244791731984,False,614
+emb_pooled_096,"Pooled embedding dim 96 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.044588013328590304,False,615
+emb_sent_max_203,"Per-sentence embedding dim 203, max over sentences",0.04450166116584198,False,616
+emb_sent_max_383,"Per-sentence embedding dim 383, max over sentences",0.0444793360849558,False,617
+emb_sent_mean_293,"Per-sentence embedding dim 293, mean over sentences",0.04442070330399783,False,618
+emb_sent_max_060,"Per-sentence embedding dim 60, max over sentences",0.04430438523313551,False,619
+emb_sent_max_281,"Per-sentence embedding dim 281, max over sentences",0.044242827991400446,False,620
+emb_sent_max_046,"Per-sentence embedding dim 46, max over sentences",0.04398695910945305,False,621
+emb_sent_mean_241,"Per-sentence embedding dim 241, mean over sentences",0.04397057134957372,False,622
+emb_sent_max_382,"Per-sentence embedding dim 382, max over sentences",0.04394468630842718,False,623
+emb_sent_mean_303,"Per-sentence embedding dim 303, mean over sentences",0.043898777929439525,False,624
+emb_sent_mean_078,"Per-sentence embedding dim 78, mean over sentences",0.04367123605794321,False,625
+emb_sent_max_289,"Per-sentence embedding dim 289, max over sentences",0.04358469931438691,False,626
+emb_sent_max_102,"Per-sentence embedding dim 102, max over sentences",0.04355056214899511,False,627
+emb_sent_max_045,"Per-sentence embedding dim 45, max over sentences",0.04350608856031846,False,628
+emb_sent_max_179,"Per-sentence embedding dim 179, max over sentences",0.04347006898768058,False,629
+emb_sent_mean_309,"Per-sentence embedding dim 309, mean over sentences",0.04346655734252014,False,630
+emb_sent_mean_015,"Per-sentence embedding dim 15, mean over sentences",0.0434437595870838,False,631
+emb_sent_max_071,"Per-sentence embedding dim 71, max over sentences",0.04340496546023731,False,632
+emb_sent_mean_221,"Per-sentence embedding dim 221, mean over sentences",0.04334957787148541,False,633
+emb_sent_mean_298,"Per-sentence embedding dim 298, mean over sentences",0.04329493148328867,False,634
+emb_sent_mean_250,"Per-sentence embedding dim 250, mean over sentences",0.04329345845766408,False,635
+emb_sent_mean_085,"Per-sentence embedding dim 85, mean over sentences",0.043253795906813775,False,636
+emb_pooled_346,"Pooled embedding dim 346 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04324145067661345,False,637
+emb_sent_mean_246,"Per-sentence embedding dim 246, mean over sentences",0.04321341839150161,False,638
+emb_sent_mean_187,"Per-sentence embedding dim 187, mean over sentences",0.04318374691634297,False,639
+num_special_chars,"num_special_chars (shipped with the dataset, not computed here)",0.04318136002702344,False,640
+emb_sent_mean_058,"Per-sentence embedding dim 58, mean over sentences",0.043180789646489526,False,641
+emb_sent_max_067,"Per-sentence embedding dim 67, max over sentences",0.043093784281862835,False,642
+emb_sent_mean_102,"Per-sentence embedding dim 102, mean over sentences",0.04305873843140651,False,643
+emb_sent_mean_333,"Per-sentence embedding dim 333, mean over sentences",0.0430270682648346,False,644
+emb_sent_max_249,"Per-sentence embedding dim 249, max over sentences",0.043003870576067804,False,645
+emb_sent_mean_282,"Per-sentence embedding dim 282, mean over sentences",0.042993240481759454,False,646
+emb_pooled_090,"Pooled embedding dim 90 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.042908600946852005,False,647
+emb_sent_mean_239,"Per-sentence embedding dim 239, mean over sentences",0.04284599903113229,False,648
+emb_sent_mean_131,"Per-sentence embedding dim 131, mean over sentences",0.04283317708472767,False,649
+emb_pooled_111,"Pooled embedding dim 111 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04279612410434375,False,650
+emb_pooled_129,"Pooled embedding dim 129 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04269054365915803,False,651
+emb_sent_mean_174,"Per-sentence embedding dim 174, mean over sentences",0.04267843534417182,False,652
+emb_sent_mean_200,"Per-sentence embedding dim 200, mean over sentences",0.04267043070028853,False,653
+emb_sent_mean_068,"Per-sentence embedding dim 68, mean over sentences",0.04264568136074898,False,654
+emb_sent_mean_091,"Per-sentence embedding dim 91, mean over sentences",0.042625193748456525,False,655
+emb_pooled_334,"Pooled embedding dim 334 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0425766686774689,False,656
+emb_sent_mean_038,"Per-sentence embedding dim 38, mean over sentences",0.042542412857804024,False,657
+emb_pooled_121,"Pooled embedding dim 121 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04250834923330071,False,658
+emb_pooled_158,"Pooled embedding dim 158 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.042351916680180235,False,659
+emb_sent_max_355,"Per-sentence embedding dim 355, max over sentences",0.042277337222772715,False,660
+emb_sent_max_072,"Per-sentence embedding dim 72, max over sentences",0.042246395588975805,False,661
+emb_sent_mean_040,"Per-sentence embedding dim 40, mean over sentences",0.04213689425072209,False,662
+emb_sent_mean_139,"Per-sentence embedding dim 139, mean over sentences",0.042110942976101295,False,663
+emb_sent_max_153,"Per-sentence embedding dim 153, max over sentences",0.04199338191492963,False,664
+emb_sent_max_111,"Per-sentence embedding dim 111, max over sentences",0.04196572951633204,False,665
+emb_sent_mean_211,"Per-sentence embedding dim 211, mean over sentences",0.04195489895041149,False,666
+emb_sent_mean_257,"Per-sentence embedding dim 257, mean over sentences",0.0419430403655614,False,667
+emb_sent_mean_271,"Per-sentence embedding dim 271, mean over sentences",0.04192594284682105,False,668
+emb_pooled_124,"Pooled embedding dim 124 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04188562204483981,False,669
+emb_sent_mean_012,"Per-sentence embedding dim 12, mean over sentences",0.04183220210777128,False,670
+emb_pooled_001,"Pooled embedding dim 1 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04181577220275745,False,671
+emb_sent_mean_194,"Per-sentence embedding dim 194, mean over sentences",0.04175150838400832,False,672
+emb_pooled_302,"Pooled embedding dim 302 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04167772189931629,False,673
+emb_sent_mean_378,"Per-sentence embedding dim 378, mean over sentences",0.04160156825409267,False,674
+emb_pooled_298,"Pooled embedding dim 298 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04149501959149182,False,675
+emb_pooled_130,"Pooled embedding dim 130 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04143214154991126,False,676
+emb_sent_mean_053,"Per-sentence embedding dim 53, mean over sentences",0.04143211668618596,False,677
+emb_sent_mean_116,"Per-sentence embedding dim 116, mean over sentences",0.041409388419699766,False,678
+emb_sent_max_213,"Per-sentence embedding dim 213, max over sentences",0.04133641168094826,False,679
+emb_sent_mean_229,"Per-sentence embedding dim 229, mean over sentences",0.04125787215762022,False,680
+emb_sent_mean_055,"Per-sentence embedding dim 55, mean over sentences",0.04124563388177771,False,681
+emb_sent_max_262,"Per-sentence embedding dim 262, max over sentences",0.04124317754170015,False,682
+emb_sent_max_117,"Per-sentence embedding dim 117, max over sentences",0.04112132482749198,False,683
+emb_sent_max_106,"Per-sentence embedding dim 106, max over sentences",0.041083415766790754,False,684
+emb_sent_mean_367,"Per-sentence embedding dim 367, mean over sentences",0.0410527931284248,False,685
+emb_sent_max_085,"Per-sentence embedding dim 85, max over sentences",0.04097932916583247,False,686
+emb_sent_max_181,"Per-sentence embedding dim 181, max over sentences",0.040975517280255946,False,687
+emb_sent_mean_215,"Per-sentence embedding dim 215, mean over sentences",0.04083931035385957,False,688
+emb_sent_max_152,"Per-sentence embedding dim 152, max over sentences",0.040802930493717415,False,689
+emb_sent_mean_037,"Per-sentence embedding dim 37, mean over sentences",0.04080144460777868,False,690
+emb_pooled_190,"Pooled embedding dim 190 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04079058952113179,False,691
+emb_sent_max_271,"Per-sentence embedding dim 271, max over sentences",0.04076021153253473,False,692
+emb_sent_mean_202,"Per-sentence embedding dim 202, mean over sentences",0.0407129205955683,False,693
+emb_sent_mean_277,"Per-sentence embedding dim 277, mean over sentences",0.040671214758893015,False,694
+emb_sent_max_022,"Per-sentence embedding dim 22, max over sentences",0.040633596376268954,False,695
+emb_sent_max_360,"Per-sentence embedding dim 360, max over sentences",0.040628840890531315,False,696
+emb_sent_mean_204,"Per-sentence embedding dim 204, mean over sentences",0.04049719162364651,False,697
+emb_sent_mean_376,"Per-sentence embedding dim 376, mean over sentences",0.04036617048638291,False,698
+emb_sent_mean_100,"Per-sentence embedding dim 100, mean over sentences",0.040353297613114236,False,699
+emb_sent_mean_285,"Per-sentence embedding dim 285, mean over sentences",0.04033002724504975,False,700
+emb_sent_max_330,"Per-sentence embedding dim 330, max over sentences",0.04031978933489544,False,701
+emb_pooled_046,"Pooled embedding dim 46 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04019132869487052,False,702
+emb_sent_max_184,"Per-sentence embedding dim 184, max over sentences",0.04018019189510724,False,703
+emb_sent_mean_151,"Per-sentence embedding dim 151, mean over sentences",0.04017588418337814,False,704
+emb_sent_max_121,"Per-sentence embedding dim 121, max over sentences",0.04017056340706926,False,705
+emb_sent_mean_364,"Per-sentence embedding dim 364, mean over sentences",0.04007192327398279,False,706
+emb_sent_max_063,"Per-sentence embedding dim 63, max over sentences",0.0400527554691652,False,707
+emb_sent_max_347,"Per-sentence embedding dim 347, max over sentences",0.04003704731556956,False,708
+emb_pooled_106,"Pooled embedding dim 106 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.04002836535329024,False,709
+emb_sent_mean_379,"Per-sentence embedding dim 379, mean over sentences",0.040027652432539806,False,710
+emb_sent_max_198,"Per-sentence embedding dim 198, max over sentences",0.03996594648241869,False,711
+emb_sent_mean_104,"Per-sentence embedding dim 104, mean over sentences",0.039951270705958386,False,712
+emb_sent_mean_373,"Per-sentence embedding dim 373, mean over sentences",0.039835644105500556,False,713
+emb_sent_mean_342,"Per-sentence embedding dim 342, mean over sentences",0.03979541879266124,False,714
+emb_sent_mean_328,"Per-sentence embedding dim 328, mean over sentences",0.03979330255065738,False,715
+emb_pooled_330,"Pooled embedding dim 330 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03978890960438308,False,716
+emb_sent_max_139,"Per-sentence embedding dim 139, max over sentences",0.03978157739260002,False,717
+emb_sent_mean_046,"Per-sentence embedding dim 46, mean over sentences",0.03975213756760043,False,718
+emb_sent_mean_216,"Per-sentence embedding dim 216, mean over sentences",0.039693172909969654,False,719
+emb_sent_mean_163,"Per-sentence embedding dim 163, mean over sentences",0.03966022468771557,False,720
+emb_sent_mean_363,"Per-sentence embedding dim 363, mean over sentences",0.03941471618545922,False,721
+emb_sent_mean_024,"Per-sentence embedding dim 24, mean over sentences",0.03929492211404506,False,722
+emb_sent_mean_369,"Per-sentence embedding dim 369, mean over sentences",0.03921769583896628,False,723
+emb_sent_max_307,"Per-sentence embedding dim 307, max over sentences",0.0392003789862545,False,724
+emb_sent_max_297,"Per-sentence embedding dim 297, max over sentences",0.03915790513933359,False,725
+emb_sent_max_302,"Per-sentence embedding dim 302, max over sentences",0.03912002701173867,False,726
+emb_pooled_287,"Pooled embedding dim 287 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.039078358928602785,False,727
+emb_sent_mean_032,"Per-sentence embedding dim 32, mean over sentences",0.039060937798387485,False,728
+emb_pooled_154,"Pooled embedding dim 154 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.038980335340940364,False,729
+emb_sent_max_185,"Per-sentence embedding dim 185, max over sentences",0.03897180338562212,False,730
+emb_sent_mean_355,"Per-sentence embedding dim 355, mean over sentences",0.03890983858521535,False,731
+emb_sent_mean_380,"Per-sentence embedding dim 380, mean over sentences",0.0388534738050903,False,732
+emb_sent_max_303,"Per-sentence embedding dim 303, max over sentences",0.038838914933331026,False,733
+emb_sent_max_001,"Per-sentence embedding dim 1, max over sentences",0.038775920511604056,False,734
+emb_sent_max_173,"Per-sentence embedding dim 173, max over sentences",0.03856458297921206,False,735
+emb_sent_max_052,"Per-sentence embedding dim 52, max over sentences",0.038552656661482665,False,736
+emb_sent_mean_014,"Per-sentence embedding dim 14, mean over sentences",0.03850851471490424,False,737
+emb_sent_mean_061,"Per-sentence embedding dim 61, mean over sentences",0.0384801607037204,False,738
+emb_sent_mean_316,"Per-sentence embedding dim 316, mean over sentences",0.03838420994765013,False,739
+emb_sent_mean_299,"Per-sentence embedding dim 299, mean over sentences",0.03835490777489703,False,740
+emb_sent_mean_360,"Per-sentence embedding dim 360, mean over sentences",0.03829876016035216,False,741
+emb_sent_mean_253,"Per-sentence embedding dim 253, mean over sentences",0.03824062103707382,False,742
+emb_sent_max_189,"Per-sentence embedding dim 189, max over sentences",0.03820215351568246,False,743
+emb_pooled_215,"Pooled embedding dim 215 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03818178811784101,False,744
+emb_sent_mean_020,"Per-sentence embedding dim 20, mean over sentences",0.03809856136888978,False,745
+emb_sent_max_378,"Per-sentence embedding dim 378, max over sentences",0.03806159566846379,False,746
+emb_sent_mean_137,"Per-sentence embedding dim 137, mean over sentences",0.038031610290996554,False,747
+emb_sent_mean_095,"Per-sentence embedding dim 95, mean over sentences",0.03800544207485679,False,748
+emb_sent_mean_047,"Per-sentence embedding dim 47, mean over sentences",0.037898291253358085,False,749
+emb_sent_mean_269,"Per-sentence embedding dim 269, mean over sentences",0.0378379907932076,False,750
+emb_sent_max_284,"Per-sentence embedding dim 284, max over sentences",0.03775906109425975,False,751
+emb_pooled_280,"Pooled embedding dim 280 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03765504682204357,False,752
+emb_sent_mean_073,"Per-sentence embedding dim 73, mean over sentences",0.03758900222312089,False,753
+emb_sent_mean_054,"Per-sentence embedding dim 54, mean over sentences",0.03758084319921773,False,754
+emb_sent_max_107,"Per-sentence embedding dim 107, max over sentences",0.03753533007882481,False,755
+emb_sent_max_195,"Per-sentence embedding dim 195, max over sentences",0.03745902828073788,False,756
+emb_sent_mean_318,"Per-sentence embedding dim 318, mean over sentences",0.03745149730405162,False,757
+emb_pooled_104,"Pooled embedding dim 104 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.037380604944298845,False,758
+emb_sent_mean_126,"Per-sentence embedding dim 126, mean over sentences",0.0373430264423944,False,759
+emb_sent_mean_350,"Per-sentence embedding dim 350, mean over sentences",0.03733192138548569,False,760
+emb_sent_max_228,"Per-sentence embedding dim 228, max over sentences",0.03733181834168464,False,761
+emb_sent_mean_074,"Per-sentence embedding dim 74, mean over sentences",0.0373194265152601,False,762
+emb_sent_mean_050,"Per-sentence embedding dim 50, mean over sentences",0.03724312526658258,False,763
+emb_pooled_261,"Pooled embedding dim 261 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03718519442180179,False,764
+emb_sent_max_113,"Per-sentence embedding dim 113, max over sentences",0.03716877515677908,False,765
+emb_sent_max_143,"Per-sentence embedding dim 143, max over sentences",0.03706078697673032,False,766
+emb_sent_mean_141,"Per-sentence embedding dim 141, mean over sentences",0.037051407601654596,False,767
+emb_sent_mean_039,"Per-sentence embedding dim 39, mean over sentences",0.03703929517909854,False,768
+emb_pooled_082,"Pooled embedding dim 82 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03699257652420407,False,769
+emb_sent_mean_294,"Per-sentence embedding dim 294, mean over sentences",0.0369755699171912,False,770
+emb_sent_mean_082,"Per-sentence embedding dim 82, mean over sentences",0.03697375846427109,False,771
+emb_sent_mean_150,"Per-sentence embedding dim 150, mean over sentences",0.036957659542655286,False,772
+emb_sent_mean_349,"Per-sentence embedding dim 349, mean over sentences",0.03690994303819384,False,773
+emb_pooled_324,"Pooled embedding dim 324 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03688997724822318,False,774
+emb_sent_mean_256,"Per-sentence embedding dim 256, mean over sentences",0.03680007908780647,False,775
+emb_pooled_337,"Pooled embedding dim 337 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.036435331466626586,False,776
+emb_sent_max_006,"Per-sentence embedding dim 6, max over sentences",0.03642488279215561,False,777
+emb_sent_mean_181,"Per-sentence embedding dim 181, mean over sentences",0.03642367679493708,False,778
+emb_sent_mean_197,"Per-sentence embedding dim 197, mean over sentences",0.03640932884553383,False,779
+emb_sent_mean_334,"Per-sentence embedding dim 334, mean over sentences",0.03632636727332983,False,780
+emb_sent_max_231,"Per-sentence embedding dim 231, max over sentences",0.036308157972952504,False,781
+emb_pooled_283,"Pooled embedding dim 283 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.036277124994009924,False,782
+emb_pooled_091,"Pooled embedding dim 91 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03626482547723153,False,783
+emb_pooled_342,"Pooled embedding dim 342 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03624226702294653,False,784
+emb_sent_mean_035,"Per-sentence embedding dim 35, mean over sentences",0.03592615223640472,False,785
+emb_sent_mean_033,"Per-sentence embedding dim 33, mean over sentences",0.03584949284605399,False,786
+emb_sent_mean_217,"Per-sentence embedding dim 217, mean over sentences",0.035810637043687255,False,787
+emb_sent_mean_382,"Per-sentence embedding dim 382, mean over sentences",0.03580509688198674,False,788
+emb_sent_max_170,"Per-sentence embedding dim 170, max over sentences",0.035605021433165795,False,789
+emb_sent_mean_117,"Per-sentence embedding dim 117, mean over sentences",0.0355830190688482,False,790
+emb_sent_mean_067,"Per-sentence embedding dim 67, mean over sentences",0.03556375525332456,False,791
+emb_pooled_250,"Pooled embedding dim 250 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03553691258303138,False,792
+emb_pooled_068,"Pooled embedding dim 68 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03545538365828138,False,793
+emb_sent_max_348,"Per-sentence embedding dim 348, max over sentences",0.03543655485262809,False,794
+emb_pooled_245,"Pooled embedding dim 245 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03542199564729698,False,795
+emb_sent_mean_232,"Per-sentence embedding dim 232, mean over sentences",0.03530364869670999,False,796
+emb_sent_mean_228,"Per-sentence embedding dim 228, mean over sentences",0.03525059819582621,False,797
+emb_sent_mean_220,"Per-sentence embedding dim 220, mean over sentences",0.03524411772531355,False,798
+emb_pooled_211,"Pooled embedding dim 211 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03517612942778925,False,799
+emb_sent_mean_092,"Per-sentence embedding dim 92, mean over sentences",0.035146071317059935,False,800
+emb_sent_mean_072,"Per-sentence embedding dim 72, mean over sentences",0.03509717774675192,False,801
+emb_sent_mean_034,"Per-sentence embedding dim 34, mean over sentences",0.035064163381334,False,802
+emb_sent_mean_345,"Per-sentence embedding dim 345, mean over sentences",0.03504471493219263,False,803
+emb_sent_mean_152,"Per-sentence embedding dim 152, mean over sentences",0.03502813310694419,False,804
+emb_sent_max_283,"Per-sentence embedding dim 283, max over sentences",0.03500926022525652,False,805
+emb_sent_mean_134,"Per-sentence embedding dim 134, mean over sentences",0.034994011395538926,False,806
+emb_pooled_126,"Pooled embedding dim 126 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03493544906671442,False,807
+emb_sent_max_090,"Per-sentence embedding dim 90, max over sentences",0.03485467843743262,False,808
+emb_pooled_074,"Pooled embedding dim 74 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03483985390319999,False,809
+emb_sent_max_142,"Per-sentence embedding dim 142, max over sentences",0.034649498267171897,False,810
+emb_pooled_216,"Pooled embedding dim 216 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.034612875558098555,False,811
+emb_pooled_114,"Pooled embedding dim 114 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03460435949848506,False,812
+emb_sent_max_342,"Per-sentence embedding dim 342, max over sentences",0.03460138402694479,False,813
+emb_sent_max_175,"Per-sentence embedding dim 175, max over sentences",0.034595560001092096,False,814
+emb_pooled_318,"Pooled embedding dim 318 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03450713054040788,False,815
+emb_sent_mean_260,"Per-sentence embedding dim 260, mean over sentences",0.03446469171679922,False,816
+emb_pooled_366,"Pooled embedding dim 366 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03443950060187406,False,817
+emb_sent_mean_148,"Per-sentence embedding dim 148, mean over sentences",0.03439733369846021,False,818
+emb_sent_max_110,"Per-sentence embedding dim 110, max over sentences",0.03436303727642942,False,819
+emb_sent_max_024,"Per-sentence embedding dim 24, max over sentences",0.034316097720460625,False,820
+emb_sent_mean_258,"Per-sentence embedding dim 258, mean over sentences",0.03413636853960478,False,821
+emb_sent_max_047,"Per-sentence embedding dim 47, max over sentences",0.034109800850532945,False,822
+emb_sent_mean_146,"Per-sentence embedding dim 146, mean over sentences",0.03407046097019517,False,823
+emb_sent_mean_135,"Per-sentence embedding dim 135, mean over sentences",0.03403805847411778,False,824
+emb_pooled_288,"Pooled embedding dim 288 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03396531051665086,False,825
+emb_sent_mean_280,"Per-sentence embedding dim 280, mean over sentences",0.03396310301923666,False,826
+emb_sent_max_205,"Per-sentence embedding dim 205, max over sentences",0.03393845787826466,False,827
+emb_sent_max_364,"Per-sentence embedding dim 364, max over sentences",0.033841988331192674,False,828
+emb_pooled_177,"Pooled embedding dim 177 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03376499962704882,False,829
+emb_sent_max_126,"Per-sentence embedding dim 126, max over sentences",0.03375168452298505,False,830
+emb_sent_max_376,"Per-sentence embedding dim 376, max over sentences",0.03374166762923414,False,831
+emb_sent_mean_083,"Per-sentence embedding dim 83, mean over sentences",0.03363658458753216,False,832
+emb_sent_mean_097,"Per-sentence embedding dim 97, mean over sentences",0.0336292038469983,False,833
+emb_pooled_248,"Pooled embedding dim 248 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03362033531424968,False,834
+emb_sent_mean_381,"Per-sentence embedding dim 381, mean over sentences",0.03356577908828884,False,835
+emb_sent_max_076,"Per-sentence embedding dim 76, max over sentences",0.03336541952837235,False,836
+emb_sent_max_108,"Per-sentence embedding dim 108, max over sentences",0.033226688869500975,False,837
+emb_pooled_174,"Pooled embedding dim 174 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03303293805549723,False,838
+emb_pooled_005,"Pooled embedding dim 5 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.032954717435635494,False,839
+emb_sent_max_109,"Per-sentence embedding dim 109, max over sentences",0.03292249427264604,False,840
+emb_sent_mean_177,"Per-sentence embedding dim 177, mean over sentences",0.03285955893903747,False,841
+emb_sent_mean_335,"Per-sentence embedding dim 335, mean over sentences",0.03275261670488616,False,842
+emb_sent_mean_122,"Per-sentence embedding dim 122, mean over sentences",0.032742436302679145,False,843
+emb_sent_max_100,"Per-sentence embedding dim 100, max over sentences",0.032720433615434086,False,844
+emb_sent_max_267,"Per-sentence embedding dim 267, max over sentences",0.03266157121211233,False,845
+emb_pooled_254,"Pooled embedding dim 254 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.032649288821462896,False,846
+emb_pooled_229,"Pooled embedding dim 229 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03250627348892321,False,847
+emb_sent_mean_344,"Per-sentence embedding dim 344, mean over sentences",0.0324383220818949,False,848
+emb_sent_max_039,"Per-sentence embedding dim 39, max over sentences",0.032421678575071944,False,849
+emb_sent_mean_188,"Per-sentence embedding dim 188, mean over sentences",0.03236427735612013,False,850
+emb_sent_mean_322,"Per-sentence embedding dim 322, mean over sentences",0.03235064011880562,False,851
+emb_pooled_040,"Pooled embedding dim 40 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03230713148966036,False,852
+emb_sent_max_058,"Per-sentence embedding dim 58, max over sentences",0.03228058967636782,False,853
+emb_sent_mean_296,"Per-sentence embedding dim 296, mean over sentences",0.03221525942691139,False,854
+emb_sent_max_315,"Per-sentence embedding dim 315, max over sentences",0.03205815210852503,False,855
+emb_pooled_166,"Pooled embedding dim 166 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0320402677747631,False,856
+emb_sent_mean_274,"Per-sentence embedding dim 274, mean over sentences",0.03159189569521459,False,857
+emb_sent_max_031,"Per-sentence embedding dim 31, max over sentences",0.03158513076007674,False,858
+emb_sent_mean_209,"Per-sentence embedding dim 209, mean over sentences",0.03158431786585103,False,859
+emb_pooled_354,"Pooled embedding dim 354 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03134811142121663,False,860
+emb_sent_mean_155,"Per-sentence embedding dim 155, mean over sentences",0.03119063163688729,False,861
+emb_pooled_277,"Pooled embedding dim 277 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.031114635610459462,False,862
+emb_sent_mean_112,"Per-sentence embedding dim 112, mean over sentences",0.031106716553963132,False,863
+emb_sent_max_206,"Per-sentence embedding dim 206, max over sentences",0.03109539418320928,False,864
+emb_sent_max_239,"Per-sentence embedding dim 239, max over sentences",0.03093143131198639,False,865
+emb_pooled_134,"Pooled embedding dim 134 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.030905621900745306,False,866
+emb_sent_max_144,"Per-sentence embedding dim 144, max over sentences",0.030884411796326283,False,867
+emb_sent_max_018,"Per-sentence embedding dim 18, max over sentences",0.030811414378181468,False,868
+emb_pooled_107,"Pooled embedding dim 107 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.030713016184272135,False,869
+emb_sent_mean_185,"Per-sentence embedding dim 185, mean over sentences",0.030619226359173357,False,870
+emb_sent_max_242,"Per-sentence embedding dim 242, max over sentences",0.030580738118997974,False,871
+emb_sent_max_253,"Per-sentence embedding dim 253, max over sentences",0.03055710201751305,False,872
+emb_pooled_103,"Pooled embedding dim 103 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03049634266508372,False,873
+emb_sent_mean_305,"Per-sentence embedding dim 305, mean over sentences",0.030330919289632607,False,874
+emb_sent_mean_313,"Per-sentence embedding dim 313, mean over sentences",0.03028907567602923,False,875
+emb_sent_mean_301,"Per-sentence embedding dim 301, mean over sentences",0.03022251884529492,False,876
+emb_pooled_080,"Pooled embedding dim 80 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.030210010207011972,False,877
+emb_sent_mean_017,"Per-sentence embedding dim 17, mean over sentences",0.030152504890485154,False,878
+emb_pooled_034,"Pooled embedding dim 34 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.03014206361543792,False,879
+emb_sent_mean_354,"Per-sentence embedding dim 354, mean over sentences",0.030135838399050652,False,880
+emb_sent_mean_312,"Per-sentence embedding dim 312, mean over sentences",0.03008667380994412,False,881
+emb_sent_max_178,"Per-sentence embedding dim 178, max over sentences",0.03006255343236308,False,882
+emb_sent_max_098,"Per-sentence embedding dim 98, max over sentences",0.03003030883084401,False,883
+emb_sent_mean_173,"Per-sentence embedding dim 173, mean over sentences",0.030005242477540328,False,884
+emb_sent_max_274,"Per-sentence embedding dim 274, max over sentences",0.029981395476613937,False,885
+emb_pooled_239,"Pooled embedding dim 239 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02992217848219303,False,886
+emb_sent_mean_320,"Per-sentence embedding dim 320, mean over sentences",0.029917650995987533,False,887
+emb_pooled_021,"Pooled embedding dim 21 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02989938487290722,False,888
+emb_pooled_069,"Pooled embedding dim 69 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02982542564588675,False,889
+emb_sent_max_374,"Per-sentence embedding dim 374, max over sentences",0.029766931663469,False,890
+emb_pooled_044,"Pooled embedding dim 44 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.029610201408297954,False,891
+emb_pooled_365,"Pooled embedding dim 365 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02953128351287626,False,892
+emb_pooled_064,"Pooled embedding dim 64 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02952837256580132,False,893
+emb_sent_max_149,"Per-sentence embedding dim 149, max over sentences",0.029475682333079067,False,894
+emb_pooled_266,"Pooled embedding dim 266 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02947366867727741,False,895
+emb_pooled_374,"Pooled embedding dim 374 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.029297867464237015,False,896
+emb_sent_mean_013,"Per-sentence embedding dim 13, mean over sentences",0.029187027950169142,False,897
+emb_pooled_314,"Pooled embedding dim 314 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02887691402239545,False,898
+emb_pooled_222,"Pooled embedding dim 222 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.028819498246027475,False,899
+emb_pooled_153,"Pooled embedding dim 153 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02879901456045486,False,900
+emb_pooled_260,"Pooled embedding dim 260 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.028734402099298784,False,901
+emb_sent_max_227,"Per-sentence embedding dim 227, max over sentences",0.028626832025285598,False,902
+emb_sent_max_010,"Per-sentence embedding dim 10, max over sentences",0.028595280594873262,False,903
+emb_pooled_372,"Pooled embedding dim 372 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.028558467439327107,False,904
+emb_sent_mean_331,"Per-sentence embedding dim 331, mean over sentences",0.02852871058740769,False,905
+emb_sent_max_279,"Per-sentence embedding dim 279, max over sentences",0.0285159620151596,False,906
+emb_sent_mean_002,"Per-sentence embedding dim 2, mean over sentences",0.02840153995863348,False,907
+emb_sent_mean_193,"Per-sentence embedding dim 193, mean over sentences",0.02834548888010069,False,908
+emb_pooled_304,"Pooled embedding dim 304 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02820142874582965,False,909
+emb_sent_max_141,"Per-sentence embedding dim 141, max over sentences",0.02818241211715078,False,910
+emb_sent_mean_249,"Per-sentence embedding dim 249, mean over sentences",0.028122995676617357,False,911
+emb_pooled_037,"Pooled embedding dim 37 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02797716490315283,False,912
+emb_sent_max_238,"Per-sentence embedding dim 238, max over sentences",0.027911179041649525,False,913
+emb_sent_max_216,"Per-sentence embedding dim 216, max over sentences",0.027873502198255462,False,914
+emb_sent_max_120,"Per-sentence embedding dim 120, max over sentences",0.027832855714149396,False,915
+emotion_anger,Emotion probability: anger (emotion-english-distilroberta-base),0.027808436714210405,False,916
+emb_sent_max_026,"Per-sentence embedding dim 26, max over sentences",0.027775872325740192,False,917
+emb_pooled_273,"Pooled embedding dim 273 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02771255556417218,False,918
+emb_sent_mean_199,"Per-sentence embedding dim 199, mean over sentences",0.027651759293668476,False,919
+emb_sent_max_222,"Per-sentence embedding dim 222, max over sentences",0.027432428442469625,False,920
+emb_pooled_265,"Pooled embedding dim 265 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.027282552493209433,False,921
+emb_pooled_220,"Pooled embedding dim 220 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02725904031583104,False,922
+emb_pooled_178,"Pooled embedding dim 178 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.026989606718459846,False,923
+emb_pooled_378,"Pooled embedding dim 378 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02692651181767447,False,924
+emb_sent_mean_284,"Per-sentence embedding dim 284, mean over sentences",0.02684000077165738,False,925
+emb_pooled_087,"Pooled embedding dim 87 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.026742452279092,False,926
+emb_pooled_251,"Pooled embedding dim 251 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02649228723253705,False,927
+emb_sent_mean_295,"Per-sentence embedding dim 295, mean over sentences",0.02645193526277101,False,928
+emb_sent_max_264,"Per-sentence embedding dim 264, max over sentences",0.0263925028809191,False,929
+emb_sent_mean_213,"Per-sentence embedding dim 213, mean over sentences",0.0261614044045686,False,930
+emb_pooled_359,"Pooled embedding dim 359 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02611159576327937,False,931
+emb_pooled_301,"Pooled embedding dim 301 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.026047479250693506,False,932
+emb_sent_mean_332,"Per-sentence embedding dim 332, mean over sentences",0.02598204408363891,False,933
+emb_pooled_089,"Pooled embedding dim 89 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02580089812548314,False,934
+emb_sent_mean_059,"Per-sentence embedding dim 59, mean over sentences",0.025753824201971476,False,935
+emb_sent_max_070,"Per-sentence embedding dim 70, max over sentences",0.025743957894523994,False,936
+emb_sent_max_129,"Per-sentence embedding dim 129, max over sentences",0.025422649990469726,False,937
+emb_sent_max_157,"Per-sentence embedding dim 157, max over sentences",0.025422430283978503,False,938
+emb_pooled_305,"Pooled embedding dim 305 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.025394965367776745,False,939
+emb_pooled_191,"Pooled embedding dim 191 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.025394705861169875,False,940
+emb_pooled_268,"Pooled embedding dim 268 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02538972476494772,False,941
+emb_sent_mean_323,"Per-sentence embedding dim 323, mean over sentences",0.025235845905290155,False,942
+emb_pooled_316,"Pooled embedding dim 316 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.025234401207789414,False,943
+emb_pooled_116,"Pooled embedding dim 116 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02522556869586534,False,944
+emb_pooled_163,"Pooled embedding dim 163 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02521852359951282,False,945
+emb_pooled_312,"Pooled embedding dim 312 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02521582495280672,False,946
+emb_pooled_207,"Pooled embedding dim 207 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02515705795948886,False,947
+emb_sent_max_036,"Per-sentence embedding dim 36, max over sentences",0.025138167641129527,False,948
+emb_sent_mean_235,"Per-sentence embedding dim 235, mean over sentences",0.02509117634900937,False,949
+emb_pooled_331,"Pooled embedding dim 331 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.024900719667997784,False,950
+emb_pooled_383,"Pooled embedding dim 383 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.024898962095237565,False,951
+emb_pooled_058,"Pooled embedding dim 58 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.024859565485454205,False,952
+emb_sent_max_341,"Per-sentence embedding dim 341, max over sentences",0.024807300389242393,False,953
+emb_pooled_208,"Pooled embedding dim 208 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.024625855964565346,False,954
+emb_pooled_327,"Pooled embedding dim 327 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.024497866570245996,False,955
+emb_sent_max_299,"Per-sentence embedding dim 299, max over sentences",0.024388856489723665,False,956
+emb_sent_max_183,"Per-sentence embedding dim 183, max over sentences",0.024179703963411736,False,957
+emb_pooled_234,"Pooled embedding dim 234 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.024144520538853076,False,958
+emb_pooled_328,"Pooled embedding dim 328 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.024119572511180465,False,959
+emb_pooled_059,"Pooled embedding dim 59 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02409526498429182,False,960
+emb_pooled_052,"Pooled embedding dim 52 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02409104343518287,False,961
+emb_pooled_269,"Pooled embedding dim 269 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02407607936840339,False,962
+emb_sent_mean_326,"Per-sentence embedding dim 326, mean over sentences",0.024073736942271662,False,963
+emb_pooled_112,"Pooled embedding dim 112 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.024057522140749743,False,964
+emb_pooled_150,"Pooled embedding dim 150 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02396529456611196,False,965
+emb_pooled_246,"Pooled embedding dim 246 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.023944472443106157,False,966
+emb_sent_max_182,"Per-sentence embedding dim 182, max over sentences",0.023755597329544464,False,967
+emb_pooled_160,"Pooled embedding dim 160 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.023736379215443026,False,968
+emb_sent_mean_201,"Per-sentence embedding dim 201, mean over sentences",0.023700789185862714,False,969
+emb_pooled_197,"Pooled embedding dim 197 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.023697710682366147,False,970
+emb_pooled_147,"Pooled embedding dim 147 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.023638311593922712,False,971
+emb_sent_mean_225,"Per-sentence embedding dim 225, mean over sentences",0.0236177824040098,False,972
+emb_sent_mean_145,"Per-sentence embedding dim 145, mean over sentences",0.02349359484394231,False,973
+emb_pooled_296,"Pooled embedding dim 296 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.023467684954499468,False,974
+emb_pooled_310,"Pooled embedding dim 310 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.023384213490301065,False,975
+emb_pooled_122,"Pooled embedding dim 122 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.023130866945035855,False,976
+emb_pooled_138,"Pooled embedding dim 138 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.023011625326552654,False,977
+emb_sent_mean_203,"Per-sentence embedding dim 203, mean over sentences",0.0229771395671321,False,978
+emb_pooled_281,"Pooled embedding dim 281 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02292085994548554,False,979
+emb_sent_mean_144,"Per-sentence embedding dim 144, mean over sentences",0.022796264274411726,False,980
+emb_sent_max_009,"Per-sentence embedding dim 9, max over sentences",0.02277804218223256,False,981
+emb_pooled_235,"Pooled embedding dim 235 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02269142386410472,False,982
+emb_pooled_225,"Pooled embedding dim 225 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.022636582705906072,False,983
+emb_pooled_329,"Pooled embedding dim 329 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.022615881127839188,False,984
+emb_sent_max_077,"Per-sentence embedding dim 77, max over sentences",0.022599532791005572,False,985
+emb_sent_max_257,"Per-sentence embedding dim 257, max over sentences",0.02256568612011378,False,986
+emb_sent_max_161,"Per-sentence embedding dim 161, max over sentences",0.022542949579496874,False,987
+emb_sent_max_240,"Per-sentence embedding dim 240, max over sentences",0.02244496634150961,False,988
+emb_pooled_271,"Pooled embedding dim 271 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02234053371994893,False,989
+emb_pooled_194,"Pooled embedding dim 194 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.022248563221543893,False,990
+emb_sent_mean_133,"Per-sentence embedding dim 133, mean over sentences",0.022090950044462154,False,991
+emb_pooled_048,"Pooled embedding dim 48 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.022062958789698328,False,992
+emb_sent_max_324,"Per-sentence embedding dim 324, max over sentences",0.021906584004261376,False,993
+emb_pooled_015,"Pooled embedding dim 15 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.021896992996443654,False,994
+emb_sent_max_229,"Per-sentence embedding dim 229, max over sentences",0.021893738229778137,False,995
+emb_pooled_017,"Pooled embedding dim 17 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02173814450748157,False,996
+emb_sent_mean_198,"Per-sentence embedding dim 198, mean over sentences",0.02163264761744399,False,997
+emb_sent_max_244,"Per-sentence embedding dim 244, max over sentences",0.02154037411489096,False,998
+emb_sent_mean_016,"Per-sentence embedding dim 16, mean over sentences",0.021237970517256066,False,999
+emb_pooled_139,"Pooled embedding dim 139 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.021170987399059094,False,1000
+emb_pooled_313,"Pooled embedding dim 313 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02115286852663667,False,1001
+emb_pooled_073,"Pooled embedding dim 73 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.020981327585481324,False,1002
+emb_pooled_275,"Pooled embedding dim 275 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02096034114137524,False,1003
+emb_sent_max_310,"Per-sentence embedding dim 310, max over sentences",0.02089528469378843,False,1004
+emb_sent_mean_291,"Per-sentence embedding dim 291, mean over sentences",0.020850272519757684,False,1005
+emb_sent_max_243,"Per-sentence embedding dim 243, max over sentences",0.02084378557441502,False,1006
+emb_pooled_355,"Pooled embedding dim 355 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.020774934522490796,False,1007
+emb_pooled_297,"Pooled embedding dim 297 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.020774802245019597,False,1008
+emb_pooled_077,"Pooled embedding dim 77 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02063992898176137,False,1009
+emb_sent_max_176,"Per-sentence embedding dim 176, max over sentences",0.020373279624242624,False,1010
+emb_sent_max_308,"Per-sentence embedding dim 308, max over sentences",0.0203206360082544,False,1011
+emb_sent_max_132,"Per-sentence embedding dim 132, max over sentences",0.020283631516367695,False,1012
+emb_pooled_020,"Pooled embedding dim 20 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.020253956240669613,False,1013
+emb_pooled_149,"Pooled embedding dim 149 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.02023431378159346,False,1014
+emb_pooled_120,"Pooled embedding dim 120 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.020136358121698006,False,1015
+emb_sent_max_049,"Per-sentence embedding dim 49, max over sentences",0.019900239265059128,False,1016
+emb_sent_max_096,"Per-sentence embedding dim 96, max over sentences",0.01976947947302765,False,1017
+emb_pooled_108,"Pooled embedding dim 108 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.019727655905614316,False,1018
+emb_sent_max_263,"Per-sentence embedding dim 263, max over sentences",0.019657071704103135,False,1019
+emb_pooled_362,"Pooled embedding dim 362 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01957517096316419,False,1020
+emb_sent_mean_219,"Per-sentence embedding dim 219, mean over sentences",0.01953543973448868,False,1021
+emb_pooled_023,"Pooled embedding dim 23 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.019441536963168193,False,1022
+emb_pooled_294,"Pooled embedding dim 294 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0193892778625111,False,1023
+emb_pooled_204,"Pooled embedding dim 204 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.019267824595158967,False,1024
+emb_sent_mean_103,"Per-sentence embedding dim 103, mean over sentences",0.01912742099281628,False,1025
+emb_pooled_257,"Pooled embedding dim 257 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.018979504752270948,False,1026
+emb_sent_max_314,"Per-sentence embedding dim 314, max over sentences",0.018976538106486807,False,1027
+emb_pooled_180,"Pooled embedding dim 180 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.018974725247902224,False,1028
+emb_pooled_333,"Pooled embedding dim 333 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.018971912438539462,False,1029
+emb_pooled_286,"Pooled embedding dim 286 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01892830157529435,False,1030
+emb_pooled_200,"Pooled embedding dim 200 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01891802295229672,False,1031
+emb_pooled_050,"Pooled embedding dim 50 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01886734374158827,False,1032
+emb_pooled_110,"Pooled embedding dim 110 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0188581098856746,False,1033
+emb_pooled_232,"Pooled embedding dim 232 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.018794924517641753,False,1034
+emb_pooled_259,"Pooled embedding dim 259 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.018759695467838178,False,1035
+emotion_disgust,Emotion probability: disgust (emotion-english-distilroberta-base),0.018496024749734108,False,1036
+emb_sent_max_027,"Per-sentence embedding dim 27, max over sentences",0.018464695704208278,False,1037
+emb_sent_max_351,"Per-sentence embedding dim 351, max over sentences",0.018359260065391236,False,1038
+emb_pooled_038,"Pooled embedding dim 38 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.018332013416312964,False,1039
+emb_sent_max_101,"Per-sentence embedding dim 101, max over sentences",0.018220583984406957,False,1040
+emb_pooled_272,"Pooled embedding dim 272 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.018103921824864866,False,1041
+emb_pooled_161,"Pooled embedding dim 161 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.018042797599755467,False,1042
+emb_pooled_326,"Pooled embedding dim 326 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01797825916218132,False,1043
+emb_sent_mean_140,"Per-sentence embedding dim 140, mean over sentences",0.01779270817591838,False,1044
+emb_pooled_043,"Pooled embedding dim 43 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.017724221488598868,False,1045
+emb_sent_max_214,"Per-sentence embedding dim 214, max over sentences",0.017705272745044187,False,1046
+emb_sent_max_156,"Per-sentence embedding dim 156, max over sentences",0.017611220142904838,False,1047
+emb_sent_max_167,"Per-sentence embedding dim 167, max over sentences",0.017543792651811607,False,1048
+emb_pooled_086,"Pooled embedding dim 86 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01718028961500684,False,1049
+emb_pooled_170,"Pooled embedding dim 170 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.017069904141536973,False,1050
+emb_pooled_300,"Pooled embedding dim 300 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.017020359460767853,False,1051
+emb_pooled_171,"Pooled embedding dim 171 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.016968572696407502,False,1052
+emb_pooled_164,"Pooled embedding dim 164 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.016810668214953584,False,1053
+emb_pooled_006,"Pooled embedding dim 6 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01679774720027849,False,1054
+emb_pooled_133,"Pooled embedding dim 133 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01673057035583092,False,1055
+emb_pooled_380,"Pooled embedding dim 380 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.016608708825854634,False,1056
+emb_pooled_181,"Pooled embedding dim 181 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.016508581644675058,False,1057
+emb_pooled_053,"Pooled embedding dim 53 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0163678443600217,False,1058
+emb_pooled_182,"Pooled embedding dim 182 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.016326725120491936,False,1059
+emb_pooled_078,"Pooled embedding dim 78 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.016175118503398256,False,1060
+emb_pooled_131,"Pooled embedding dim 131 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.016137414100300784,False,1061
+emb_pooled_115,"Pooled embedding dim 115 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.016122675927566554,False,1062
+emb_pooled_339,"Pooled embedding dim 339 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01611722747673472,False,1063
+emb_pooled_024,"Pooled embedding dim 24 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.015968001257930187,False,1064
+emb_pooled_117,"Pooled embedding dim 117 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.015892899756303258,False,1065
+emb_pooled_350,"Pooled embedding dim 350 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.015790605596544882,False,1066
+emb_pooled_307,"Pooled embedding dim 307 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.015746657919301743,False,1067
+emb_pooled_033,"Pooled embedding dim 33 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01569435290000465,False,1068
+emb_pooled_100,"Pooled embedding dim 100 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.015658994861625697,False,1069
+emb_pooled_221,"Pooled embedding dim 221 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.015403865011367923,False,1070
+emb_pooled_217,"Pooled embedding dim 217 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.015311907224385468,False,1071
+emb_pooled_309,"Pooled embedding dim 309 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.014916309363255387,False,1072
+emb_pooled_228,"Pooled embedding dim 228 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.014902400841768415,False,1073
+emb_pooled_151,"Pooled embedding dim 151 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.014684427715207615,False,1074
+emb_pooled_379,"Pooled embedding dim 379 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.014646439142875778,False,1075
+emb_pooled_360,"Pooled embedding dim 360 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.014339339578495203,False,1076
+emb_pooled_060,"Pooled embedding dim 60 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.014330457250582462,False,1077
+emb_pooled_291,"Pooled embedding dim 291 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.014225856971580075,False,1078
+emb_pooled_187,"Pooled embedding dim 187 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.014204481805123237,False,1079
+emb_sent_max_190,"Per-sentence embedding dim 190, max over sentences",0.014074396105268505,False,1080
+emb_pooled_032,"Pooled embedding dim 32 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.014056531466539735,False,1081
+emb_pooled_002,"Pooled embedding dim 2 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.013789909735327122,False,1082
+emb_sent_max_154,"Per-sentence embedding dim 154, max over sentences",0.01378857673597711,False,1083
+emb_pooled_012,"Pooled embedding dim 12 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.013710385099378719,False,1084
+emb_pooled_290,"Pooled embedding dim 290 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.013703321737600582,False,1085
+emb_pooled_083,"Pooled embedding dim 83 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.013611253589662198,False,1086
+emb_pooled_369,"Pooled embedding dim 369 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.013592686495327744,False,1087
+emb_pooled_295,"Pooled embedding dim 295 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.013581537576202063,False,1088
+emb_pooled_364,"Pooled embedding dim 364 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.013546678867288442,False,1089
+emb_pooled_343,"Pooled embedding dim 343 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.012990538178121902,False,1090
+emb_pooled_013,"Pooled embedding dim 13 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.012974690201973171,False,1091
+emb_pooled_140,"Pooled embedding dim 140 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.012818844705760224,False,1092
+emb_pooled_055,"Pooled embedding dim 55 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.012644245922209585,False,1093
+emb_pooled_095,"Pooled embedding dim 95 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.012612282887509707,False,1094
+emb_pooled_193,"Pooled embedding dim 193 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.012517915619437936,False,1095
+emb_pooled_029,"Pooled embedding dim 29 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.012346865720388678,False,1096
+emb_pooled_152,"Pooled embedding dim 152 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.012320038681773227,False,1097
+emb_sent_max_340,"Per-sentence embedding dim 340, max over sentences",0.012234872740198188,False,1098
+emb_pooled_196,"Pooled embedding dim 196 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.012180984444924103,False,1099
+emb_pooled_014,"Pooled embedding dim 14 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01208484061402082,False,1100
+emb_pooled_345,"Pooled embedding dim 345 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.011989774222974425,False,1101
+emb_pooled_098,"Pooled embedding dim 98 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.011916396124136419,False,1102
+emb_pooled_315,"Pooled embedding dim 315 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.011885111094185774,False,1103
+emb_pooled_011,"Pooled embedding dim 11 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.011881916074027554,False,1104
+emb_pooled_335,"Pooled embedding dim 335 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01185628413046702,False,1105
+emb_pooled_097,"Pooled embedding dim 97 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.011480164638593582,False,1106
+emb_pooled_253,"Pooled embedding dim 253 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01145372056068128,False,1107
+emb_pooled_146,"Pooled embedding dim 146 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.011453289271312617,False,1108
+emb_sent_mean_179,"Per-sentence embedding dim 179, mean over sentences",0.011420748727021035,False,1109
+emb_pooled_382,"Pooled embedding dim 382 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.011393925042412878,False,1110
+emb_pooled_303,"Pooled embedding dim 303 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.011145864816509032,False,1111
+emb_pooled_381,"Pooled embedding dim 381 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01109969339179484,False,1112
+emb_pooled_054,"Pooled embedding dim 54 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.011027871572145909,False,1113
+emb_pooled_322,"Pooled embedding dim 322 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.010937495802822106,False,1114
+emb_pooled_141,"Pooled embedding dim 141 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.010806089144287157,False,1115
+emb_pooled_320,"Pooled embedding dim 320 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.010730885660408696,False,1116
+emb_pooled_102,"Pooled embedding dim 102 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.010460205902916186,False,1117
+emb_sent_max_158,"Per-sentence embedding dim 158, max over sentences",0.010315323554094924,False,1118
+emb_pooled_317,"Pooled embedding dim 317 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.010307066984465152,False,1119
+emb_pooled_241,"Pooled embedding dim 241 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.010293588944404242,False,1120
+emb_pooled_092,"Pooled embedding dim 92 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.01026232333723165,False,1121
+emb_pooled_293,"Pooled embedding dim 293 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.010187342528230392,False,1122
+emb_pooled_213,"Pooled embedding dim 213 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.009973079180537692,False,1123
+emb_pooled_159,"Pooled embedding dim 159 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.00995957465607189,False,1124
+emb_pooled_028,"Pooled embedding dim 28 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.009801136683372569,False,1125
+emb_pooled_067,"Pooled embedding dim 67 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.009796423813909438,False,1126
+emb_pooled_035,"Pooled embedding dim 35 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.009574272259392114,False,1127
+emb_pooled_363,"Pooled embedding dim 363 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.009107380903065287,False,1128
+emb_pooled_299,"Pooled embedding dim 299 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.009035927520125497,False,1129
+emb_pooled_274,"Pooled embedding dim 274 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.008827982505747567,False,1130
+emb_pooled_137,"Pooled embedding dim 137 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.008590585091588832,False,1131
+emb_pooled_344,"Pooled embedding dim 344 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.008444535450637947,False,1132
+emb_pooled_039,"Pooled embedding dim 39 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.007934469737315375,False,1133
+emb_pooled_285,"Pooled embedding dim 285 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.007908112126280287,False,1134
+emb_pooled_323,"Pooled embedding dim 323 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.007581505227345353,False,1135
+emb_pooled_371,"Pooled embedding dim 371 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.007258957731545834,False,1136
+emb_pooled_042,"Pooled embedding dim 42 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.007133564825437588,False,1137
+emb_pooled_185,"Pooled embedding dim 185 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0068454910364597055,False,1138
+emb_pooled_349,"Pooled embedding dim 349 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.006492348309512508,False,1139
+emb_pooled_258,"Pooled embedding dim 258 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.006349046411390891,False,1140
+emb_pooled_148,"Pooled embedding dim 148 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.005797538759900078,False,1141
+emb_sent_max_162,"Per-sentence embedding dim 162, max over sentences",0.005542969466938441,False,1142
+emb_pooled_127,"Pooled embedding dim 127 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.005539243732103127,False,1143
+emb_pooled_367,"Pooled embedding dim 367 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.005456686244134978,False,1144
+emb_pooled_198,"Pooled embedding dim 198 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.00542305532658327,False,1145
+emb_pooled_332,"Pooled embedding dim 332 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.005371149922657192,False,1146
+emb_sent_max_127,"Per-sentence embedding dim 127, max over sentences",0.005290598946214864,False,1147
+emb_pooled_376,"Pooled embedding dim 376 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0050975741481851244,False,1148
+num_excess_punct,"num_excess_punct (shipped with the dataset, not computed here)",0.0050524604491184455,False,1149
+emb_pooled_179,"Pooled embedding dim 179 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.004686482232134193,False,1150
+emb_pooled_284,"Pooled embedding dim 284 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.004654800628307587,False,1151
+emb_pooled_072,"Pooled embedding dim 72 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0038911083262420654,False,1152
+emb_pooled_373,"Pooled embedding dim 373 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0038862305710192224,False,1153
+emb_pooled_085,"Pooled embedding dim 85 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.003756211195624637,False,1154
+emb_pooled_203,"Pooled embedding dim 203 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0034696211353311135,False,1155
+emb_pooled_173,"Pooled embedding dim 173 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.00326600093111562,False,1156
+num_urls,"num_urls (shipped with the dataset, not computed here)",0.002567747904425044,False,1157
+emb_pooled_249,"Pooled embedding dim 249 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0016359112773498552,False,1158
+emb_pooled_047,"Pooled embedding dim 47 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0016216245162281595,False,1159
+emb_pooled_155,"Pooled embedding dim 155 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0012333068838952244,False,1160
+emb_pooled_201,"Pooled embedding dim 201 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0012077108955987903,False,1161
+emb_pooled_199,"Pooled embedding dim 199 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.00010573417607018243,False,1162
+emb_pooled_016,"Pooled embedding dim 16 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0,False,1163
+emb_pooled_061,"Pooled embedding dim 61 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0,False,1164
+emb_pooled_109,"Pooled embedding dim 109 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0,False,1165
+emb_pooled_135,"Pooled embedding dim 135 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0,False,1166
+emb_pooled_144,"Pooled embedding dim 144 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0,False,1167
+emb_pooled_188,"Pooled embedding dim 188 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0,False,1168
+emb_pooled_219,"Pooled embedding dim 219 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0,False,1169
+emb_pooled_223,"Pooled embedding dim 223 (all-MiniLM-L6-v2, whole text, 256 tokens)",0.0,False,1170
+emb_sent_mean_127,"Per-sentence embedding dim 127, mean over sentences",0.0,False,1171
+emb_sent_mean_223,"Per-sentence embedding dim 223, mean over sentences",0.0,False,1172
+emb_sent_max_223,"Per-sentence embedding dim 223, max over sentences",0.0,False,1173
+num_emojis,"num_emojis (shipped with the dataset, not computed here)",0.0,False,1174

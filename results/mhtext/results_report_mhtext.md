@@ -75,6 +75,10 @@ PCA vs mutual-information selection to reach 8 quantum inputs: see Box 15 (P4) �
 
 Source: results/mhtext/phase2/manifest.json · results/mhtext/phase2/mi_by_family.csv
 
+![Figure 3.1](report_figures/fig_mhtext_mi_ranking.png)
+
+*Figure 3.1. Top 20 of 1,174 text features by mutual information with the 4-class label; hatching marks the feature family. Column names only; no post text. Source: results/mhtext/phase2/mi_scores_4class.csv*
+
 ## Box 4 — Privacy-Preserving Mechanisms
 
 **What this step does:** Applies the NSCH mechanisms with their NSCH settings: DP-SGD during training, Laplace local DP on the encoder inputs, federated training (Box 13); identifier scrubbing for text.
@@ -120,6 +124,10 @@ Best encodings on both datasets: angle and re-upload on PCA inputs; basis is wor
 
 Source: results/mhtext/phase4/binary/sweep_summary.csv
 
+![Figure 5.1](report_figures/fig_mhtext_encodings.png)
+
+*Figure 5.1. Encoding comparison on the binary Depression vs Suicidal view, 1,200 training rows, PCA inputs: ROC AUC per encoding at 4, 6 and 8 qubits (bars, hatched by qubit count) with SD error bars. Source: results/mhtext/phase4/binary/sweep_summary.csv*
+
 ## Box 6 — Quantum Model (Simulation)
 
 **What this step does:** Trains QSVM, VQC and hybrid QNN on the binary Depression vs Suicidal view, 1,200 rows per fold, 15 folds (exp2 method).
@@ -133,6 +141,10 @@ Source: results/mhtext/phase4/binary/sweep_summary.csv
 Four-class and three-class quantum views: deliberately not run (reason in results/mhtext/phase4/binary/phase4.md).
 
 Source: results/mhtext/phase4/binary/summary.csv
+
+![Figure 6.1](report_figures/fig_mhtext_qubit_pairs.png)
+
+*Figure 6.1. Qubit count, paired: change in ROC AUC from 4 to 6, 6 to 8 and 4 to 8 qubits for every quantum model x feature method x encoding cell, NSCH beside Mental Health Text (paired NB-t over the same folds, 95 % CI; filled marker = Holm p < 0.05). Backs pattern P3. Source: results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv*
 
 ## Box 7 — Hybrid Quantum-Classical Learning
 
@@ -248,6 +260,10 @@ Every table in Boxes 6 and 10 reports accuracy beside balanced accuracy, recall,
 
 Source: results/mhtext/phase3/summary.csv
 
+![Figure 11.1](report_figures/fig_mhtext_headline.png)
+
+*Figure 11.1. Every quantum and classical model on the same 1,200 training rows and the same inputs (binary Depression vs Suicidal view), sorted by ROC AUC; reference lines: length-only floor and the two classical ceilings. Source: results/mhtext/phase4/binary/summary.csv*
+
 ## Box 12 — Privacy Evaluation
 
 **What this step does:** Measures re-identification, membership inference and the utility cost of DP, beside NSCH.
@@ -271,6 +287,18 @@ Source: results/mhtext/phase3/summary.csv
 
 Source: results/mhtext/phase5/phase5.md · results/mhtext/phase5/reid/fragment_risk.csv · results/mhtext/phase5/reid/linkage.csv · results/mhtext/phase5/mia/summary.csv · results/reidentification/risk.csv · results/exp6-nsch2024-membership-inference-20261112-120934/summary.csv
 
+![Figure 12.1](report_figures/fig_mhtext_dp_utility.png)
+
+*Figure 12.1. Utility against privacy budget for DP-SGD, NSCH beside Mental Health Text, same arms and settings (exp3 method). Source: results/mhtext/phase7/nsch_reference/nsch_exp3_summary.csv (copy of results/exp3-nsch2024-privacy-utility-20261108-165618/summary.csv); results/mhtext/phase5/dp/summary.csv*
+
+![Figure 12.2](report_figures/fig_mhtext_reid_uniqueness.png)
+
+*Figure 12.2. Re-identification: share of posts singled out by a fragment of k consecutive words, against k; horizontal lines: share of NSCH adolescents unique on their quasi-identifiers, before and after k-anonymity. Source: results/mhtext/phase5/reid/fragment_risk.csv; results/mhtext/phase7/nsch_reference/nsch_reidentification_risk.csv (copy of results/reidentification/risk.csv)*
+
+![Figure 12.3](report_figures/fig_mhtext_linkage.png)
+
+*Figure 12.3. Linkage success against fragment length, without local DP, for three released forms of the same development posts. Cells under local DP that are suppressed (< 5 posts) are not plotted; the local-DP rows are in the table. Source: results/mhtext/phase5/reid/fragment_risk.csv; results/mhtext/phase5/reid/linkage.csv*
+
 ## Box 13 — Scalability Analysis (Simulation)
 
 **What this step does:** FedAvg with client DP-SGD (ε = 4) over 3, 5 and 10 SIMULATED clients (exp4 method).
@@ -286,6 +314,10 @@ Communication per FedAvg round: VQC 2.44 kB, LogReg 36.09 kB (mean over clients 
 
 Source: results/mhtext/phase6/fold_metrics.csv · results/exp4-nsch2024-federated-dp-20261108-170320/summary.csv · results/mhtext/phase6/phase6.md
 
+![Figure 13.1](report_figures/fig_mhtext_federated.png)
+
+*Figure 13.1. Federated learning with client DP-SGD (ε = 4): ROC AUC against the number of simulated clients for the VQC and LogReg, NSCH beside Mental Health Text. Pattern P5: the VQC falls as clients increase, LogReg stays flat, on both. Source: results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv (copy of results/exp4-nsch2024-federated-dp-20261108-170320/summary.csv); results/mhtext/phase6/summary.csv*
+
 ## Box 14 — Output & Visualization
 
 **What this step does:** Lists what this dataset adds to the visual outputs.
@@ -295,8 +327,25 @@ Source: results/mhtext/phase6/fold_metrics.csv · results/exp4-nsch2024-federate
 | Feature and attention visualization: attention | Not available | Not produced: the encoder is used frozen and attention maps were not extracted; available in principle, not built |
 | Quantum state visualization | Built (Box 5 of the NSCH report) | Not repeated: same circuits, different inputs |
 | Results tables | Built | Built (this report and the phase reports) |
+| Results figures | Built | Built: 9 figures in Boxes 3, 5, 6, 11, 12, 13, 15 (index below) |
 
-Source: results/mhtext/phase4/binary/phase4.md
+Figures are drawn by scripts/build_mhtext_figures.py from committed files only; nothing is recomputed there. Every plotted column passes a suppression guard that stops the build if any cell is a suppressed small count (126 plotted columns checked, none suppressed; list in results/mhtext/report_figures/figures.json). No cell shown as "< 5 posts (suppressed)" in a table appears as a point, bar or label in any figure: the linkage figure plots only the rows without local DP, and no figure plots the self-disclosure table. Figures contain no post text: axis labels and legends are model, feature-column and setting names only. All figures print in black and white (markers, line styles, hatching).
+
+*Index of figures*
+
+| Figure | Box | Caption | Page |
+|---|---|---|---|
+| Figure 3.1 | Box 3 | Top 20 of 1,174 text features by mutual information with the 4-class label; hatching marks… | 4 |
+| Figure 5.1 | Box 5 | Encoding comparison on the binary Depression vs Suicidal view, 1,200 training rows, PCA in… | 6 |
+| Figure 6.1 | Box 6 | Qubit count, paired: change in ROC AUC from 4 to 6, 6 to 8 and 4 to 8 qubits for every qua… | 7 |
+| Figure 11.1 | Box 11 | Every quantum and classical model on the same 1,200 training rows and the same inputs (bin… | 13 |
+| Figure 12.1 | Box 12 | Utility against privacy budget for DP-SGD, NSCH beside Mental Health Text, same arms and s… | 15 |
+| Figure 12.2 | Box 12 | Re-identification: share of posts singled out by a fragment of k consecutive words, agains… | 15 |
+| Figure 12.3 | Box 12 | Linkage success against fragment length, without local DP, for three released forms of the… | 16 |
+| Figure 13.1 | Box 13 | Federated learning with client DP-SGD (ε = 4): ROC AUC against the number of simulated cli… | 17 |
+| Figure 15.1 | Box 15 | Replication summary: the five patterns that replicate across NSCH (filled circle) and Ment… | 21 |
+
+Source: results/mhtext/report_figures/figures.json
 
 ## Box 15 — Key Outcomes
 
@@ -341,6 +390,10 @@ NSCH's separate comparison of PCA against UMAP and an autoencoder (NSCH report, 
 
 Source: results/mhtext/phase7/pattern_checks/p3_qubits_8_vs_4.csv · results/mhtext/phase7/pattern_checks/p4_mi_vs_pca_text.csv · results/mhtext/phase7/pattern_checks/p4_mi_vs_pca_nsch_stored.csv · results/mhtext/phase6/tests_replication_clients.csv · results/exp2-nsch2024-quantum-vs-classical-20261108-165426/summary.csv · results/exp2-nsch2024-quantum-vs-classical-20261108-165426/tests_same_rows_features.csv · results/mhtext/phase4/binary/summary.csv · results/mhtext/phase4/binary/tests_same_rows_features.csv
 
+![Figure 15.1](report_figures/fig_mhtext_replication.png)
+
+*Figure 15.1. Replication summary: the five patterns that replicate across NSCH (filled circle) and Mental Health Text (open square), as differences in ROC AUC with 95 % CIs where a test exists, and the one disagreement (P4) as counts of significant cells. Source: results/mhtext/phase7/pattern_checks/replication_summary.csv*
+
 ## Coverage update: what this dataset added to the architecture
 
 | Box | Diagram item | Before (NSCH only) | Now |
@@ -368,6 +421,8 @@ Still unavailable, with the reason:
 | 14 | Attention visualization | Available in principle (frozen transformer); not extracted. |
 
 ## Traceability appendix
+
+Every number and figure in the report, with the file it came from.
 
 | Box | Item | Value | File |
 |---|---|---|---|
@@ -675,3 +730,16 @@ Still unavailable, with the reason:
 | Box 15 | text MI sig wins | 0 | results/mhtext/phase7/pattern_checks/p4_mi_vs_pca_text.csv |
 | Box 15 | NSCH PCA higher mean | 22 | results/mhtext/phase7/pattern_checks/p4_mi_vs_pca_nsch_stored.csv |
 | Box 15 | text PCA higher mean | 27 | results/mhtext/phase7/pattern_checks/p4_mi_vs_pca_text.csv |
+| Box 3 | Figure 3.1 (plotted values) | all plotted points | results/mhtext/phase2/mi_scores_4class.csv |
+| Box 5 | Figure 5.1 (plotted values) | all plotted points | results/mhtext/phase4/binary/sweep_summary.csv |
+| Box 6 | Figure 6.1 (plotted values) | all plotted points | results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv |
+| Box 11 | Figure 11.1 (plotted values) | all plotted points | results/mhtext/phase4/binary/summary.csv |
+| Box 12 | Figure 12.1 (plotted values) | all plotted points | results/mhtext/phase7/nsch_reference/nsch_exp3_summary.csv |
+| Box 12 | Figure 12.1 (plotted values) | all plotted points | results/mhtext/phase5/dp/summary.csv |
+| Box 12 | Figure 12.2 (plotted values) | all plotted points | results/mhtext/phase5/reid/fragment_risk.csv |
+| Box 12 | Figure 12.2 (plotted values) | all plotted points | results/mhtext/phase7/nsch_reference/nsch_reidentification_risk.csv |
+| Box 12 | Figure 12.3 (plotted values) | all plotted points | results/mhtext/phase5/reid/fragment_risk.csv |
+| Box 12 | Figure 12.3 (plotted values) | all plotted points | results/mhtext/phase5/reid/linkage.csv |
+| Box 13 | Figure 13.1 (plotted values) | all plotted points | results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv |
+| Box 13 | Figure 13.1 (plotted values) | all plotted points | results/mhtext/phase6/summary.csv |
+| Box 15 | Figure 15.1 (plotted values) | all plotted points | results/mhtext/phase7/pattern_checks/replication_summary.csv |

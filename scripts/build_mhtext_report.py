@@ -304,8 +304,18 @@ def main() -> None:
           "| Feature and attention visualization: attention | Not available | Not produced: the encoder is used frozen and "
           "attention maps were not extracted; available in principle, not built |",
           "| Quantum state visualization | Built (Box 5 of the NSCH report) | Not repeated: same circuits, different inputs |",
-          "| Results tables | Built | Built (this report and the phase reports) |", ""]
-    sources(L, MH / "phase4/binary/phase4.md")
+          "| Results tables | Built | Built (this report and the phase reports) |",
+          f"| Results figures | Built | Built: {len(FIGMAN['figures'])} figures in Boxes "
+          f"{', '.join(str(b) for b in sorted({f['box'] for f in FIGMAN['figures']}))} (index below) |", "",
+          "Figures are drawn by scripts/build_mhtext_figures.py from committed files only; nothing is recomputed there. "
+          "Every plotted column passes a suppression guard that stops the build if any cell is a suppressed small count "
+          f"({len(FIGMAN['plotted_columns_checked_for_suppression'])} plotted columns checked, none suppressed; list in "
+          "results/mhtext/report_figures/figures.json). No cell shown as \"< 5 posts (suppressed)\" in a table appears as a "
+          "point, bar or label in any figure: the linkage figure plots only the rows without local DP, and no figure "
+          "plots the self-disclosure table. Figures contain no post text: axis labels and legends are model, feature-"
+          "column and setting names only. All figures print in black and white (markers, line styles, hatching).", "",
+          "<<FIGINDEX>>", ""]
+    sources(L, FIGDIR / "figures.json")
 
     # ---------------------------------------------------------------- Box 15
     section(L, 15, "Key Outcomes", "States which findings replicate across two unrelated datasets, and the limits.")
@@ -425,11 +435,168 @@ def main() -> None:
           "| 9 | Personalized insights (simulated) | Needs a per-person history; posts are not linked to authors. |",
           "| 14 | Attention visualization | Available in principle (frozen transformer); not extracted. |", ""]
 
-    L += ["## Traceability appendix", "", "| Box | Item | Value | File |", "|---|---|---|---|"]
+    L = insert_figures(L)
+    L += ["## Traceability appendix", "", "Every number and figure in the report, with the file it came from.", "",
+          "| Box | Item | Value | File |", "|---|---|---|---|"]
     L += [f"| {b} | {i} | {val} | {f} |" for b, i, val, f in TRACE]
-    out = MH / "results_report_mhtext.md"
-    out.write_text("\n".join(L) + "\n", encoding="utf-8")
-    print(f"wrote {out}: {len(TRACE)} traced numbers")
+    write_outputs(L)
+
+
+# ---------------------------------------------------------------- figures and printing
+FIGDIR = MH / "report_figures"
+FIGMAN = json.loads((FIGDIR / "figures.json").read_text(encoding="utf-8")) if (FIGDIR / "figures.json").exists() else {
+    "figures": [], "plotted_columns_checked_for_suppression": []}
+CHROME = Path("C:/Program Files/Google/Chrome/Application/chrome.exe")
+NUMBERED: list[dict] = []
+
+
+def insert_figures(L: list[str]) -> list[str]:
+    """Place each figure at the end of its box as Figure <box>.<k>, and trace its source files."""
+    by_box: dict[int, list[dict]] = {}
+    for f in FIGMAN["figures"]:
+        by_box.setdefault(f["box"], []).append(f)
+    out, current = [], None
+
+    def flush(box):
+        for k, f in enumerate(by_box.get(box, []), 1):
+            n = f"{box}.{k}"
+            NUMBERED.append({**f, "n": n})
+            out.extend([f"![Figure {n}](report_figures/{f['file']})", "",
+                        f"*Figure {n}. {f['caption']} Source: {'; '.join(f['sources'])}*", ""])
+            for s in f["sources"]:
+                TRACE.append((f"Box {box}", f"Figure {n} (plotted values)", "all plotted points", s.split(" (copy of")[0]))
+
+    for line in L:
+        if line.startswith("## "):
+            if current is not None:
+                flush(current)
+            current = int(line.split()[2]) if line.startswith("## Box ") else None
+        out.append(line)
+    if current is not None:
+        flush(current)
+    return out
+
+
+def fig_index(pages: dict[str, str] | None) -> list[str]:
+    rows = ["| Figure | Box | Caption | Page |", "|---|---|---|---|"]
+    for f in NUMBERED:
+        cap = f["caption"][:90] + ("…" if len(f["caption"]) > 90 else "")
+        rows.append(f"| Figure {f['n']} | Box {f['box']} | {cap} | {(pages or {}).get(f['n'], '–')} |")
+    return ["*Index of figures*", ""] + rows
+
+
+CSS = """
+@page { size: A4 portrait; margin: 16mm 15mm 18mm 15mm;
+  @bottom-center { content: "Page " counter(page); font: 9pt "Segoe UI", Arial, sans-serif; color: #000; } }
+body { font: 10.5pt/1.4 "Segoe UI", Arial, sans-serif; color: #000; background: #fff; }
+h1 { font-size: 17pt; margin: 0 0 4mm; } h3 { font-size: 11.5pt; margin: 4mm 0 2mm; }
+h2 { font-size: 14pt; margin: 0 0 3mm; border-bottom: 1.5pt solid #000; padding-bottom: 1mm; break-before: page; }
+table { border-collapse: collapse; width: 100%; font-size: 8.3pt; margin: 1mm 0 2mm; }
+th, td { border: 0.6pt solid #000; padding: 0.6mm 1mm; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+th { background: #e6e6e6; } tr { break-inside: avoid; }
+p.src { font-size: 8pt; color: #333; }
+figure { margin: 2mm 0 4mm; break-inside: avoid; page-break-inside: avoid; }
+figure img { max-width: 100%; max-height: 200mm; display: block; margin: 0 auto; }
+figcaption { font-size: 8.8pt; margin-top: 1.5mm; }
+.appendix td { font-size: 7.5pt; }
+ul { margin: 1mm 0 2mm 5mm; padding-left: 4mm; }
+"""
+
+
+def _inline(s: str) -> str:
+    import html
+    import re
+    s = html.escape(s, quote=False)
+    s = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
+    s = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<i>\1</i>", s)
+    return re.sub(r"`(.+?)`", r"<code>\1</code>", s)
+
+
+def md_to_html(lines: list[str]) -> str:
+    """Converter for the subset of markdown this builder writes (headings, tables, figures, lists, paragraphs)."""
+    import html
+    import re
+    out, i, first_h2, appendix = [], 0, True, False
+    while i < len(lines):
+        ln = lines[i]
+        if not ln.strip():
+            i += 1
+            continue
+        if ln.startswith("# "):
+            out.append(f"<h1>{_inline(ln[2:])}</h1>")
+        elif ln.startswith("## "):
+            appendix = ln.startswith("## Traceability")
+            style = " style='break-before:auto'" if first_h2 else ""
+            out.append(f"<h2{style}>{_inline(ln[3:])}</h2>")
+            first_h2 = False
+        elif ln.startswith("### "):
+            out.append(f"<h3>{_inline(ln[4:])}</h3>")
+        elif ln.startswith("!["):
+            m = re.match(r"!\[(.*?)\]\((.*?)\)", ln)
+            cap = lines[i + 2] if i + 2 < len(lines) else ""
+            cap = cap.strip("*")
+            num, _, rest = cap.partition(". ")
+            text, _, src = rest.partition(" Source: ")
+            out.append(f"<figure><img src='{html.escape(m.group(2))}' alt='{html.escape(m.group(1))}'>"
+                       f"<figcaption><b>{_inline(num)}.</b> {_inline(text)} <span class='src'>Source: {_inline(src)}</span>"
+                       "</figcaption></figure>")
+            i += 3
+            continue
+        elif ln.startswith("|"):
+            rows = []
+            while i < len(lines) and lines[i].startswith("|"):
+                rows.append([c.strip() for c in lines[i].strip().strip("|").split(" | ")])
+                i += 1
+            head, body = rows[0], [r for r in rows[1:] if not set("".join(r)) <= set("-|: ")]
+            out.append(f"<table{' class=appendix' if appendix else ''}><thead><tr>" + "".join(f"<th>{_inline(c)}</th>" for c in head)
+                       + "</tr></thead><tbody>" + "".join("<tr>" + "".join(f"<td>{_inline(c)}</td>" for c in r) + "</tr>" for r in body)
+                       + "</tbody></table>")
+            continue
+        elif ln.startswith("- "):
+            items = []
+            while i < len(lines) and lines[i].startswith("- "):
+                items.append(f"<li>{_inline(lines[i][2:])}</li>")
+                i += 1
+            out.append("<ul>" + "".join(items) + "</ul>")
+            continue
+        else:
+            out.append(f"<p{' class=src' if ln.startswith('Source: ') else ''}>{_inline(ln)}</p>")
+        i += 1
+    return ("<!doctype html><html><head><meta charset='utf-8'><title>Mental Health Text results report</title>"
+            f"<style>{CSS}</style></head><body>" + "\n".join(out) + "</body></html>")
+
+
+def print_pdf(html_path: Path, pdf_path: Path) -> int:
+    import re
+    import subprocess
+    import tempfile
+    with tempfile.TemporaryDirectory() as prof:
+        subprocess.run([str(CHROME), "--headless=new", "--disable-gpu", f"--user-data-dir={prof}", "--no-pdf-header-footer",
+                        f"--print-to-pdf={pdf_path}", html_path.resolve().as_uri()], check=True, capture_output=True, timeout=180)
+    return len(re.findall(rb"/Type\s*/Page[^s]", pdf_path.read_bytes()))
+
+
+def write_outputs(L: list[str]) -> None:
+    def with_index(pages):
+        j = L.index("<<FIGINDEX>>")
+        return L[:j] + fig_index(pages) + L[j + 1:]
+    # page of each figure: print the report cut just after that figure's caption and count the pages
+    pages, probe_h, probe_p = {}, MH / "_probe.html", MH / "_probe.pdf"
+    full = with_index(None)
+    for f in NUMBERED:
+        cut = next(k for k, ln in enumerate(full) if ln.startswith(f"*Figure {f['n']}. "))
+        probe_h.write_text(md_to_html(full[:cut + 1]), encoding="utf-8")
+        pages[f["n"]] = f"{print_pdf(probe_h, probe_p)}"
+    probe_h.unlink(missing_ok=True)
+    probe_p.unlink(missing_ok=True)
+    final = with_index(pages)
+    md = MH / "results_report_mhtext.md"
+    md.write_text("\n".join(final) + "\n", encoding="utf-8")
+    hp = MH / "results_report_mhtext.html"
+    hp.write_text(md_to_html(final), encoding="utf-8")
+    n = print_pdf(hp, MH / "results_report_mhtext.pdf")
+    print(f"wrote {md.name}, {hp.name}, results_report_mhtext.pdf ({n} pages, {len(NUMBERED)} figures, "
+          f"{len(TRACE)} traced items); figure pages {pages}")
 
 
 if __name__ == "__main__":

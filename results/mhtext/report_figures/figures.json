@@ -1,0 +1,208 @@
+{
+ "figures": [
+  {
+   "file": "fig_mhtext_mi_ranking.png",
+   "box": 3,
+   "caption": "Top 20 of 1,174 text features by mutual information with the 4-class label; hatching marks the feature family. Column names only; no post text.",
+   "sources": [
+    "results/mhtext/phase2/mi_scores_4class.csv"
+   ]
+  },
+  {
+   "file": "fig_mhtext_encodings.png",
+   "box": 5,
+   "caption": "Encoding comparison on the binary Depression vs Suicidal view, 1,200 training rows, PCA inputs: ROC AUC per encoding at 4, 6 and 8 qubits (bars, hatched by qubit count) with SD error bars.",
+   "sources": [
+    "results/mhtext/phase4/binary/sweep_summary.csv"
+   ]
+  },
+  {
+   "file": "fig_mhtext_qubit_pairs.png",
+   "box": 6,
+   "caption": "Qubit count, paired: change in ROC AUC from 4 to 6, 6 to 8 and 4 to 8 qubits for every quantum model x feature method x encoding cell, NSCH beside Mental Health Text (paired NB-t over the same folds, 95 % CI; filled marker = Holm p < 0.05). Backs pattern P3.",
+   "sources": [
+    "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv"
+   ]
+  },
+  {
+   "file": "fig_mhtext_headline.png",
+   "box": 11,
+   "caption": "Every quantum and classical model on the same 1,200 training rows and the same inputs (binary Depression vs Suicidal view), sorted by ROC AUC; reference lines: length-only floor and the two classical ceilings.",
+   "sources": [
+    "results/mhtext/phase4/binary/summary.csv"
+   ]
+  },
+  {
+   "file": "fig_mhtext_dp_utility.png",
+   "box": 12,
+   "caption": "Utility against privacy budget for DP-SGD, NSCH beside Mental Health Text, same arms and settings (exp3 method).",
+   "sources": [
+    "results/mhtext/phase7/nsch_reference/nsch_exp3_summary.csv (copy of results/exp3-nsch2024-privacy-utility-20261108-165618/summary.csv)",
+    "results/mhtext/phase5/dp/summary.csv"
+   ]
+  },
+  {
+   "file": "fig_mhtext_reid_uniqueness.png",
+   "box": 12,
+   "caption": "Re-identification: share of posts singled out by a fragment of k consecutive words, against k; horizontal lines: share of NSCH adolescents unique on their quasi-identifiers, before and after k-anonymity.",
+   "sources": [
+    "results/mhtext/phase5/reid/fragment_risk.csv",
+    "results/mhtext/phase7/nsch_reference/nsch_reidentification_risk.csv (copy of results/reidentification/risk.csv)"
+   ]
+  },
+  {
+   "file": "fig_mhtext_linkage.png",
+   "box": 12,
+   "caption": "Linkage success against fragment length, without local DP, for three released forms of the same development posts. Cells under local DP that are suppressed (< 5 posts) are not plotted; the local-DP rows are in the table.",
+   "sources": [
+    "results/mhtext/phase5/reid/fragment_risk.csv",
+    "results/mhtext/phase5/reid/linkage.csv"
+   ]
+  },
+  {
+   "file": "fig_mhtext_federated.png",
+   "box": 13,
+   "caption": "Federated learning with client DP-SGD (\u03b5 = 4): ROC AUC against the number of simulated clients for the VQC and LogReg, NSCH beside Mental Health Text. Pattern P5: the VQC falls as clients increase, LogReg stays flat, on both.",
+   "sources": [
+    "results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv (copy of results/exp4-nsch2024-federated-dp-20261108-170320/summary.csv)",
+    "results/mhtext/phase6/summary.csv"
+   ]
+  },
+  {
+   "file": "fig_mhtext_replication.png",
+   "box": 15,
+   "caption": "Replication summary: the five patterns that replicate across NSCH (filled circle) and Mental Health Text (open square), as differences in ROC AUC with 95 % CIs where a test exists, and the one disagreement (P4) as counts of significant cells.",
+   "sources": [
+    "results/mhtext/phase7/pattern_checks/replication_summary.csv"
+   ]
+  }
+ ],
+ "plotted_columns_checked_for_suppression": [
+  "results/mhtext/phase2/mi_scores_4class.csv:mutual_information:20",
+  "results/mhtext/phase4/binary/sweep_summary.csv:roc_auc:5",
+  "results/mhtext/phase4/binary/sweep_summary.csv:roc_auc_std:5",
+  "results/mhtext/phase4/binary/sweep_summary.csv:roc_auc:5",
+  "results/mhtext/phase4/binary/sweep_summary.csv:roc_auc_std:5",
+  "results/mhtext/phase4/binary/sweep_summary.csv:roc_auc:5",
+  "results/mhtext/phase4/binary/sweep_summary.csv:roc_auc_std:5",
+  "results/mhtext/phase4/binary/sweep_summary.csv:roc_auc:5",
+  "results/mhtext/phase4/binary/sweep_summary.csv:roc_auc_std:5",
+  "results/mhtext/phase4/binary/sweep_summary.csv:roc_auc:5",
+  "results/mhtext/phase4/binary/sweep_summary.csv:roc_auc_std:5",
+  "results/mhtext/phase4/binary/sweep_summary.csv:roc_auc:5",
+  "results/mhtext/phase4/binary/sweep_summary.csv:roc_auc_std:5",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:mean_diff:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:ci95_low:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:ci95_high:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:mean_diff:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:ci95_low:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:ci95_high:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:mean_diff:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:ci95_low:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:ci95_high:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:mean_diff:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:ci95_low:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:ci95_high:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:mean_diff:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:ci95_low:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:ci95_high:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:mean_diff:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:ci95_low:20",
+  "results/mhtext/phase7/pattern_checks/p3_qubit_pairs.csv:ci95_high:20",
+  "results/mhtext/phase4/binary/summary.csv:roc_auc_mean:15",
+  "results/mhtext/phase4/binary/summary.csv:roc_auc_std:15",
+  "results/mhtext/phase4/binary/summary.csv:roc_auc_mean:1",
+  "results/mhtext/phase4/binary/summary.csv:roc_auc_mean:1",
+  "results/mhtext/phase4/binary/summary.csv:roc_auc_mean:1",
+  "results/mhtext/phase7/nsch_reference/nsch_exp3_summary.csv:roc_auc_mean:6",
+  "results/mhtext/phase7/nsch_reference/nsch_exp3_summary.csv:roc_auc_std:6",
+  "results/mhtext/phase7/nsch_reference/nsch_exp3_summary.csv:roc_auc_mean:6",
+  "results/mhtext/phase7/nsch_reference/nsch_exp3_summary.csv:roc_auc_std:6",
+  "results/mhtext/phase7/nsch_reference/nsch_exp3_summary.csv:roc_auc_mean:6",
+  "results/mhtext/phase7/nsch_reference/nsch_exp3_summary.csv:roc_auc_std:6",
+  "results/mhtext/phase5/dp/summary.csv:mean:6",
+  "results/mhtext/phase5/dp/summary.csv:std:6",
+  "results/mhtext/phase5/dp/summary.csv:mean:6",
+  "results/mhtext/phase5/dp/summary.csv:std:6",
+  "results/mhtext/phase5/dp/summary.csv:mean:6",
+  "results/mhtext/phase5/dp/summary.csv:std:6",
+  "results/mhtext/phase5/reid/fragment_risk.csv:span_words:5",
+  "results/mhtext/phase5/reid/fragment_risk.csv:uniqueness:5",
+  "results/mhtext/phase5/reid/fragment_risk.csv:span_words:5",
+  "results/mhtext/phase5/reid/fragment_risk.csv:uniqueness:5",
+  "results/mhtext/phase5/reid/fragment_risk.csv:span_words:5",
+  "results/mhtext/phase5/reid/fragment_risk.csv:uniqueness:5",
+  "results/mhtext/phase7/nsch_reference/nsch_reidentification_risk.csv:uniqueness:1",
+  "results/mhtext/phase7/nsch_reference/nsch_reidentification_risk.csv:uniqueness:1",
+  "results/mhtext/phase7/nsch_reference/nsch_reidentification_risk.csv:uniqueness:1",
+  "results/mhtext/phase5/reid/fragment_risk.csv:span_words:3",
+  "results/mhtext/phase5/reid/fragment_risk.csv:avg_prosecutor_risk:3",
+  "results/mhtext/phase5/reid/linkage.csv:fragment_words:3",
+  "results/mhtext/phase5/reid/linkage.csv:top1:3",
+  "results/mhtext/phase5/reid/linkage.csv:fragment_words:3",
+  "results/mhtext/phase5/reid/linkage.csv:top1:3",
+  "results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv:n_clients:3",
+  "results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv:roc_auc_mean:3",
+  "results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv:roc_auc_std:3",
+  "results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv:n_clients:3",
+  "results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv:roc_auc_mean:3",
+  "results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv:roc_auc_std:3",
+  "results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv:n_clients:3",
+  "results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv:roc_auc_mean:3",
+  "results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv:roc_auc_std:3",
+  "results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv:n_clients:3",
+  "results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv:roc_auc_mean:3",
+  "results/mhtext/phase7/nsch_reference/nsch_exp4_summary.csv:roc_auc_std:3",
+  "results/mhtext/phase6/summary.csv:n_clients:3",
+  "results/mhtext/phase6/summary.csv:roc_auc_mean:3",
+  "results/mhtext/phase6/summary.csv:roc_auc_std:3",
+  "results/mhtext/phase6/summary.csv:n_clients:3",
+  "results/mhtext/phase6/summary.csv:roc_auc_mean:3",
+  "results/mhtext/phase6/summary.csv:roc_auc_std:3",
+  "results/mhtext/phase6/summary.csv:n_clients:3",
+  "results/mhtext/phase6/summary.csv:roc_auc_mean:3",
+  "results/mhtext/phase6/summary.csv:roc_auc_std:3",
+  "results/mhtext/phase6/summary.csv:n_clients:3",
+  "results/mhtext/phase6/summary.csv:roc_auc_mean:3",
+  "results/mhtext/phase6/summary.csv:roc_auc_std:3",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_low:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_high:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_low:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_high:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_low:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_high:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_low:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_high:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_low:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_high:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_low:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_high:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_low:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_high:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_low:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_high:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_low:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_high:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_low:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_high:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_low:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_high:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_low:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:ci95_high:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:1",
+  "results/mhtext/phase7/pattern_checks/replication_summary.csv:estimate:4"
+ ]
+}

@@ -151,6 +151,14 @@ def report(cfg: dict, out: Path) -> None:
     ref["target_epsilon"] = ref.target_epsilon.map(lambda v: "inf" if str(v) in ("inf", "nan") else f"{float(v):g}")
     ratio = test_train_ratio(df)
     eps = "4"
+    g = df.groupby(["arm", "partition", "n_clients"])
+    summ = g[["roc_auc", "balanced_accuracy", "recall"]].agg(["mean", "std"])
+    summ.columns = [f"{a}_{b}" for a, b in summ.columns]
+    summ = summ.join(g.size().rename("n_folds")).reset_index().assign(setting="federated")
+    cen = ref[ref.target_epsilon == eps].groupby("arm")[["roc_auc", "balanced_accuracy", "recall"]].agg(["mean", "std"])
+    cen.columns = [f"{a}_{b}" for a, b in cen.columns]
+    cen = cen.reset_index().assign(setting="centralised", partition="-", n_clients=1)
+    pd.concat([summ, cen[cen.arm.isin(summ.arm.unique())]], ignore_index=True).to_csv(out / "summary.csv", index=False)
     L = ["# Phase 6 — SIMULATED federated learning on Mental Health Text (binary view), beside NSCH", "",
          "Box 13. Clients are SIMULATED: partitions of one dataset on one machine, not separate institutions. exp4 method "
          "unchanged (FedAvg, 30 rounds x 1 local epoch, client-side DP-SGD at ε = 4, δ = 1e-5; arms VQC re-upload 4 qubits "

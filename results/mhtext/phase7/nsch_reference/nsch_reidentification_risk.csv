@@ -1,0 +1,8 @@
+table,n_rows,n_quasi_identifiers,n_classes,uniqueness,k,k_violation_rate,min_class_size,avg_prosecutor_risk,max_prosecutor_risk,source_file
+"10 demographic/household QIs, raw values",17431,10,9782,0.493373874132293,5,0.6159715449486547,1,0.5611840972979175,1.0,results/reidentification/risk.csv
+"7 demographic QIs, raw values",17431,7,7771,0.3675061671734266,5,0.5158051746887728,1,0.4458149274281452,1.0,results/reidentification/risk.csv
+"7 demographic QIs, raw values + U.S. state",17431,8,12258,0.6271011416441972,5,0.7463714072629224,1,0.7032298778039126,1.0,results/reidentification/risk.csv
+"7 demographic QIs, generalised (age and poverty bands)",17431,7,1455,0.0316103493775457,5,0.0993632034880385,1,0.0834719752165681,1.0,results/reidentification/risk.csv
+"7 demographic QIs, generalised + state",17431,8,8054,0.3218403992886237,5,0.5770753255693879,1,0.4620503700304055,1.0,results/reidentification/risk.csv
+"7 demographic QIs after k-anonymity (k = 5, as used in the pipeline)",17431,7,461,0.0,5,0.0,5,0.0264471344156961,0.2,results/reidentification/risk.csv
+7 demographic QIs after k-anonymity + state,17431,8,6430,0.2290172680855946,5,0.4777121220813493,1,0.3688830244965865,1.0,results/reidentification/risk.csv
