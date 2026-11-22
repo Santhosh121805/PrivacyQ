@@ -2,6 +2,8 @@
 
 Boxes 4 (privacy-preserving mechanisms) and 12 (privacy evaluation). Source REAL:MHText. Every model-based privacy parameter is read from the NSCH experiment configs (exp3, exp5, exp6) and the NSCH numbers are read from its results/ files; no NSCH experiment was run. Inputs: frozen MiniLM sentence encoder (BERT family) embeddings. The locked hold-out is not used. Quantum circuits are simulated; a quantum model is not a privacy mechanism.
 
+**Disclosure control.** Counts below 5 are suppressed following standard statistical disclosure practice: the cell shows "< 5 posts (suppressed)" and its share is removed with it (share x rows would give the count back). Where a suppressed value could be recovered by arithmetic from the cells that remain, a second cell is also suppressed. A "< 5" is a policy, not missing data. Applied in this report to 10 cells: 8 in the linkage table (posts linked under local DP at ε_input 16, 8 and 4) and 2 in the self-disclosure table (posts stating age, sex and state together, in both corpora). Secondary suppression was checked and not needed: the age-sex-state cell cannot be rebuilt from the published cells (that would need the age-state and sex-state pairs, which are not published, and both corpus rows are suppressed), and a top-1 linkage cell cannot be derived from top-5, top-10, median rank or MRR, which only bound it. Zero cells are kept; they identify no one. Counts of rows removed by deduplication (Phase 1, Phase 4) count pipeline steps, not authors or their characteristics, and are not suppressed.
+
 ## Summary
 
 - **The 8 inputs fed to the quantum circuit (step 5) still identify the post 32.6 % of the time** from a 12-word fragment, when the PCA projection is known. 8 PCA components are not anonymous. Keeping the projection secret would lower linkage, but secrecy of a projection is not a privacy guarantee and is not claimed.
@@ -61,7 +63,7 @@ NSCH's quasi-identifiers (age, sex, state) are columns that can be generalised o
 | Names a U.S. state | 0.2 % |
 | Mentions a school level | 0.9 % |
 | Age and sex | 0.5 % |
-| Age, sex and state | 0.0 % |
+| Age, sex and state | < 5 posts (suppressed) |
 | Any of age, sex, state | 3.5 % |
 
 ### Linking a fragment to the released vectors
@@ -73,21 +75,21 @@ If only model inputs are released (not text), an attacker embeds the known fragm
 | MiniLM embedding (384 dims) | 8 | ∞ | 49.1 % | 59.6 % | 2 | 0.00008 |
 | PCA-8 encoder input | 8 | ∞ | 23.1 % | 28.6 % | 662 | 0.00008 |
 | PCA-8 encoder input | 8 | 32 | 0.0 % | 0.3 % | 3,941 | 0.00008 |
-| PCA-8 encoder input | 8 | 16 | 0.0 % | 0.1 % | 4,806 | 0.00008 |
-| PCA-8 encoder input | 8 | 8 | 0.0 % | 0.1 % | 5,283 | 0.00008 |
+| PCA-8 encoder input | 8 | 16 | < 5 posts (suppressed) | 0.1 % | 4,806 | 0.00008 |
+| PCA-8 encoder input | 8 | 8 | < 5 posts (suppressed) | 0.1 % | 5,283 | 0.00008 |
 | PCA-8 encoder input | 8 | 4 | 0.0 % | 0.1 % | 5,584 | 0.00008 |
 | MiniLM embedding (384 dims) | 12 | ∞ | 59.8 % | 70.6 % | 1 | 0.00008 |
 | PCA-8 encoder input | 12 | ∞ | 32.6 % | 38.3 % | 155 | 0.00008 |
 | PCA-8 encoder input | 12 | 32 | 0.0 % | 0.4 % | 3,527 | 0.00008 |
-| PCA-8 encoder input | 12 | 16 | 0.0 % | 0.1 % | 4,498 | 0.00008 |
-| PCA-8 encoder input | 12 | 8 | 0.0 % | 0.1 % | 5,141 | 0.00008 |
+| PCA-8 encoder input | 12 | 16 | < 5 posts (suppressed) | 0.1 % | 4,498 | 0.00008 |
+| PCA-8 encoder input | 12 | 8 | < 5 posts (suppressed) | 0.1 % | 5,141 | 0.00008 |
 | PCA-8 encoder input | 12 | 4 | 0.0 % | 0.1 % | 5,534 | 0.00008 |
 | MiniLM embedding (384 dims) | 20 | ∞ | 72.3 % | 82.5 % | 1 | 0.00008 |
 | PCA-8 encoder input | 20 | ∞ | 45.1 % | 50.9 % | 8 | 0.00008 |
 | PCA-8 encoder input | 20 | 32 | 0.0 % | 0.5 % | 3,072 | 0.00008 |
-| PCA-8 encoder input | 20 | 16 | 0.0 % | 0.1 % | 4,172 | 0.00008 |
-| PCA-8 encoder input | 20 | 8 | 0.0 % | 0.1 % | 4,945 | 0.00008 |
-| PCA-8 encoder input | 20 | 4 | 0.0 % | 0.1 % | 5,356 | 0.00008 |
+| PCA-8 encoder input | 20 | 16 | < 5 posts (suppressed) | 0.1 % | 4,172 | 0.00008 |
+| PCA-8 encoder input | 20 | 8 | < 5 posts (suppressed) | 0.1 % | 4,945 | 0.00008 |
+| PCA-8 encoder input | 20 | 4 | < 5 posts (suppressed) | 0.1 % | 5,356 | 0.00008 |
 
 ## 2. Membership inference (box 12) beside NSCH
 

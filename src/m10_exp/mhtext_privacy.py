@@ -174,8 +174,13 @@ def run_reid(cfg: dict, out: Path) -> None:
                              "n_rows": len(toks), "uniqueness": tr.any_unique_ngram_rate(toks, n), "span_words": n})
             print(f"reid {corpus} / {version[:11]}: {time.time() - t0:.0f}s", flush=True)
         disc.append({"corpus": corpus, **tr.self_disclosures(texts)})
-    pd.DataFrame(risk).to_csv(d / "fragment_risk.csv", index=False)
-    pd.DataFrame(disc).to_csv(d / "self_disclosures.csv", index=False)
+    from src.m9_audit.disclosure import suppress_shares
+    fr_df = pd.DataFrame(risk)
+    fr_df, _ = suppress_shares(fr_df, "n_rows", ["uniqueness", "k_violation_rate"])
+    fr_df.to_csv(d / "fragment_risk.csv", index=False)
+    sd = pd.DataFrame(disc)
+    sd, _ = suppress_shares(sd, "n_rows", [c for c in sd.columns if c not in ("corpus", "n_rows")])
+    sd.to_csv(d / "self_disclosures.csv", index=False)
 
     # linkage: a fragment of a dev post, embedded with the public MiniLM, matched against released dev vectors
     p2 = load_config(ROOT / "configs/mhtext_phase2.yaml")["embedding"]
@@ -200,7 +205,8 @@ def run_reid(cfg: dict, out: Path) -> None:
             link.append({"released": "PCA-8 encoder input", "epsilon_input": "inf" if eps is None else f"{float(eps):g}",
                          "fragment_words": w, **tr.linkage(qe, rel, "euclidean")})
         print(f"linkage {w} words: {time.time() - t0:.0f}s", flush=True)
-    pd.DataFrame(link).to_csv(d / "linkage.csv", index=False)
+    lk_df, _ = suppress_shares(pd.DataFrame(link), "n_queries", ["top1", "top5", "top10"])
+    lk_df.to_csv(d / "linkage.csv", index=False)
     (d / "run.json").write_text(json.dumps({"wall_seconds": round(time.time() - t0, 1), "config": r,
                                             "environment": environment_record(cfg)}, indent=2, default=str), encoding="utf-8")
     print(f"reid done: {time.time() - t0:.0f}s", flush=True)

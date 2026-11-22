@@ -17,6 +17,8 @@ sys.path.insert(0, str(ROOT))
 
 import pandas as pd  # noqa: E402
 
+from src.m9_audit.disclosure import RULE, numeric  # noqa: E402
+
 R = ROOT / "results"
 MH = R / "mhtext"
 NS_EXP2 = R / "exp2-nsch2024-quantum-vs-classical-20261108-165426"
@@ -67,7 +69,11 @@ def main() -> None:
          "traceability appendix lists each one with its file. NSCH numbers are read from the NSCH results/ files and "
          "were not recomputed. Inputs are the frozen MiniLM sentence encoder (BERT family: "
          "sentence-transformers/all-MiniLM-L6-v2), never fine-tuned. Quantum circuits are simulated. Federated clients "
-         "are simulated. The locked hold-out of this dataset has not been scored.", ""]
+         "are simulated. The locked hold-out of this dataset has not been scored.", "",
+         f"**Disclosure control.** {RULE} In this dataset's reports it applies to 10 cells of the Phase 5 "
+         "re-identification tables (results/mhtext/phase5/phase5.md, which states which cells and why no second "
+         "cell was needed); counts of rows removed by deduplication describe pipeline steps, not authors, and are not "
+         "suppressed.", ""]
 
     # ---------------------------------------------------------------- Box 1
     section(L, 1, "Data Sources (Adolescent Mental Health)", "Adds a second, unrelated data source: public social-media "
@@ -252,6 +258,8 @@ def main() -> None:
     ns_r = csv(R / "reidentification/risk.csv").set_index("table")
     dv = fr[(fr.corpus == "dev") & (fr.text == "as released") & fr.attacker_knows.str.startswith("a ")].set_index("span_words")
     lk = csv(p5 / "reid/linkage.csv")
+    for c in ("top1", "top5", "top10"):
+        lk[c] = numeric(lk[c])          # suppressed cells -> NaN; none of them is shown here
     LK = p5 / "reid/linkage.csv"
     pca12 = lk[(lk.released == "PCA-8 encoder input") & (lk.fragment_words == 12) & (lk.epsilon_input.astype(str) == "inf")].iloc[0]
     mia = csv(p5 / "mia/summary.csv")

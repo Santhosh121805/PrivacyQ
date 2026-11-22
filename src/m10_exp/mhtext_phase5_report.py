@@ -14,6 +14,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src.m9_audit.disclosure import RULE, SUPPRESSED, is_suppressed, numeric
 from src.m10_exp.common import load_config
 from src.m10_exp.exp3_report import cost_of_privacy, quantum_vs_classical
 
@@ -22,7 +23,9 @@ EPS = ["0.5", "1", "2", "4", "8", "inf"]
 
 
 def pct(x) -> str:
-    return f"{100 * x:.1f} %"
+    if is_suppressed(x):
+        return SUPPRESSED
+    return f"{100 * float(x):.1f} %"
 
 
 def f3(x) -> str:
@@ -227,7 +230,15 @@ def main() -> None:
          "privacy parameter is read from the NSCH experiment configs (exp3, exp5, exp6) and the NSCH numbers are read "
          "from its results/ files; no NSCH experiment was run. Inputs: frozen MiniLM sentence encoder (BERT family) "
          "embeddings. The locked hold-out is not used. Quantum circuits are simulated; a quantum model is not a privacy "
-         "mechanism.", ""]
+         "mechanism.", "",
+         f"**Disclosure control.** {RULE} Applied in this report to 10 cells: 8 in the linkage table (posts linked under "
+         "local DP at ε_input 16, 8 and 4) and 2 in the self-disclosure table (posts stating age, sex and state together, "
+         "in both corpora). Secondary suppression was checked and not needed: the age-sex-state cell cannot be "
+         "rebuilt from the published cells (that would need the age-state and sex-state pairs, which are not published, "
+         "and both corpus rows are suppressed), and a top-1 linkage cell cannot be derived from top-5, top-10, median "
+         "rank or MRR, which only bound it. Zero cells are kept; they identify no one. Counts of rows removed by "
+         "deduplication (Phase 1, Phase 4) count pipeline steps, not authors or their characteristics, and are not "
+         "suppressed.", ""]
     body: list = []
     for sec in (section_reid, section_mia, section_dp, section_ldp):
         sec(cfg, d, body, facts)
@@ -272,7 +283,7 @@ def commentary(facts: dict) -> list[str]:
     lk = facts["link"]
     lk_emb = lk[(lk.released.str.startswith("MiniLM")) & (lk.fragment_words == 12)].iloc[0]
     lk_pca = lk[(lk.released.str.startswith("PCA")) & (lk.fragment_words == 12) & (lk.epsilon_input.map(eps_str) == "inf")].iloc[0]
-    lk_32 = lk[(lk.released.str.startswith("PCA")) & (lk.epsilon_input.map(eps_str) == "32")].top1.max()
+    lk_32 = numeric(lk[(lk.released.str.startswith("PCA")) & (lk.epsilon_input.map(eps_str) == "32")].top1).max()
     ldp = facts["ldp"]
     q_inf, q_32 = ldp.loc[("qsvm", "subsample", "inf"), "mean"], ldp.loc[("qsvm", "subsample", "32"), "mean"]
     d, c, dn = facts["dp"], facts["dp_cost"], facts["dp_nsch"]

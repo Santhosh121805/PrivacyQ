@@ -1,29 +1,29 @@
 corpus,text,attacker_knows,n_rows,uniqueness,k,k_violation_rate,min_class_size,median_class_size,avg_prosecutor_risk,max_prosecutor_risk,span_words,posts_shorter_than_span
 dev,as released,a 3-word fragment,11992,0.6633589059372915,5.0,0.8011174116077385,1.0,1.0,0.7341998095473901,1.0,3,135.0
-dev,as released,a 5-word fragment,11992,0.950133422281521,5.0,0.9830720480320213,1.0,1.0,0.9663191420773081,1.0,5,745.0
-dev,as released,a 8-word fragment,11992,0.9931621080720481,5.0,0.9988325550366911,1.0,1.0,0.9958459447047654,1.0,8,1891.0
-dev,as released,a 12-word fragment,11992,0.9951634422948632,5.0,0.9989993328885924,1.0,1.0,0.9969828137285589,1.0,12,3016.0
-dev,as released,a 20-word fragment,11992,0.9954136090727151,5.0,0.9989993328885924,1.0,1.0,0.9971078971174848,1.0,20,4448.0
-dev,as released,any 5-word span,11992,0.9369579719813209,,,,,,,5,
+dev,as released,a 5-word fragment,11992,0.950133422281521,5.0,0.9830720480320212,1.0,1.0,0.966319142077308,1.0,5,745.0
+dev,as released,a 8-word fragment,11992,0.993162108072048,5.0,0.9988325550366912,1.0,1.0,0.9958459447047654,1.0,8,1891.0
+dev,as released,a 12-word fragment,11992,0.9951634422948632,5.0,0.9989993328885924,1.0,1.0,0.9969828137285588,1.0,12,3016.0
+dev,as released,a 20-word fragment,11992,0.9954136090727153,5.0,0.9989993328885924,1.0,1.0,0.9971078971174848,1.0,20,4448.0
+dev,as released,any 5-word span,11992,0.9369579719813208,,,,,,,5,
 dev,as released,any 8-word span,11992,0.8422281521014009,,,,,,,8,
 dev,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 3-word fragment,11992,0.6562708472314877,5.0,0.7945296864576384,1.0,1.0,0.728290263935939,1.0,3,132.0
-dev,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 5-word fragment,11992,0.951717811874583,5.0,0.9849066044029353,1.0,1.0,0.9676744678076495,1.0,5,720.0
-dev,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 8-word fragment,11992,0.9919946631087392,5.0,0.9983322214809873,1.0,1.0,0.9948904406648417,1.0,8,1864.0
-dev,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 12-word fragment,11992,0.9938292194796531,5.0,0.9989159439626417,1.0,1.0,0.9961075388539512,1.0,12,2989.0
-dev,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 20-word fragment,11992,0.9945797198132088,5.0,0.9989159439626417,1.0,1.0,0.996482789020729,1.0,20,4409.0
+dev,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 5-word fragment,11992,0.951717811874583,5.0,0.9849066044029352,1.0,1.0,0.9676744678076497,1.0,5,720.0
+dev,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 8-word fragment,11992,0.9919946631087392,5.0,0.9983322214809872,1.0,1.0,0.9948904406648416,1.0,8,1864.0
+dev,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 12-word fragment,11992,0.9938292194796532,5.0,0.9989159439626416,1.0,1.0,0.9961075388539512,1.0,12,2989.0
+dev,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 20-word fragment,11992,0.9945797198132088,5.0,0.9989159439626416,1.0,1.0,0.996482789020729,1.0,20,4409.0
 dev,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",any 5-word span,11992,0.9381254169446298,,,,,,,5,
 dev,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",any 8-word span,11992,0.8444796531020681,,,,,,,8,
 dev+quarantine,as released,a 3-word fragment,21574,0.5855196069342727,5.0,0.7355149717252248,1.0,1.0,0.6643809336140062,1.0,3,139.0
-dev+quarantine,as released,a 5-word fragment,21574,0.9422452952628163,5.0,0.9807638824510986,1.0,1.0,0.9607540586938952,1.0,5,768.0
-dev+quarantine,as released,a 8-word fragment,21574,0.9938815240567349,5.0,0.9987021414665801,1.0,1.0,0.9961226120895665,1.0,8,1977.0
-dev+quarantine,as released,a 12-word fragment,21574,0.9957356076759062,5.0,0.9986557893761009,1.0,1.0,0.9971610319845049,1.0,12,3267.0
-dev+quarantine,as released,a 20-word fragment,21574,0.9961527764902197,5.0,0.9990266060999351,1.0,1.0,0.9974891559934239,1.0,20,5242.0
+dev+quarantine,as released,a 5-word fragment,21574,0.9422452952628164,5.0,0.9807638824510986,1.0,1.0,0.9607540586938952,1.0,5,768.0
+dev+quarantine,as released,a 8-word fragment,21574,0.9938815240567348,5.0,0.99870214146658,1.0,1.0,0.9961226120895664,1.0,8,1977.0
+dev+quarantine,as released,a 12-word fragment,21574,0.9957356076759062,5.0,0.9986557893761008,1.0,1.0,0.9971610319845048,1.0,12,3267.0
+dev+quarantine,as released,a 20-word fragment,21574,0.9961527764902196,5.0,0.9990266060999352,1.0,1.0,0.997489155993424,1.0,20,5242.0
 dev+quarantine,as released,any 5-word span,21574,0.963659961064244,,,,,,,5,
-dev+quarantine,as released,any 8-word span,21574,0.9081765087605451,,,,,,,8,
+dev+quarantine,as released,any 8-word span,21574,0.9081765087605452,,,,,,,8,
 dev+quarantine,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 3-word fragment,21574,0.5785667933623806,5.0,0.727774172615185,1.0,1.0,0.6573271301869517,1.0,3,136.0
-dev+quarantine,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 5-word fragment,21574,0.9407156762770001,5.0,0.9802540094558264,1.0,1.0,0.9598511554632556,1.0,5,741.0
-dev+quarantine,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 8-word fragment,21574,0.9925836655233151,5.0,0.9979141559284324,1.0,1.0,0.9950540665814938,1.0,8,1944.0
-dev+quarantine,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 12-word fragment,21574,0.9949476221377584,5.0,0.9987948456475387,1.0,1.0,0.9967072166097075,1.0,12,3233.0
-dev+quarantine,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 20-word fragment,21574,0.9956892555854269,5.0,0.9989802540094558,1.0,1.0,0.9971764298764889,1.0,20,5184.0
-dev+quarantine,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",any 5-word span,21574,0.9643088903309539,,,,,,,5,
+dev+quarantine,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 5-word fragment,21574,0.940715676277,5.0,0.9802540094558264,1.0,1.0,0.9598511554632556,1.0,5,741.0
+dev+quarantine,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 8-word fragment,21574,0.9925836655233152,5.0,0.9979141559284324,1.0,1.0,0.9950540665814938,1.0,8,1944.0
+dev+quarantine,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 12-word fragment,21574,0.9949476221377584,5.0,0.9987948456475388,1.0,1.0,0.9967072166097076,1.0,12,3233.0
+dev+quarantine,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",a 20-word fragment,21574,0.9956892555854268,5.0,0.9989802540094558,1.0,1.0,0.9971764298764888,1.0,20,5184.0
+dev+quarantine,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",any 5-word span,21574,0.964308890330954,,,,,,,5,
 dev+quarantine,"scrubbed (URLs, e-mails, handles, communities, numbers removed)",any 8-word span,21574,0.9096134235654028,,,,,,,8,

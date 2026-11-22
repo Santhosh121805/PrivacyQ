@@ -2,6 +2,8 @@
 
 One section per architecture box. Every number is read from a results/ file at build time; the traceability appendix lists each one with its file. NSCH numbers are read from the NSCH results/ files and were not recomputed. Inputs are the frozen MiniLM sentence encoder (BERT family: sentence-transformers/all-MiniLM-L6-v2), never fine-tuned. Quantum circuits are simulated. Federated clients are simulated. The locked hold-out of this dataset has not been scored.
 
+**Disclosure control.** Counts below 5 are suppressed following standard statistical disclosure practice: the cell shows "< 5 posts (suppressed)" and its share is removed with it (share x rows would give the count back). Where a suppressed value could be recovered by arithmetic from the cells that remain, a second cell is also suppressed. A "< 5" is a policy, not missing data. In this dataset's reports it applies to 10 cells of the Phase 5 re-identification tables (results/mhtext/phase5/phase5.md, which states which cells and why no second cell was needed); counts of rows removed by deduplication describe pipeline steps, not authors, and are not suppressed.
+
 ## Box 1 — Data Sources (Adolescent Mental Health)
 
 **What this step does:** Adds a second, unrelated data source: public social-media posts labelled Normal / Anxiety / Depression / Suicidal.
