@@ -13,6 +13,15 @@ results/mhtext/**
 !results/mhtext/**/summary.csv
 !results/mhtext/**/fold_metrics.csv
 !results/mhtext/**/tests_*.csv
+# inputs the committed reports are rebuilt from (aggregates, numbers only; checked for post text)
+!results/mhtext/phase7/pattern_checks/p3_*.csv
+!results/mhtext/phase7/pattern_checks/p4_*.csv
+!results/mhtext/phase4/binary/sweep_summary.csv
+!results/mhtext/phase4/binary/sweep_fold_metrics.csv
+!results/mhtext/phase4/binary/compare_fold_metrics.csv
+!results/mhtext/phase5/reid/fragment_risk.csv
+!results/mhtext/phase5/reid/linkage.csv
+!results/mhtext/phase5/reid/self_disclosures.csv
 results/mhtext/**/tasks/
 data/*
 !data/README.md
