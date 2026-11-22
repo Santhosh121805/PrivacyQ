@@ -72,8 +72,7 @@ def main() -> None:
          "are simulated. The locked hold-out of this dataset has not been scored.", "",
          f"**Disclosure control.** {RULE} In this dataset's reports it applies to 10 cells of the Phase 5 "
          "re-identification tables (results/mhtext/phase5/phase5.md, which states which cells and why no second "
-         "cell was needed); counts of rows removed by deduplication describe pipeline steps, not authors, and are not "
-         "suppressed.", ""]
+         "cell was needed).", ""]
 
     # ---------------------------------------------------------------- Box 1
     section(L, 1, "Data Sources (Adolescent Mental Health)", "Adds a second, unrelated data source: public social-media "

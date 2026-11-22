@@ -12,10 +12,12 @@ import pandas as pd
 
 THRESHOLD = 5
 SUPPRESSED = "< 5 posts (suppressed)"
-RULE = ("Counts below 5 are suppressed following standard statistical disclosure practice: the cell shows "
-        f"\"{SUPPRESSED}\" and its share is removed with it (share x rows would give the count back). Where a "
-        "suppressed value could be recovered by arithmetic from the cells that remain, a second cell is also "
-        "suppressed. A \"< 5\" is a policy, not missing data.")
+RULE = ("Counts below 5 are suppressed where the cell describes people or their attributes, following standard "
+        "statistical disclosure practice; the cell shows "
+        f"\"{SUPPRESSED}\" and its share is removed with it (share x rows would give the count back). A second cell "
+        "is suppressed where the first could be recovered by arithmetic. Counts describing pipeline operations - rows "
+        "removed by deduplication and similar - are not suppressed, because they cannot single out an individual. "
+        "'< 5' is a policy, not missing data.")
 
 
 def suppress_shares(df: pd.DataFrame, n_col: str, share_cols: list[str], threshold: int = THRESHOLD

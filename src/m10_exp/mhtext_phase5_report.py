@@ -236,9 +236,7 @@ def main() -> None:
          "in both corpora). Secondary suppression was checked and not needed: the age-sex-state cell cannot be "
          "rebuilt from the published cells (that would need the age-state and sex-state pairs, which are not published, "
          "and both corpus rows are suppressed), and a top-1 linkage cell cannot be derived from top-5, top-10, median "
-         "rank or MRR, which only bound it. Zero cells are kept; they identify no one. Counts of rows removed by "
-         "deduplication (Phase 1, Phase 4) count pipeline steps, not authors or their characteristics, and are not "
-         "suppressed.", ""]
+         "rank or MRR, which only bound it. Zero cells are kept; they identify no one.", ""]
     body: list = []
     for sec in (section_reid, section_mia, section_dp, section_ldp):
         sec(cfg, d, body, facts)
