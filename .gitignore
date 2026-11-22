@@ -4,7 +4,16 @@ __pycache__/
 .pytest_cache/
 .coverage
 htmlcov/
-results/
+results/*
+# Mental Health Text reports and summary tables are versioned; every other results file stays ignored.
+!results/mhtext/
+results/mhtext/**
+!results/mhtext/**/
+!results/mhtext/**/*.md
+!results/mhtext/**/summary.csv
+!results/mhtext/**/fold_metrics.csv
+!results/mhtext/**/tests_*.csv
+results/mhtext/**/tasks/
 data/*
 !data/README.md
 data/raw/
