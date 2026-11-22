@@ -61,7 +61,8 @@ def run_task(task: dict) -> list[dict]:
     torch.set_num_threads(1)
     torch.set_flush_denormal(True)
     seed = task["seed"]
-    A, B, C = feature_matrices(task["feature_spec"], task["X_in"], task["y_in"], [task["X_iv"], task["X_ov"]], seed)
+    extra = [task["X_extra"]] if "X_extra" in task else []      # optional extra scoring set (default: none)
+    A, B, C, *E = feature_matrices(task["feature_spec"], task["X_in"], task["y_in"], [task["X_iv"], task["X_ov"], *extra], seed)
     rows = []
     for model_name in task["models"]:
         if model_name in task["quantum"]:
@@ -106,6 +107,8 @@ def run_task(task: dict) -> list[dict]:
             "fit_seconds": best["fit_seconds"], "tuning_seconds": best["tuning_seconds"],
             "predict_seconds": predict_seconds, "n_params": n_params,
             **task["counts"], "_scores": scores.astype(np.float32),
+            **({f"extra_{k}": v for k, v in binary_metrics(task["y_extra"], scores_of(model, E[0]),
+                                                            threshold=best["threshold"]).items()} if E else {}),
         })
     return rows
 

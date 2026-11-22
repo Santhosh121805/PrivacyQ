@@ -1,0 +1,25 @@
+# Phase 2 (box 3): text features for the Mental Health Text dataset. Frozen models only; nothing fine-tuned.
+# python scripts/build_mhtext_features.py --config configs/mhtext_phase2.yaml
+project:
+  name: mhtext-phase2
+  seed: 2026
+  output_dir: results/mhtext/phase2               # counts, MI rankings, timings (no text)
+
+data:
+  processed: data/processed/mhtext/mhtext_phase1.csv
+  features_dir: data/processed/mhtext/features   # git-ignored; one row per processed-table row, same order
+
+embedding:
+  model: sentence-transformers/all-MiniLM-L6-v2
+  revision: 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
+  max_tokens: 256
+  batch_size: 64
+
+emotion:
+  model: j-hartmann/emotion-english-distilroberta-base
+  revision: 0e1cd914e3d46199ed785853e12b57304e04178b
+  max_tokens: 256
+  batch_size: 32
+
+mi:
+  top: 8                                         # selected_top8, as in results/feature_importance/mi_scores.csv

@@ -46,13 +46,17 @@ def sigmoid(z):
 def run_task(t: dict) -> list[dict]:
     import torch
     torch.set_num_threads(1)
-    frame, labels, seed, arm = t["frame"], t["labels"], t["seed"], t["arm"]
+    labels, seed, arm = t["labels"], t["seed"], t["arm"]
     rng = np.random.default_rng(seed)
     members = t["tr"]
     nonmembers = rng.choice(t["ov"], size=min(len(members), len(t["ov"])), replace=False)
-    prep = TabularPreprocessor(identifier_columns=t["metadata"])
-    X_m = prep.fit_transform(frame.iloc[members], "label").to_numpy()
-    X_n = prep.transform(frame.iloc[nonmembers], "label").to_numpy()
+    if "X" in t:      # a ready numeric matrix (text embeddings); the NSCH path below never passes one
+        X_m, X_n = t["X"][members], t["X"][nonmembers]
+    else:
+        frame = t["frame"]
+        prep = TabularPreprocessor(identifier_columns=t["metadata"])
+        X_m = prep.fit_transform(frame.iloc[members], "label").to_numpy()
+        X_n = prep.transform(frame.iloc[nonmembers], "label").to_numpy()
     y_m, y_n = labels[members], labels[nonmembers]
     if arm in ("dp_logreg_full", "mlp_overfit"):
         sc = StandardScaler().fit(X_m)

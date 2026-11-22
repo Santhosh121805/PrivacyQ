@@ -1,0 +1,65 @@
+# Phase 4: quantum models on the Mental Health Text dataset, METHOD HELD FIXED from NSCH (Experiments 1 and 2).
+# python -m src.m10_exp.mhtext_quantum --config configs/mhtext_phase4.yaml --view binary
+# Input: the frozen MiniLM sentence encoder (BERT family) embeddings, 384 dims, reduced inside each fold.
+project:
+  name: mhtext-phase4-quantum
+  seed: 2026
+  output_dir: results/mhtext/phase4
+  n_jobs: 6
+
+data:
+  processed: data/processed/mhtext/mhtext_phase1.csv
+  features_dir: data/processed/mhtext/features
+
+views:
+  binary: {negative: Depression, positive: Suicidal}      # the headline view for the NSCH comparison
+
+cv:                                   # as NSCH: 5 x 3 repeated stratified folds of the development rows
+  n_splits: 5
+  n_repeats: 3
+
+subsample:
+  n: 1500                             # the 1,200-row quantum regime (1,200 inner-train / 300 inner-validation)
+
+tuning:
+  inner_val_fraction: 0.2
+
+# Encoding x qubit sweep: configs/exp1_nsch2024_final.yaml (+ basis, results/exp1-nsch2024-basis-encoding-*), 5 x 2 folds
+sweep:
+  repeats: 2
+  models: [vqc, qsvm, logreg]
+  encodings: [angle, amplitude, zz, reupload, basis]
+  qubits: [4, 6, 8]
+  feature_methods: [mi, pca]
+  base_params:
+    vqc: {epochs: 30, batch_size: 64, init_scale: 0.1}
+  grids:
+    qsvm: {C: [0.1, 1.0, 10.0]}
+    vqc: {learning_rate: [0.01, 0.05], n_layers: [1, 2]}
+    logreg: {C: [0.01, 0.1, 1.0, 10.0]}
+
+# Quantum vs classical: configs/exp2_nsch2024.yaml (all95 -> all384, the whole embedding), 5 x 3 folds.
+# Classical models see exactly the same rows and inputs as the quantum ones (regime "subsample");
+# regime "full" (all of each fold's training rows) is the classical CEILING, reported separately.
+compare:
+  regimes: [subsample, full]
+  feature_sets:
+    pca4: {method: pca, k: 4}
+    pca8: {method: pca, k: 8}
+    all384: {method: all}
+    length: {method: all, source: length}       # the length-only floor: log words, log characters
+  classical_models: [logreg, xgboost, mlp, svm]
+  length_models: [logreg]
+  quantum:
+    qsvm: {feature_set: pca8, encoding: angle, n_qubits: 8, grid: {C: [0.1, 1.0, 10.0]}}
+    vqc: {feature_set: pca4, encoding: reupload, n_qubits: 4, epochs: 30, batch_size: 64, init_scale: 0.1,
+          grid: {learning_rate: [0.01, 0.05], n_layers: [1, 2]}}
+    hybrid: {feature_set: all384, encoding: angle, n_qubits: 8, n_layers: 2, epochs: 30, batch_size: 64,
+             init_scale: 0.1, grid: {learning_rate: [0.01, 0.05]}}
+  base_params:
+    xgboost: {n_estimators: 300}
+    mlp: {epochs: 60, batch_size: 128}
+  grids:
+    logreg: {C: [0.01, 0.1, 1.0, 10.0]}
+    xgboost: {max_depth: [2, 4, 6], learning_rate: [0.03, 0.1]}
+    svm: {C: [0.1, 1.0, 10.0]}

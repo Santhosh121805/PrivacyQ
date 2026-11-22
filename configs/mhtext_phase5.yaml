@@ -1,0 +1,31 @@
+# Phase 5 (boxes 4 and 12): privacy on the Mental Health Text dataset, binary Depression vs Suicidal view.
+# python -m src.m10_exp.mhtext_privacy --config configs/mhtext_phase5.yaml --part reid|mia|dp|ldp
+# Method held fixed: every privacy parameter is read from the NSCH experiment configs below (read only; no NSCH
+# experiment is run). Their all95 feature set (every survey column) becomes all384 (the whole MiniLM embedding).
+project:
+  name: mhtext-phase5-privacy
+  seed: 2026
+  output_dir: results/mhtext/phase5
+  n_jobs: 6
+
+nsch_method_configs:
+  dp: configs/exp3_nsch2024.yaml        # DP-SGD privacy-utility: epsilons, delta, arms
+  ldp: configs/exp5_nsch2024.yaml       # input-stage local DP: eps_inputs, eps_training, regimes
+  mia: configs/exp6_nsch2024.yaml       # membership inference: arms, epsilons, folds
+
+nsch_results:                           # read for the comparison tables, never recomputed
+  reidentification: results/reidentification/risk.csv
+  mia: results/exp6-nsch2024-membership-inference-20261112-120934/summary.csv
+  dp: results/exp3-nsch2024-privacy-utility-20261108-165618
+  ldp: results/exp5-nsch2024-input-privacy-20261112-120542/summary.csv
+
+phase4_config: configs/mhtext_phase4.yaml   # data paths, binary view, folds, subsample (same as Phase 4)
+view: binary
+
+reid:
+  corpora: [dev, dev+quarantine]        # hold-out never read (as for NSCH, which measured its dev rows)
+  span_words: [3, 5, 8, 12, 20]
+  unique_ngram_n: [5, 8]
+  k: 5                                  # k-violation threshold, as NSCH
+  linkage_span_words: [8, 12, 20]
+  linkage_eps_inputs: [null, 32, 16, 8, 4]   # local DP on the released PCA-8 encoder inputs (exp5 values)

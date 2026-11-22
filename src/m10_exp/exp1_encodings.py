@@ -67,7 +67,8 @@ def run_task(task: dict) -> list[dict]:
             enc = make_encoding(encoding, n_qubits)
             scale = enc.input_scale
             n_feat = enc.n_features(available=X_in.shape[1])
-        A, B, C = _features(X_in, y_in, [X_iv, X_ov], n_feat, method, scale, seed)
+        extra = [task["X_extra"]] if "X_extra" in task else []  # optional extra scoring set (default: none)
+        A, B, C, *E = _features(X_in, y_in, [X_iv, X_ov, *extra], n_feat, method, scale, seed)
 
         if model_kind == "logreg":
             def factory(**p):
@@ -97,6 +98,8 @@ def run_task(task: dict) -> list[dict]:
             "fit_seconds": best["fit_seconds"], "tuning_seconds": best["tuning_seconds"],
             "predict_seconds": predict_seconds, "n_params": n_params,
             **task["counts"], "_scores": scores.astype(np.float32),
+            **({f"extra_{k}": v for k, v in binary_metrics(task["y_extra"], scores_of(model, E[0]),
+                                                            threshold=best["threshold"]).items()} if E else {}),
         })
     return rows
 

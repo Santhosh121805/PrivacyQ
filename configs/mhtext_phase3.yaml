@@ -1,0 +1,39 @@
+# Phase 3 (box 10): baselines on the Mental Health Text dataset, 4-class and 3-class, identical folds per view.
+# python -m src.m10_exp.mhtext_baselines --config configs/mhtext_phase3.yaml
+project:
+  name: mhtext-phase3-baselines
+  seed: 2026
+  output_dir: results/mhtext/phase3
+  n_jobs: 6
+
+data:
+  processed: data/processed/mhtext/mhtext_phase1.csv
+  features_dir: data/processed/mhtext/features
+  tokenizer: sentence-transformers/all-MiniLM-L6-v2        # frozen WordPiece vocabulary (nothing fitted)
+  tokenizer_revision: 1110a243fdf4706b3f48f1d95db1a4f5529b4d41
+  max_tokens: 256
+
+views: [4, 3]                      # 4-class and 3-class (Normal dropped); hold-out never used here
+
+cv:                                # same protocol as NSCH: repeated stratified K-fold on development rows
+  n_splits: 5
+  n_repeats: 3
+
+tuning:
+  inner_val_fraction: 0.2          # hyperparameters and early stopping chosen on inner-validation rows
+
+# model name -> features, grid. Feature sets: length (log word count + log characters, computed from the text),
+# bert_pooled / bert_sentence = frozen MiniLM sentence encoder (BERT family; not BERT-base), whole text / per-sentence mean + max, all_pooled (every pooled
+# feature: both embeddings + emotion + shipped numeric columns; keyword flags are blocked), tokens (sequences).
+models:
+  length_only_logreg: {class: logreg, features: length, grid: {C: [1.0]}}
+  bert_pooled_logreg: {class: logreg, features: bert_pooled, grid: {C: [0.01, 0.1, 1.0, 10.0]}}
+  bert_sentence_logreg: {class: logreg, features: bert_sentence, grid: {C: [0.01, 0.1, 1.0, 10.0]}}
+  logreg: {class: logreg, features: all_pooled, grid: {C: [0.01, 0.1, 1.0, 10.0]}}
+  xgboost: {class: xgboost, features: all_pooled, grid: {max_depth: [2, 4], learning_rate: [0.1]}}
+  mlp: {class: mlp, features: all_pooled, grid: null}
+  svm: {class: svm, features: all_pooled, grid: {C: [1.0, 10.0]}}
+  lstm: {class: lstm, features: tokens, grid: {epochs: [15]}}
+  cnn: {class: cnn, features: tokens, grid: {epochs: [15]}}
+
+reference_model: length_only_logreg   # every model is tested against it (NB-t, Holm within view x metric)

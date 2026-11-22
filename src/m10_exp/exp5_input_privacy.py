@@ -43,21 +43,25 @@ def eps_label(e) -> str:
 def run_task(t: dict) -> list[dict]:
     import torch
     torch.set_num_threads(1)
-    frame, labels, seed = t["frame"], t["labels"], t["seed"]
+    labels, seed = t["labels"], t["seed"]
     tr, iv, ov = t["tr"], t["iv"], t["ov"]
-    f_tr, f_iv, f_ov = frame.iloc[tr], frame.iloc[iv], frame.iloc[ov]
     kinfo = {"k": None, "suppression_rate_train": 0.0, "suppression_rate_val": 0.0, "k_anonymous_train": None,
              "min_class_size_train": None}
-    if t["k"]:
-        anon = KAnonymizer(k=t["k"]).fit(f_tr)
-        f_tr, f_iv = anon.transform(f_tr), anon.transform(f_iv)
-        f_ov = anon.transform(f_ov)
-        kinfo = {"k": t["k"], "suppression_rate_train": anon.report_["suppression_rate"],
-                 "suppression_rate_val": anon.last_suppressed_ / len(ov), "k_anonymous_train": anon.report_["k_anonymous"],
-                 "min_class_size_train": anon.report_["min_class_size"]}
-    prep = TabularPreprocessor(identifier_columns=t["metadata"])
-    X_tr = prep.fit_transform(f_tr, "label").to_numpy()
-    X_iv, X_ov = prep.transform(f_iv, "label").to_numpy(), prep.transform(f_ov, "label").to_numpy()
+    if "X" in t:      # a ready numeric matrix (text embeddings; no quasi-identifier columns, so no k-anonymity)
+        X_tr, X_iv, X_ov = t["X"][tr], t["X"][iv], t["X"][ov]
+    else:
+        frame = t["frame"]
+        f_tr, f_iv, f_ov = frame.iloc[tr], frame.iloc[iv], frame.iloc[ov]
+        if t["k"]:
+            anon = KAnonymizer(k=t["k"]).fit(f_tr)
+            f_tr, f_iv = anon.transform(f_tr), anon.transform(f_iv)
+            f_ov = anon.transform(f_ov)
+            kinfo = {"k": t["k"], "suppression_rate_train": anon.report_["suppression_rate"],
+                     "suppression_rate_val": anon.last_suppressed_ / len(ov),
+                     "k_anonymous_train": anon.report_["k_anonymous"], "min_class_size_train": anon.report_["min_class_size"]}
+        prep = TabularPreprocessor(identifier_columns=t["metadata"])
+        X_tr = prep.fit_transform(f_tr, "label").to_numpy()
+        X_iv, X_ov = prep.transform(f_iv, "label").to_numpy(), prep.transform(f_ov, "label").to_numpy()
     ft = FeatureTransformer(d_prime=8, method="pca", output="angle", seed=seed).fit(X_tr, labels[tr])
     A, B, C = ft.transform(X_tr), ft.transform(X_iv), ft.transform(X_ov)
     rows = []

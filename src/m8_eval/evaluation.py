@@ -90,3 +90,28 @@ def multiclass_metrics(y_true: np.ndarray, class_scores: np.ndarray, y_pred: np.
         out[f"f1_{name}"] = float(f1_score(y_true == k, y_pred == k, zero_division=0))
     out["macro_ovr_auc"] = float(np.mean(aucs))
     return out
+
+
+def multiclass_full_metrics(y_true: np.ndarray, class_scores: np.ndarray, y_pred: np.ndarray,
+                            class_names: tuple[str, ...]) -> dict[str, float]:
+    """Macro and per-class precision, recall, F1 and one-vs-rest ROC-AUC, with accuracy and balanced accuracy
+    beside them (accuracy is never reported alone). Used for the Mental Health Text baselines."""
+    from sklearn.metrics import precision_score
+
+    y_true, y_pred = np.asarray(y_true), np.asarray(y_pred)
+    scores = np.asarray(class_scores, dtype=float)
+    out = {"accuracy": float(accuracy_score(y_true, y_pred)),
+           "balanced_accuracy": float(recall_score(y_true, y_pred, average="macro", zero_division=0)),
+           "macro_precision": float(precision_score(y_true, y_pred, average="macro", zero_division=0)),
+           "macro_recall": float(recall_score(y_true, y_pred, average="macro", zero_division=0)),
+           "macro_f1": float(f1_score(y_true, y_pred, average="macro", zero_division=0))}
+    aucs = []
+    for k, name in enumerate(class_names):
+        pos, hit = y_true == k, y_pred == k
+        out[f"precision_{name}"] = float(precision_score(pos, hit, zero_division=0))
+        out[f"recall_{name}"] = float(recall_score(pos, hit, zero_division=0))
+        out[f"f1_{name}"] = float(f1_score(pos, hit, zero_division=0))
+        out[f"auc_{name}"] = float(roc_auc_score(pos, scores[:, k])) if 0 < pos.sum() < len(pos) else float("nan")
+        aucs.append(out[f"auc_{name}"])
+    out["macro_auc"] = float(np.nanmean(aucs))
+    return out
